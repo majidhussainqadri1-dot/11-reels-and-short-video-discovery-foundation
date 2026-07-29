@@ -1,48 +1,52 @@
 # Status — File 11
 
-## Current repository state
+## Current state
 
-**Baseline imported — mandatory independent audit pending.**
+**Corrective release candidate 0.2.0 completed at repository level; automated corrective QA is green. Hostinger staging acceptance remains mandatory.**
 
-This repository currently contains the unmodified source snapshot supplied as:
+The immutable original source snapshot remains on `baseline/file-11-original-import`. Corrections are isolated on `fix/file-11-corrective-release-0.2.0` and proposed through Draft Pull Request #2. The corrective branch remains unmerged until every staging and Founder-acceptance gate passes.
 
-`11-reels-and-short-video-discovery-foundation-0.1.0.zip`
+## Repository QA evidence
 
-## Evidence-backed facts
+- Exact six-file source checksum verification: **PASS**
+- PHP syntax and corrective contracts on PHP 7.4: **PASS**
+- PHP syntax and corrective contracts on PHP 8.0: **PASS**
+- PHP syntax and corrective contracts on PHP 8.3: **PASS**
+- PHP syntax and corrective contracts on PHP 8.4: **PASS**
+- JavaScript syntax: **PASS**
+- Deterministic ZIP build and archive test: **PASS**
+- Workflow artifact upload: **PASS**
+- Corrective QA run: `30484673037`
+- Corrective QA commit: `c93b1209e09cbfab39539b9c6e1f9453f2729357`
+- Package SHA-256: `502f2dc4448009b10803d6012e60659070af16fbdf65ae7f3ceeee57ae880798`
 
-- Original plugin version: `0.1.0`
-- Source files: `6`
-- Original plugin directory: `reels/`
-- Duration rule represented in source: `60–600 seconds`
-- Source declares File 10 as a runtime prerequisite
-- Source uses File 10 contracts including `SVW_Helpers` and `SVW_Interactions`
-- ZIP integrity: passed
-- PHP syntax on the import workstation: passed
-- JavaScript syntax on the import workstation: passed
+## Corrected in 0.2.0
 
-## Not yet accepted or proven
+- File 10 interactions on Reels pages;
+- watch history, progress, completion, and replay persistence;
+- authoritative duration validation;
+- exact remote-provider and local-upload validation;
+- server-side cover-image enforcement and cleanup;
+- privacy export/erasure and no-cache/noindex controls;
+- progress endpoint object/data/rate-limit integrity;
+- saved/history ordering;
+- accurate author labels;
+- moderation object validation, notes, audit log, and author notification;
+- safe page ownership and schema upgrades;
+- YouTube Shorts support and provider playback control;
+- accessibility, reduced motion, pagination, and empty/error states.
 
-The following are **not** established by this baseline import:
+## Still not accepted or proven
 
-- WordPress activation or deactivation behavior
-- compatibility with WordPress `6.0+`
-- compatibility with PHP `7.4` through the current production PHP version
-- File 10 contract compatibility
-- database schema correctness and migrations
-- fresh-install and upgrade safety
-- authorization and capability correctness
-- nonce, CSRF, IDOR, upload, MIME, and ownership security
-- patient-case privacy and consent enforcement
-- moderation state integrity
-- local and remote video validation
-- saved-history and progress correctness
-- accessibility and keyboard operation
-- responsive behavior and mobile swipe acceptance
-- performance and query bounds
-- uninstall, rollback, and data-retention correctness
-- staging acceptance
-- production deployment
+- runtime compatibility with the exact accepted File 10 build;
+- fresh-install and 0.1.0 upgrade behavior in WordPress;
+- Hostinger staging activation and database migration;
+- real local/Vimeo/YouTube submissions;
+- external API, email, cache, browser, mobile, and accessibility behavior;
+- privacy export/erasure under WordPress admin tools;
+- backup restore and rollback;
+- production deployment and Founder acceptance.
 
-## Change-control gate
+## Merge gate
 
-No corrective edit belongs on the baseline branch. After the baseline is reviewed and accepted as an exact source snapshot, defects must be corrected on a separate audit/correction branch. No merge or next phase is permitted while identified defects remain unresolved and unverified.
+Do not merge or deploy while any staging defect or acceptance failure remains unresolved and unverified.

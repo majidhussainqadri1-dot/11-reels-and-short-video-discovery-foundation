@@ -1,52 +1,51 @@
 # File 11 — Reels and Short Video Discovery Foundation
 
-Controlled baseline repository for **File 11** of the **Sabri Social Homeopathy Platform**.
+Controlled repository for **File 11** of the **Sabri Social Homeopathy Platform**.
 
-## Module identity
+## Current development line
 
-- **Plugin name:** Reels and Short Video Discovery Foundation
-- **Original version:** `0.1.0`
-- **Original plugin directory:** `reels/`
-- **Declared WordPress minimum:** `6.0`
-- **Declared PHP minimum:** `7.4`
-- **Declared license:** `GPL-2.0-or-later`
-- **Original author header:** Dr. Allama Majid Hussain Sabri
-- **Required upstream dependency:** File 10, through the `SVW_Helpers` and `SVW_Interactions` contracts
+- Original evidentiary baseline: `0.1.0`
+- Corrective release candidate: `0.2.0`
+- Original plugin directory: `reels/`
+- WordPress minimum: `6.0`
+- PHP minimum: `7.4`
+- Required upstream dependency: File 10 Video Wall through `SVW_Helpers` and `SVW_Interactions`
 
-## Baseline status
+## 0.2.0 corrective scope
 
-This branch preserves the original supplied source **without corrections or refactoring**. It is an evidentiary baseline, not a production release.
+The corrective release addresses the independent audit blockers: inert interactions, missing progress/history/replays, non-authoritative duration, weak source/upload validation, incomplete thumbnail enforcement, missing privacy rights, weak moderation integrity, unsafe page mapping, absent schema upgrades, incorrect list ordering, inaccurate author labels, and accessibility/performance omissions.
 
-The source must not be merged, deployed, or described as complete until the mandatory independent audit identifies and corrects all defects and the corrected package passes fresh-install, upgrade, security, privacy, dependency-integration, responsive, rollback, and staging acceptance tests.
+Key controls include:
 
-See:
+- authoritative 60–600-second duration validation;
+- exact source/provider validation;
+- failed-upload cleanup;
+- File 10 reactions/saves/reports integration;
+- private watch history with export/erasure;
+- reviewer notes and audit history;
+- patient-case PII screening and attestations;
+- safe schema/page lifecycle;
+- keyboard, reduced-motion, responsive, and pagination support.
+
+See `CORRECTION-REPORT.md`, `CHANGELOG.md`, and `RELEASE-MANIFEST.md`.
+
+## Evidence separation
+
+The original 0.1.0 source evidence remains documented by:
 
 - `SOURCE-PROVENANCE.md`
 - `MANIFEST.md`
 - `CHECKSUMS.sha256`
-- `STATUS.md`
-- `BASELINE-REVIEW-REQUIRED.md`
+- `SOURCE-FILES.txt`
 
-## Original source inventory
+The current corrective source is documented by:
 
-The supplied archive contains **6 source files**:
+- `RELEASE-MANIFEST.md`
+- `RELEASE-CHECKSUMS.sha256`
+- `CORRECTION-REPORT.md`
 
-- 3 PHP files
-- 1 JavaScript file
-- 1 CSS file
-- 1 WordPress readme file
+## Quality gates
 
-The exact source inventory is machine-enforced through `SOURCE-FILES.txt` and the Baseline Integrity workflow.
+Corrective QA validates PHP 7.4/8.0/8.3/8.4 syntax, JavaScript syntax, release checksums, required security/privacy/functional contracts, and a deterministic installable ZIP artifact.
 
-## Baseline integrity checks
-
-The workflow verifies:
-
-1. exact source-file inventory;
-2. SHA-256 checksums;
-3. absence of symbolic links inside the plugin source;
-4. PHP syntax;
-5. JavaScript syntax;
-6. required plugin header and version markers.
-
-Passing these checks proves only snapshot integrity and basic syntax. It does **not** prove WordPress runtime correctness, security, privacy, data integrity, accessibility, or production readiness.
+Passing repository QA is necessary but not sufficient. File 10 compatibility, WordPress runtime, upgrade/rollback, Hostinger staging, responsive/accessibility, caching, external-provider, privacy, and Founder acceptance remain mandatory before production deployment.
