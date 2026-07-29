@@ -1,0 +1,6 @@
+reels/assets/reels.css
+reels/assets/reels.js
+reels/includes/class-srl-plugin.php
+reels/readme.txt
+reels/reels.php
+reels/uninstall.php
