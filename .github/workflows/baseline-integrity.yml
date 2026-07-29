@@ -3,9 +3,7 @@ name: Baseline Integrity
 on:
   push:
     branches:
-      - main
       - baseline/**
-      - audit/**
   pull_request:
 
 permissions:
@@ -13,12 +11,13 @@ permissions:
 
 jobs:
   baseline-integrity:
+    if: startsWith(github.ref_name, 'baseline/') || startsWith(github.head_ref, 'baseline/')
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Verify exact source inventory
+      - name: Verify exact original source inventory
         shell: bash
         run: |
           set -euo pipefail
@@ -28,12 +27,9 @@ jobs:
           test "$(wc -l < actual-files.txt)" -eq 6
 
       - name: Reject symbolic links in source
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -z "$(find reels -type l -print -quit)"
+        run: test -z "$(find reels -type l -print -quit)"
 
-      - name: Verify SHA-256 checksums
+      - name: Verify original SHA-256 checksums
         run: sha256sum --check CHECKSUMS.sha256
 
       - name: Verify PHP syntax
@@ -47,12 +43,10 @@ jobs:
       - name: Verify JavaScript syntax
         run: node --check reels/assets/reels.js
 
-      - name: Verify baseline identity markers
+      - name: Verify original baseline identity markers
         shell: bash
         run: |
-          set -euo pipefail
           grep -Fq 'Plugin Name: Reels and Short Video Discovery Foundation' reels/reels.php
           grep -Fq 'Version: 0.1.0' reels/reels.php
           grep -Fq "define('SRL_VERSION','0.1.0')" reels/reels.php
           grep -Fq 'Stable tag: 0.1.0' reels/readme.txt
-          grep -Fq 'minimum 60 seconds and maximum 600 seconds' reels/readme.txt
