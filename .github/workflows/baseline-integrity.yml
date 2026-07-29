@@ -1,0 +1,58 @@
+name: Baseline Integrity
+
+on:
+  push:
+    branches:
+      - main
+      - baseline/**
+      - audit/**
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  baseline-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify exact source inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          LC_ALL=C sort SOURCE-FILES.txt -o expected-files.txt
+          LC_ALL=C find reels -type f -print | sort > actual-files.txt
+          diff -u expected-files.txt actual-files.txt
+          test "$(wc -l < actual-files.txt)" -eq 6
+
+      - name: Reject symbolic links in source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(find reels -type l -print -quit)"
+
+      - name: Verify SHA-256 checksums
+        run: sha256sum --check CHECKSUMS.sha256
+
+      - name: Verify PHP syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            php -l "$file"
+          done < <(find reels -type f -name '*.php' -print0)
+
+      - name: Verify JavaScript syntax
+        run: node --check reels/assets/reels.js
+
+      - name: Verify baseline identity markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'Plugin Name: Reels and Short Video Discovery Foundation' reels/reels.php
+          grep -Fq 'Version: 0.1.0' reels/reels.php
+          grep -Fq "define('SRL_VERSION','0.1.0')" reels/reels.php
+          grep -Fq 'Stable tag: 0.1.0' reels/readme.txt
+          grep -Fq 'minimum 60 seconds and maximum 600 seconds' reels/readme.txt

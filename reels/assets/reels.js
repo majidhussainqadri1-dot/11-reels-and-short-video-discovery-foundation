@@ -1,0 +1,2 @@
+document.addEventListener('DOMContentLoaded',function(){var reels=document.querySelectorAll('.srl-reel');var observer=new IntersectionObserver(function(es){es.forEach(function(e){var media=e.target.querySelector('video');if(media){if(e.isIntersecting){media.muted=true;media.play().catch(function(){});}else media.pause();}});},{threshold:.72});reels.forEach(function(r){observer.observe(r);});});
+
