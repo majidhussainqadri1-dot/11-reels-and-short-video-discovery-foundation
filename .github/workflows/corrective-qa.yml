@@ -1,0 +1,66 @@
+name: Corrective QA
+
+on:
+  push:
+    branches:
+      - fix/**
+      - audit/**
+  pull_request:
+    paths:
+      - 'reels/**'
+      - 'tests/**'
+      - 'RELEASE-CHECKSUMS.sha256'
+      - '.github/workflows/corrective-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  php-and-contracts:
+    name: PHP ${{ matrix.php }} and contracts
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.0', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - name: Verify release checksums
+        run: sha256sum --check RELEASE-CHECKSUMS.sha256
+      - name: Lint PHP
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            php -l "$file"
+          done < <(find reels -type f -name '*.php' -print0)
+      - name: Verify JavaScript syntax
+        run: node --check reels/assets/reels.js
+      - name: Verify corrective contracts
+        run: bash tests/static-contracts.sh
+
+  package:
+    name: Reproducible package
+    runs-on: ubuntu-latest
+    needs: php-and-contracts
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build deterministic ZIP
+        shell: bash
+        run: |
+          set -euo pipefail
+          find reels -type f -exec touch -t 202607300000.00 {} +
+          TZ=UTC zip -X -r 11-reels-and-short-video-discovery-foundation-0.2.0.zip reels
+          unzip -t 11-reels-and-short-video-discovery-foundation-0.2.0.zip
+          sha256sum 11-reels-and-short-video-discovery-foundation-0.2.0.zip > package.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: file-11-corrective-package
+          path: |
+            11-reels-and-short-video-discovery-foundation-0.2.0.zip
+            package.sha256
+          if-no-files-found: error
