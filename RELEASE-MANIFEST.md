@@ -23,14 +23,29 @@
 
 The machine-readable copy is `RELEASE-CHECKSUMS.sha256` and is verified by Corrective QA.
 
-## Package contract
+## Package evidence
 
-Corrective QA builds:
+- Package: `11-reels-and-short-video-discovery-foundation-0.2.0.zip`
+- Package SHA-256: `502f2dc4448009b10803d6012e60659070af16fbdf65ae7f3ceeee57ae880798`
+- Corrective QA run: `30484673037`
+- QA commit: `c93b1209e09cbfab39539b9c6e1f9453f2729357`
+- Workflow artifact: `file-11-corrective-package`
+- Artifact ID: `8737116365`
+- Artifact archive digest: `sha256:b0e8bce73c75bc412cadd0e3b364ea6d32c3cb580d3464a83821f5bfbd5c124a`
 
-`11-reels-and-short-video-discovery-foundation-0.2.0.zip`
+The package contains one top-level `reels/` directory and the exact six source files listed above. Corrective QA normalized source timestamps, built with `zip -X`, tested every archive entry, generated `package.sha256`, and uploaded the ZIP and checksum as a workflow artifact.
 
-The package must contain one top-level `reels/` directory and the exact six source files listed above. The workflow normalizes source timestamps and uses `zip -X` before testing archive readability and publishing the ZIP plus `package.sha256` as a workflow artifact.
+## Automated QA result
+
+- PHP 7.4 syntax and corrective contracts: **PASS**
+- PHP 8.0 syntax and corrective contracts: **PASS**
+- PHP 8.3 syntax and corrective contracts: **PASS**
+- PHP 8.4 syntax and corrective contracts: **PASS**
+- JavaScript syntax: **PASS**
+- Source checksums: **PASS**
+- Reproducible archive construction and integrity: **PASS**
+- Artifact upload: **PASS**
 
 ## Evidence boundary
 
-This manifest establishes source identity only. It does not establish WordPress runtime, File 10 integration, external-provider availability, staging acceptance, backup restoration, rollback, or production readiness.
+This manifest establishes repository-level source and package identity. It does not establish WordPress runtime, exact File 10 integration, external-provider availability, staging acceptance, backup restoration, rollback, or production readiness.
