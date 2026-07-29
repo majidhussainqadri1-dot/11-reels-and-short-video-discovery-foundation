@@ -10,50 +10,15 @@ on:
       - 'reels/**'
       - 'tests/**'
       - 'RELEASE-CHECKSUMS.sha256'
+      - 'RELEASE-MANIFEST.md'
       - '.github/workflows/corrective-qa.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  prepare-checksums:
-    name: Prepare exact release checksums
-    runs-on: ubuntu-latest
-    outputs:
-      created: ${{ steps.manifest.outputs.created }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-      - id: manifest
-        name: Generate and lock manifest when absent
-        shell: bash
-        run: |
-          set -euo pipefail
-          if test -f RELEASE-CHECKSUMS.sha256; then
-            echo 'created=false' >> "$GITHUB_OUTPUT"
-            sha256sum --check RELEASE-CHECKSUMS.sha256
-            exit 0
-          fi
-          sha256sum \
-            reels/assets/reels.css \
-            reels/assets/reels.js \
-            reels/includes/class-srl-plugin.php \
-            reels/readme.txt \
-            reels/reels.php \
-            reels/uninstall.php > RELEASE-CHECKSUMS.sha256
-          cat RELEASE-CHECKSUMS.sha256
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add RELEASE-CHECKSUMS.sha256
-          git commit -m 'build: lock File 11 release source checksums'
-          git push origin "HEAD:${GITHUB_REF_NAME}"
-          echo 'created=true' >> "$GITHUB_OUTPUT"
-
   php-and-contracts:
     name: PHP ${{ matrix.php }} and contracts
-    needs: prepare-checksums
-    if: needs.prepare-checksums.outputs.created != 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
