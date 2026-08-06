@@ -2,6 +2,22 @@
 	'use strict';
 	if (!window.RSV_TOP20) return;
 	const cfg = window.RSV_TOP20;
+	const translate = window.wp && window.wp.i18n && typeof window.wp.i18n.__ === 'function' ? window.wp.i18n.__ : function (text) { return text; };
+	cfg.i18n = Object.assign({
+		stories: translate('Stories / Status', 'reels-short-video-discovery'),
+		wellbeing: translate('Well-being', 'reels-short-video-discovery'),
+		valueInsights: translate('Value insights', 'reels-short-video-discovery'),
+		sourceSafety: translate('Source, transcript and safety', 'reels-short-video-discovery'),
+		source: translate('Source', 'reels-short-video-discovery'),
+		safety: translate('Safety', 'reels-short-video-discovery'),
+		transcript: translate('Transcript', 'reels-short-video-discovery'),
+		response: translate('Create an attributed response/remix', 'reels-short-video-discovery'),
+		naturalStop: translate('Natural pause: take a moment before continuing.', 'reels-short-video-discovery'),
+		sessionLimit: translate('Your chosen Reel session limit has been reached.', 'reels-short-video-discovery'),
+		lateNight: translate('Late-night reminder: consider resting and returning later.', 'reels-short-video-discovery'),
+		continue: translate('Continue by choice', 'reels-short-video-discovery'),
+		error: translate('Additional Reel context is temporarily unavailable.', 'reels-short-video-discovery')
+	}, cfg.i18n || {});
 	const prefs = cfg.preferences || {};
 	let activeId = '';
 	let changes = 0;
