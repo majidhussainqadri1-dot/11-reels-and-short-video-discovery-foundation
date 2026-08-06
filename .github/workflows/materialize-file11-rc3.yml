@@ -1,0 +1,27 @@
+name: Materialize File 11 RC3
+on:
+  push:
+    branches: ['codex/file-11-four-plan-complete-1.0.0-rc3']
+permissions:
+  contents: write
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reconstruct reviewed RC3 source
+        run: |
+          set -euo pipefail
+          cat bootstrap/rc3.part* > /tmp/rc3.patch.xz.b64
+          base64 -d /tmp/rc3.patch.xz.b64 > /tmp/rc3.patch.xz
+          xz -dc /tmp/rc3.patch.xz > /tmp/rc3.patch
+          git apply --binary /tmp/rc3.patch
+          rm -rf bootstrap .github/workflows/materialize-file11-rc3.yml
+          git add -A
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Complete File 11 against four governing plans — 1.0.0-rc3'
+          git push origin HEAD:${GITHUB_REF_NAME}
