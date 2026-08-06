@@ -26,7 +26,8 @@ foreach ( array( 'stories', 'highlights', 'highlight_items', 'responses', 'prefe
 }
 foreach ( array(
 	'MAX_STORY_HOURS = 24', 'consent_snapshot', 'story_viewable', 'patient_reuse_consent',
-	'rsv_patient_reuse_consent_valid', 'mandatory_youth_mode', 'natural_stop_every',
+	'rsv_patient_reuse_consent_valid', 'rsv_patient_reuse_consent_still_valid',
+	"empty( \$row['patient_reuse_consent'] )", 'mandatory_youth_mode', 'natural_stop_every',
 	'history_paused', 'history_cursor', 'value_insights', 'meaningful_comments',
 	'rsv_source_safety_required', 'rsv_caption_track_required', 'source-open', 'natural-stop',
 ) as $needle ) {
@@ -35,6 +36,7 @@ foreach ( array(
 if ( false === strpos( $security, 'return $base_allowed && $filtered' ) || false === strpos( $security, 'null !== $user_id' ) ) exit( 1 );
 if ( false !== strpos( $security, "return (bool) apply_filters( 'rsv_authorize', false" ) ) exit( 1 );
 if ( false === strpos( $repo, "'youth_safe' => \$youth" ) || false === strpos( $repo, "LIMIT 50" ) ) exit( 1 );
+if ( false === strpos( $repo, '$requested_youth' ) || false === strpos( $repo, 'RSV_Top20::youth_mode()' ) ) exit( 1 );
 if ( false === strpos( $top, 'public static function required_tables' ) || false === strpos( $file10, 'public static function contract_compatible' ) || false === strpos( $diagnostics, 'published_without_context' ) ) exit( 1 );
 foreach ( array( 'MutationObserver', 'naturalStopShown', 'sessionStopShown', 'lateNightShown', 'recordSignal', 'source-open' ) as $needle ) if ( false === strpos( $js, $needle ) ) exit( 1 );
 echo "top20 contracts PASS\n";
