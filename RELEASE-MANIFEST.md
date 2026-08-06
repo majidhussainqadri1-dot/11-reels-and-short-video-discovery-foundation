@@ -1,18 +1,7 @@
-# Release Manifest — RC2
+# File 11 Release Manifest
 
-## Included release source
-- main bootstrap and non-destructive uninstall;
-- 16 native PHP service classes;
-- responsive/RTL/accessibility CSS;
-- progressive-enhancement JavaScript;
-- translation template;
-- unit, forensic and static checks;
-- deterministic package builder and GitHub Actions matrix;
-- requirements, review, migration, staging, operations and status evidence.
+Current candidate: `1.0.0-rc3`
 
-## Excluded intentionally
-- legacy duplicate `reels/` plugin runtime;
-- media binaries, upload/transcode/storage code owned by File 10;
-- identity/verification data owned by File 00/09;
-- comments/follow/notification backends owned by their canonical modules;
-- secrets, credentials and private operational playbooks.
+The candidate is built deterministically by `tools/build-package.sh` into the canonical root `reels-foundation-11/`. Its local reviewed checksum is recorded in `CHECKSUMS.sha256`. GitHub Actions must independently rebuild and publish the exact-head artifact before staging.
+
+Repository completion does not substitute for Hostinger staging, Founder acceptance, production deployment or operational acceptance.

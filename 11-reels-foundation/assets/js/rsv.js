@@ -24,7 +24,13 @@
 		options.headers = Object.assign({ 'Content-Type': 'application/json', 'X-WP-Nonce': RSV.nonce }, options.headers || {});
 		return fetch(RSV.root + path, options).then(async function (response) {
 			const body = await response.json().catch(function () { return {}; });
-			if (!response.ok) throw new Error(body.message || RSV.i18n.error);
+			if (!response.ok) {
+				const traceId = body && body.data && body.data.trace_id ? String(body.data.trace_id) : '';
+				const message = (body.message || RSV.i18n.error) + (traceId ? ' — ' + RSV.i18n.traceId + ': ' + traceId : '');
+				const error = new Error(message);
+				error.traceId = traceId;
+				throw error;
+			}
 			return body;
 		});
 	}
@@ -169,9 +175,9 @@
 		if (event.target.closest('[data-rsv-prev]')) { saveProgress(items()[active], true); activate(active - 1); }
 		if (event.target.closest('[data-rsv-next]')) { saveProgress(items()[active], true); activate(active + 1); }
 		const pause = event.target.closest('[data-rsv-pause]');
-		if (pause) { feedPaused = !feedPaused; pause.textContent = feedPaused ? RSV.i18n.resume : RSV.i18n.pause; feedPaused ? pauseMedia(items()[active]) : playMedia(items()[active]); }
+		if (pause) { feedPaused = !feedPaused; const label = pause.querySelector('span'); if (label) label.textContent = feedPaused ? RSV.i18n.resume : RSV.i18n.pause; else pause.textContent = feedPaused ? RSV.i18n.resume : RSV.i18n.pause; feedPaused ? pauseMedia(items()[active]) : playMedia(items()[active]); }
 		const auto = event.target.closest('[data-rsv-autoplay]');
-		if (auto) { autoplay = !autoplay; auto.setAttribute('aria-pressed', autoplay ? 'true' : 'false'); auto.textContent = autoplay ? RSV.i18n.disableAutoplay : RSV.i18n.enableAutoplay; if (autoplay) { feedPaused = false; playMedia(items()[active]); } else pauseMedia(items()[active]); }
+		if (auto) { autoplay = !autoplay; auto.setAttribute('aria-pressed', autoplay ? 'true' : 'false'); const label = auto.querySelector('span'); if (label) label.textContent = autoplay ? RSV.i18n.disableAutoplay : RSV.i18n.enableAutoplay; else auto.textContent = autoplay ? RSV.i18n.disableAutoplay : RSV.i18n.enableAutoplay; if (autoplay) { feedPaused = false; playMedia(items()[active]); } else pauseMedia(items()[active]); }
 		const action = event.target.closest('[data-rsv-action]');
 		if (action) {
 			const reel = action.closest('[data-rsv-reel]');
@@ -192,9 +198,15 @@
 		if (load && root) {
 			load.disabled = true; load.textContent = RSV.i18n.loading;
 			const sort = shell ? shell.dataset.rsvSort : 'recommended';
-			api('/reels?format=html&limit=12&sort=' + encodeURIComponent(sort) + '&cursor=' + encodeURIComponent(load.dataset.cursor), { method: 'GET' }).then(function (data) {
+			const topic = shell ? (shell.dataset.rsvTopic || '') : '';
+			api('/reels?format=html&limit=12&sort=' + encodeURIComponent(sort) + '&topic=' + encodeURIComponent(topic) + '&cursor=' + encodeURIComponent(load.dataset.cursor), { method: 'GET' }).then(function (data) {
 				(data.html || []).forEach(function (html) { const template = document.createElement('template'); template.innerHTML = html.trim(); root.appendChild(template.content.firstElementChild); });
 				if (data.next_cursor) { load.dataset.cursor = data.next_cursor; load.disabled = false; load.textContent = RSV.i18n.loadMore; } else load.remove();
+				items().forEach(function (item, index) {
+					const enabled = index === active;
+					item.setAttribute('aria-hidden', enabled ? 'false' : 'true');
+					setInteractive(item, enabled);
+				});
 				observeItems();
 				bindVideos(root);
 			}).catch(function (error) { load.disabled = false; load.textContent = RSV.i18n.loadMore; announce(error.message); });

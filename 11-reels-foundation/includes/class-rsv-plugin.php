@@ -117,6 +117,7 @@ final class RSV_Plugin {
 		( new RSV_Admin() )->register();
 		( new RSV_Privacy() )->register();
 		( new RSV_Jobs() )->register();
+		( new RSV_Integrations() )->register();
 		add_action( 'admin_notices', array( $this, 'notices' ) );
 	}
 

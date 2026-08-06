@@ -1,33 +1,29 @@
 # Changelog
 
+## 1.0.0-rc3 — 2026-08-06
+
+### Three-plan harmonization
+- Reconciled File 11 with the Definitive Master Plan v3.0, recovered directives v2.1 and the Continuous-Value/Top-20 Superset plan.
+- Aligned the deterministic installable package root to `reels-foundation-11` without creating a second runtime.
+- Added versioned read-only provider contracts for File 21 Home cards, File 25 timelines and File 26 search/recommendation consumption.
+
+### Discovery, transparency and user control
+- Added approved-topic filtering and preserved topic state across sort, REST pagination and no-JavaScript continuation.
+- Bound signed cursors to sort and topic context to prevent cross-filter pagination drift.
+- Added “Why this Reel?” explanations, explicit Recommended/Latest choice and a no-paid-placement disclosure.
+- Corrected dynamically appended Reel focus/inert states.
+
+### Visual, accessibility and supportability
+- Replaced decorative emoji controls with accessible inline SVG icons plus visible labels.
+- Scoped File 11 CSS variables to the module and consumed platform design tokens with green fallbacks.
+- Added safe trace/reference IDs to frontend API and media error states.
+- Regenerated the POT template for RC3.
+
 ## 1.0.0-rc2 — 2026-08-06
 
-### Canonical architecture
-- Removed the second legacy `reels/` runtime from the release branch.
-- Enforced File 11 Reel ownership, File 10 media ownership and File 00 identity/publishing ownership.
-- Added contract/schema/version separation and fail-closed dependency diagnostics.
-
-### Security and integrity
-- Added opaque Reel/report/view/event IDs and signed sort-bound cursors.
-- Added current File 00 membership/publishing assertions, object ownership, guardian, suspension and step-up checks.
-- Added optimistic concurrency, atomic rate limiting, idempotency and transactional audit/outbox evidence.
-- Added server-issued view sessions and server-bounded progress/completion.
-
-### Product and accessibility
-- Added public vertical feed, permanent Reel route, previous/next, touch swipe and keyboard controls.
-- Added explicit autoplay opt-in, reduced-motion/data-saver behavior, pause controls and no forced infinite scrolling.
-- Added no-JavaScript next-page continuation, safe live regions and RTL/logical CSS.
-- Added caption tracks, error/degraded states and File 10 secure download adapter.
-
-### Moderation and privacy
-- Added reports, restriction/removal/restoration, reporter/owner appeals and appellant attribution.
-- Added private history reset/export/erasure, report holds/redaction and thresholded creator insights.
-- Added bounded retention cleanup for impressions, sessions, rate limits and idempotency records.
-
-### Migration and operations
-- Added checkpointed legacy Reel/history migration, quarantine, reconciliation and rollback-preserving cutover.
-- Added Safe Mode, diagnostics, repair, queue retry/backoff/dead-letter and operational health data.
-- Added POT extraction, deterministic package, checksum, source parity and PHP 8.1/8.3/8.4 CI.
+- Completed the plan-mapped canonical Reel lifecycle, File 00/File 10 contracts, privacy, moderation, migration/rollback, deterministic packaging and PHP 8.1/8.3/8.4 QA.
+- Superseded after the third central plan required a new harmonization review.
 
 ## 1.0.0-rc1
-Initial plan-mapped release candidate. Superseded after fresh forensic review identified authorization, visibility, progress-integrity, moderation, privacy, migration, route, accessibility and QA gaps.
+
+Initial plan-mapped release candidate; superseded after forensic review.

@@ -82,14 +82,14 @@ final class RSV_Repository {
 		$table  = RSV_Helpers::table( 'reels' );
 		$limit  = min( 50, max( 1, absint( $args['limit'] ?? 12 ) ) );
 		$sort   = RSV_Helpers::enum( $args['sort'] ?? 'recommended', array( 'recommended', 'latest' ), 'recommended' );
-		$cursor = RSV_Helpers::cursor_decode( $args['cursor'] ?? '', $sort );
+		$topic  = RSV_Helpers::enum( $args['topic'] ?? '', RSV_Contracts::TOPICS, '' );
+		$cursor = RSV_Helpers::cursor_decode( $args['cursor'] ?? '', $sort, $topic );
 		if ( is_wp_error( $cursor ) ) {
 			return $cursor;
 		}
 
 		$where  = 'status=%s AND visibility=%s';
 		$params = array( 'published', 'public' );
-		$topic  = RSV_Helpers::enum( $args['topic'] ?? '', RSV_Contracts::TOPICS, '' );
 		if ( $topic ) {
 			$where   .= ' AND topic=%s';
 			$params[] = $topic;
@@ -136,8 +136,8 @@ final class RSV_Repository {
 		$next = null;
 		if ( $has_more && $last ) {
 			$next = 'latest' === $sort
-				? RSV_Helpers::cursor_encode( $sort, $last['published_at'], '', $last['id'] )
-				: RSV_Helpers::cursor_encode( $sort, $last['rank_score'], $last['updated_at'], $last['id'] );
+				? RSV_Helpers::cursor_encode( $sort, $last['published_at'], '', $last['id'], $topic )
+				: RSV_Helpers::cursor_encode( $sort, $last['rank_score'], $last['updated_at'], $last['id'], $topic );
 		}
 		return array( 'items' => $items, 'next_cursor' => $next, 'sort' => $sort );
 	}
@@ -227,4 +227,74 @@ final class RSV_Repository {
 			'next'     => $next && RSV_Security::can_view_reel( $next, 0 ) ? self::public_dto( $next ) : null,
 		);
 	}
+
+	/**
+	 * Bounded public Reel projection for File 25 timelines.
+	 *
+	 * @return array<int,array<string,mixed>>
+	 */
+	public static function public_by_author( $author_id, $limit = 20 ) {
+		global $wpdb;
+		$table = RSV_Helpers::table( 'reels' );
+		$limit = min( 50, max( 1, absint( $limit ) ) );
+		$rows  = (array) $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM $table WHERE owner_id=%d AND status=%s AND visibility=%s ORDER BY published_at DESC,id DESC LIMIT %d",
+				absint( $author_id ),
+				'published',
+				'public',
+				$limit
+			),
+			ARRAY_A
+		);
+		return array_values(
+			array_filter(
+				$rows,
+				static function ( $row ) {
+					return RSV_Security::can_view_reel( $row, 0 );
+				}
+			)
+		);
+	}
+
+	/**
+	 * Bounded public search projection for File 26. This is not a second search
+	 * index; File 26 may consume it to build its canonical derivative index.
+	 *
+	 * @return array<int,array<string,mixed>>
+	 */
+	public static function search_public( $query, $limit = 10, $topic = '' ) {
+		global $wpdb;
+		$table = RSV_Helpers::table( 'reels' );
+		$limit = min( 30, max( 1, absint( $limit ) ) );
+		$query = sanitize_text_field( $query );
+		$topic = RSV_Helpers::enum( $topic, RSV_Contracts::TOPICS, '' );
+		$where = 'status=%s AND visibility=%s';
+		$args  = array( 'published', 'public' );
+		if ( '' !== $query ) {
+			$like   = '%' . $wpdb->esc_like( $query ) . '%';
+			$where .= ' AND (title LIKE %s OR caption LIKE %s OR topic LIKE %s)';
+			$args[] = $like;
+			$args[] = $like;
+			$args[] = $like;
+		}
+		if ( $topic ) {
+			$where .= ' AND topic=%s';
+			$args[] = $topic;
+		}
+		$args[] = $limit;
+		$rows   = (array) $wpdb->get_results(
+			$wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY rank_score DESC,published_at DESC,id DESC LIMIT %d", $args ),
+			ARRAY_A
+		);
+		return array_values(
+			array_filter(
+				$rows,
+				static function ( $row ) {
+					return RSV_Security::can_view_reel( $row, 0 );
+				}
+			)
+		);
+	}
+
 }

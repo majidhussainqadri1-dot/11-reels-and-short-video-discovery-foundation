@@ -12,7 +12,7 @@ bash "$ROOT/tools/build-package.sh" "$A/file11.zip" >/dev/null
 bash "$ROOT/tools/build-package.sh" "$B/file11.zip" >/dev/null
 cmp "$A/file11.zip" "$B/file11.zip"
 unzip -t "$A/file11.zip" >/dev/null
-test "$(unzip -Z1 "$A/file11.zip" | cut -d/ -f1 | sort -u)" = "11-reels-foundation"
+test "$(unzip -Z1 "$A/file11.zip" | cut -d/ -f1 | sort -u)" = "reels-foundation-11"
 rm -rf "$A/extract"; mkdir -p "$A/extract"; unzip -q "$A/file11.zip" -d "$A/extract"
-diff -ru "$ROOT/11-reels-foundation" "$A/extract/11-reels-foundation"
+diff -ru "$ROOT/11-reels-foundation" "$A/extract/reels-foundation-11"
 echo "all File 11 automated checks PASS"

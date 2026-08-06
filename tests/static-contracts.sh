@@ -2,9 +2,23 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 P="$ROOT/11-reels-foundation"
-grep -F "Version: 1.0.0-rc2" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_VERSION', '1.0.0-rc2' )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "Version: 1.0.0-rc3" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_VERSION', '1.0.0-rc3' )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "define( 'RSV_SCHEMA_VERSION', '1.1.0' )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "class-rsv-integrations.php" "$P/11-reels-foundation.php" >/dev/null
+grep -F "new RSV_Integrations" "$P/includes/class-rsv-plugin.php" >/dev/null
+grep -F "sabri_platform_domain_provider_registered" "$P/includes/class-rsv-integrations.php" >/dev/null
+grep -F "rsv_public_author_items" "$P/includes/class-rsv-integrations.php" >/dev/null
+grep -F "rsv_public_search_documents" "$P/includes/class-rsv-integrations.php" >/dev/null
+grep -F "rsv_home_cards" "$P/includes/class-rsv-integrations.php" >/dev/null
+grep -F "Why this Reel?" "$P/includes/class-rsv-frontend.php" >/dev/null
+grep -F "data-rsv-topic" "$P/includes/class-rsv-frontend.php" >/dev/null
+grep -F "topic=' + encodeURIComponent(topic)" "$P/assets/js/rsv.js" >/dev/null
+grep -F "trace_id" "$P/assets/js/rsv.js" >/dev/null
+grep -F "rsv-trace" "$P/includes/class-rsv-frontend.php" >/dev/null
+grep -F -- "--sabri-color-primary" "$P/assets/css/rsv.css" >/dev/null
+! grep -F ":root{" "$P/assets/css/rsv.css"
+grep -F "rsv-icon" "$P/includes/class-rsv-frontend.php" >/dev/null
 grep -F "smc_membership_assertions" "$P/includes/class-rsv-security.php" >/dev/null
 grep -F "smc_publishing_assertions" "$P/includes/class-rsv-security.php" >/dev/null
 grep -F "VWLB_Videos::interact" "$P/includes/class-rsv-file10.php" >/dev/null
@@ -33,4 +47,5 @@ grep -F "appellant_id bigint unsigned" "$P/includes/class-rsv-db.php" >/dev/null
 grep -F "rsv_restore_media_invalid" "$P/includes/class-rsv-reels.php" >/dev/null
 grep -F "rp.appellant_id=%d" "$P/includes/class-rsv-privacy.php" >/dev/null
 ! grep -F "status || document.body" "$P/assets/js/rsv.js"
+grep -F "Project-Id-Version: Reels and Short Video Discovery 1.0.0-rc3" "$P/languages/reels-short-video-discovery.pot" >/dev/null
 echo "static contracts PASS"

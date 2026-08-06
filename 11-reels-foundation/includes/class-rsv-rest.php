@@ -60,7 +60,7 @@ final class RSV_REST {
 			$html = array();
 			foreach ( $data['items'] as $item ) {
 				$row = RSV_Repository::find( $item['id'], true );
-				if ( $row && RSV_Security::can_view_reel( $row, 0 ) ) $html[] = $renderer->render_reel( $row, true );
+				if ( $row && RSV_Security::can_view_reel( $row, 0 ) ) $html[] = $renderer->render_reel( $row, true, array( 'sort' => $request->get_param( 'sort' ), 'topic' => $request->get_param( 'topic' ) ) );
 			}
 			$data['html'] = $html;
 		}

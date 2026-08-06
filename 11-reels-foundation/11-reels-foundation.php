@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Reels and Short Video Discovery
  * Description: Canonical educational Reels domain for the Sabri Social Homeopathy Platform. File 10 owns media; File 11 owns Reel metadata, discovery, progress and moderation.
- * Version: 1.0.0-rc2
+ * Version: 1.0.0-rc3
  * Requires at least: 6.7
  * Requires PHP: 8.1
  * Author: Dr. Allamah Majid Hussain Sabri
@@ -11,7 +11,7 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'RSV_VERSION', '1.0.0-rc2' );
+define( 'RSV_VERSION', '1.0.0-rc3' );
 define( 'RSV_SCHEMA_VERSION', '1.1.0' );
 define( 'RSV_CONTRACT_VERSION', 2 );
 define( 'RSV_FILE', __FILE__ );
@@ -35,6 +35,7 @@ $files = array(
 	'class-rsv-jobs.php',
 	'class-rsv-migration.php',
 	'class-rsv-diagnostics.php',
+	'class-rsv-integrations.php',
 	'class-rsv-plugin.php',
 );
 foreach ( $files as $file ) {

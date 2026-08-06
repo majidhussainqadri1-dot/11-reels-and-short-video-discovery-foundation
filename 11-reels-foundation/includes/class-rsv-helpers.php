@@ -82,11 +82,12 @@ final class RSV_Helpers {
 	 * @param int    $id         Internal stable tie-breaker.
 	 * @return string
 	 */
-	public static function cursor_encode( $sort, $primary, $secondary, $id ) {
+	public static function cursor_encode( $sort, $primary, $secondary, $id, $context = '' ) {
 		$payload = self::json_encode(
 			array(
-				'v' => 2,
+				'v' => 3,
 				's' => self::enum( $sort, array( 'recommended', 'latest' ), 'recommended' ),
+				'c' => sanitize_key( (string) $context ),
 				'p' => (string) $primary,
 				'q' => (string) $secondary,
 				'i' => absint( $id ),
@@ -98,11 +99,11 @@ final class RSV_Helpers {
 	}
 
 	/**
-	 * Decode and validate a cursor for the requested sort.
+	 * Decode and validate a cursor for the requested sort and filter context.
 	 *
 	 * @return array<string,mixed>|WP_Error|null
 	 */
-	public static function cursor_decode( $cursor, $expected_sort = 'recommended' ) {
+	public static function cursor_decode( $cursor, $expected_sort = 'recommended', $expected_context = '' ) {
 		$cursor = trim( (string) $cursor );
 		if ( '' === $cursor ) {
 			return null;
@@ -115,10 +116,11 @@ final class RSV_Helpers {
 		if ( ! hash_equals( $expected, (string) $mac ) ) {
 			return self::error( 'rsv_cursor_invalid', __( 'The feed cursor is invalid or expired.', RSV_TEXT_DOMAIN ), 400 );
 		}
-		$raw = self::base64url_decode( $encoded );
-		$data = self::json_decode( $raw, array() );
-		$sort = self::enum( $data['s'] ?? '', array( 'recommended', 'latest' ), '' );
-		if ( 2 !== (int) ( $data['v'] ?? 0 ) || ! $sort || $sort !== $expected_sort || empty( $data['i'] ) ) {
+		$raw     = self::base64url_decode( $encoded );
+		$data    = self::json_decode( $raw, array() );
+		$sort    = self::enum( $data['s'] ?? '', array( 'recommended', 'latest' ), '' );
+		$context = sanitize_key( (string) ( $data['c'] ?? '' ) );
+		if ( 3 !== (int) ( $data['v'] ?? 0 ) || ! $sort || $sort !== $expected_sort || $context !== sanitize_key( (string) $expected_context ) || empty( $data['i'] ) ) {
 			return self::error( 'rsv_cursor_invalid', __( 'The feed cursor is invalid or expired.', RSV_TEXT_DOMAIN ), 400 );
 		}
 		if ( 'latest' === $sort && ! self::is_mysql_datetime( $data['p'] ?? '' ) ) {
@@ -129,6 +131,7 @@ final class RSV_Helpers {
 		}
 		return array(
 			'sort'      => $sort,
+			'context'   => $context,
 			'primary'   => (string) $data['p'],
 			'secondary' => (string) ( $data['q'] ?? '' ),
 			'id'        => absint( $data['i'] ),

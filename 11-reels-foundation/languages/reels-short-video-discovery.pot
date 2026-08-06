@@ -1,14 +1,16 @@
+# Reels and Short Video Discovery translation template.
+# Copyright (C) 2026 Dr. Allamah Majid Hussain Sabri
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Reels and Short Video Discovery 1.0.0-rc2\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-06 18:12+0500\n"
+"Project-Id-Version: Reels and Short Video Discovery 1.0.0-rc3\n"
+"POT-Creation-Date: 2026-08-06 20:29+0500\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Domain: reels-short-video-discovery\n"
 
-#: includes/class-rsv-frontend.php:36
+#: includes/class-rsv-frontend.php:40
 msgid "%1$d of %2$d"
 msgstr ""
 
@@ -28,12 +30,16 @@ msgstr ""
 msgid "A valid decision and a meaningful reason are required."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:167
+#: includes/class-rsv-frontend.php:292
 msgid "Access restricted"
 msgstr ""
 
 #: includes/class-rsv-plugin.php:18
 msgid "Activate File 10 Video Wall and Live Broadcasting 1.0.0-rc1 or later before activating File 11."
+msgstr ""
+
+#: includes/class-rsv-frontend.php:176
+msgid "All approved topics"
 msgstr ""
 
 #: includes/class-rsv-security.php:198
@@ -56,8 +62,8 @@ msgstr ""
 msgid "Apply"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:127
-msgid "Approved educational Reels will appear here after review."
+#: includes/class-rsv-frontend.php:178
+msgid "Apply filter"
 msgstr ""
 
 #: includes/class-rsv-security.php:154
@@ -72,15 +78,15 @@ msgstr ""
 msgid "Available"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:167
+#: includes/class-rsv-frontend.php:296
 msgid "Average seconds"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:169
+#: includes/class-rsv-frontend.php:301
 msgid "Back"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:162
+#: includes/class-rsv-frontend.php:272
 msgid "Caption / description"
 msgstr ""
 
@@ -92,23 +98,27 @@ msgstr ""
 msgid "Choose a valid reason and provide at least ten characters of useful detail."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:143
+#: includes/class-rsv-frontend.php:224
 msgid "Choose reason"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:162
+#: includes/class-rsv-frontend.php:272
 msgid "Choose topic"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:38
+#: includes/class-rsv-frontend.php:42
 msgid "Clear all private Reel history?"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:165
+#: includes/class-rsv-frontend.php:284
 msgid "Clear history"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:142
+#: includes/class-rsv-frontend.php:179
+msgid "Clear topic"
+msgstr ""
+
+#: includes/class-rsv-frontend.php:223
 msgid "Comments"
 msgstr ""
 
@@ -116,31 +126,31 @@ msgstr ""
 msgid "Completed"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:167
+#: includes/class-rsv-frontend.php:296
 msgid "Completions"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:41
+#: includes/class-rsv-frontend.php:45
 msgid "Copy this Reel link:"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:162
+#: includes/class-rsv-frontend.php:272
 msgid "Create draft"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:122 includes/class-rsv-frontend.php:162
+#: includes/class-rsv-frontend.php:172 includes/class-rsv-frontend.php:272
 msgid "Create Reel"
 msgstr ""
 
-#: includes/class-rsv-privacy.php:82 includes/class-rsv-privacy.php:101
+#: includes/class-rsv-privacy.php:101 includes/class-rsv-privacy.php:82
 msgid "Created"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:167
+#: includes/class-rsv-frontend.php:292
 msgid "Creator insights are available only to authorized publishers."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:88 includes/class-rsv-frontend.php:167
+#: includes/class-rsv-frontend.php:119 includes/class-rsv-frontend.php:296
 msgid "Creator Reel Insights"
 msgstr ""
 
@@ -152,31 +162,31 @@ msgstr ""
 msgid "Decision reason"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:143 includes/class-rsv-privacy.php:78
+#: includes/class-rsv-frontend.php:224 includes/class-rsv-privacy.php:78
 msgid "Details"
 msgstr ""
 
-#: includes/class-rsv-admin.php:16 includes/class-rsv-admin.php:16
+#: includes/class-rsv-admin.php:16
 msgid "Diagnostics"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:35
+#: includes/class-rsv-frontend.php:39
 msgid "Disable autoplay"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:162
+#: includes/class-rsv-frontend.php:272
 msgid "Disclosure"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:142
+#: includes/class-rsv-frontend.php:223
 msgid "Dislike"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:142
+#: includes/class-rsv-frontend.php:223
 msgid "Download"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:39
+#: includes/class-rsv-frontend.php:43
 msgid "Draft created. Submit it for review from the publishing dashboard. Reel ID: %s"
 msgstr ""
 
@@ -184,11 +194,11 @@ msgstr ""
 msgid "Dry run"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:122
+#: includes/class-rsv-frontend.php:171
 msgid "Educational short-video discovery"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:34 includes/class-rsv-frontend.php:129
+#: includes/class-rsv-frontend.php:201 includes/class-rsv-frontend.php:38
 msgid "Enable autoplay"
 msgstr ""
 
@@ -196,7 +206,7 @@ msgstr ""
 msgid "Every five minutes"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:116
+#: includes/class-rsv-frontend.php:161
 msgid "Feed unavailable"
 msgstr ""
 
@@ -216,7 +226,7 @@ msgstr ""
 msgid "File 10 media services are unavailable."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:162
+#: includes/class-rsv-frontend.php:272
 msgid "File 10 video ID"
 msgstr ""
 
@@ -224,19 +234,19 @@ msgstr ""
 msgid "File 10 video must be published first."
 msgstr ""
 
-#: includes/class-rsv-plugin.php:133
+#: includes/class-rsv-plugin.php:134
 msgid "File 11 is in Safe Mode. Open Reels Diagnostics for the exact dependency or data-integrity reason."
 msgstr ""
 
-#: includes/class-rsv-plugin.php:129
+#: includes/class-rsv-plugin.php:130
 msgid "File 11 Reels activated. Complete staging acceptance before production use."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:162
+#: includes/class-rsv-frontend.php:272
 msgid "First create or select a File 10 video. File 11 never duplicates upload, transcoding, storage or playback ownership."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:142
+#: includes/class-rsv-frontend.php:223
 msgid "Follow"
 msgstr ""
 
@@ -244,7 +254,7 @@ msgstr ""
 msgid "Forbidden"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:142
+#: includes/class-rsv-frontend.php:223
 msgid "Full video page"
 msgstr ""
 
@@ -252,11 +262,11 @@ msgstr ""
 msgid "Healthy"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:169 includes/class-rsv-frontend.php:170
+#: includes/class-rsv-frontend.php:301 includes/class-rsv-frontend.php:306
 msgid "Home"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:167
+#: includes/class-rsv-frontend.php:296
 msgid "Insufficient aggregate data"
 msgstr ""
 
@@ -264,11 +274,23 @@ msgstr ""
 msgid "Interactions are temporarily unavailable."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:162
+#: includes/class-rsv-integrations.php:111
+msgid "It is a recently published, approved educational Reel."
+msgstr ""
+
+#: includes/class-rsv-integrations.php:113
+msgid "It passed educational relevance, source, rights, consent and safety gates."
+msgstr ""
+
+#: includes/class-rsv-integrations.php:119
+msgid "Its approved topic is %s."
+msgstr ""
+
+#: includes/class-rsv-frontend.php:272
 msgid "Language"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:124
+#: includes/class-rsv-frontend.php:183
 msgid "Latest"
 msgstr ""
 
@@ -284,19 +306,19 @@ msgstr ""
 msgid "Legacy Reel title is missing."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:142
+#: includes/class-rsv-frontend.php:223
 msgid "Like"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:42 includes/class-rsv-frontend.php:130
+#: includes/class-rsv-frontend.php:203 includes/class-rsv-frontend.php:46
 msgid "Load more"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:43
+#: includes/class-rsv-frontend.php:47
 msgid "Loading…"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:149
+#: includes/class-rsv-frontend.php:234
 msgid "Media is temporarily unavailable. Skip to the next Reel or retry later."
 msgstr ""
 
@@ -304,7 +326,7 @@ msgstr ""
 msgid "Media rights review is incomplete."
 msgstr ""
 
-#: includes/class-rsv-admin.php:15 includes/class-rsv-admin.php:15
+#: includes/class-rsv-admin.php:15
 msgid "Moderation"
 msgstr ""
 
@@ -312,15 +334,15 @@ msgstr ""
 msgid "Moderation evidence was retained under an approved hold and de-identified."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:129
+#: includes/class-rsv-frontend.php:201
 msgid "Next"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:130
+#: includes/class-rsv-frontend.php:204
 msgid "Next page of Reels"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:165
+#: includes/class-rsv-frontend.php:284
 msgid "No history yet"
 msgstr ""
 
@@ -328,23 +350,23 @@ msgstr ""
 msgid "No open reports."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:127
-msgid "No published Reels yet"
+#: includes/class-rsv-frontend.php:190
+msgid "No published Reels found"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:122
+#: includes/class-rsv-frontend.php:171
 msgid "One-to-ten-minute educational Reels linked to File 10 verified media."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:167
+#: includes/class-rsv-frontend.php:296
 msgid "Only privacy-safe aggregate metrics are shown; viewer identities are never exposed."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:161
+#: includes/class-rsv-frontend.php:269
 msgid "Only the Founder, authorized administrators and File 00 verified doctors can create Reels."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:142
+#: includes/class-rsv-frontend.php:223
 msgid "Open"
 msgstr ""
 
@@ -356,7 +378,7 @@ msgstr ""
 msgid "Owned Reels"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:169
+#: includes/class-rsv-frontend.php:301
 msgid "Page navigation"
 msgstr ""
 
@@ -364,7 +386,7 @@ msgstr ""
 msgid "Patient privacy review is incomplete."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:32 includes/class-rsv-frontend.php:129
+#: includes/class-rsv-frontend.php:201 includes/class-rsv-frontend.php:36
 msgid "Pause feed"
 msgstr ""
 
@@ -376,11 +398,11 @@ msgstr ""
 msgid "Position"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:129
+#: includes/class-rsv-frontend.php:201
 msgid "Previous"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:157
+#: includes/class-rsv-frontend.php:255
 msgid "Previous and next Reels"
 msgstr ""
 
@@ -404,11 +426,11 @@ msgstr ""
 msgid "Publisher"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:161
+#: includes/class-rsv-frontend.php:269
 msgid "Publishing access required"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:167
+#: includes/class-rsv-frontend.php:296
 msgid "Rapid swipes"
 msgstr ""
 
@@ -416,7 +438,7 @@ msgstr ""
 msgid "Ready"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:143 includes/class-rsv-privacy.php:77
+#: includes/class-rsv-frontend.php:224 includes/class-rsv-privacy.php:77
 msgid "Reason"
 msgstr ""
 
@@ -424,23 +446,31 @@ msgstr ""
 msgid "Reason / details"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:124
+#: includes/class-rsv-frontend.php:182
 msgid "Recommended"
 msgstr ""
 
-#: includes/class-rsv-admin.php:24 includes/class-rsv-frontend.php:95 includes/class-rsv-frontend.php:167 includes/class-rsv-privacy.php:48
+#: includes/class-rsv-frontend.php:185
+msgid "Recommended ordering is explainable and excludes paid placement. Choose Latest for chronological control."
+msgstr ""
+
+#: includes/class-rsv-integrations.php:114
+msgid "Recommended ordering uses bounded quality, completion, freshness and diversity signals—not payment or follower count alone."
+msgstr ""
+
+#: includes/class-rsv-admin.php:24 includes/class-rsv-frontend.php:129 includes/class-rsv-frontend.php:296 includes/class-rsv-privacy.php:48
 msgid "Reel"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:142
+#: includes/class-rsv-frontend.php:223
 msgid "Reel actions"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:88 includes/class-rsv-frontend.php:165
+#: includes/class-rsv-frontend.php:119 includes/class-rsv-frontend.php:284
 msgid "Reel History"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:40
+#: includes/class-rsv-frontend.php:44
 msgid "Reel link copied."
 msgstr ""
 
@@ -448,11 +478,11 @@ msgstr ""
 msgid "Reel Moderation"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:129
+#: includes/class-rsv-frontend.php:201
 msgid "Reel navigation"
 msgstr ""
 
-#: includes/class-rsv-reels.php:85 includes/class-rsv-reels.php:113 includes/class-rsv-reels.php:187 includes/class-rsv-reels.php:219 includes/class-rsv-reels.php:318 includes/class-rsv-reels.php:333 includes/class-rsv-reels.php:455 includes/class-rsv-rest.php:72 includes/class-rsv-rest.php:79 includes/class-rsv-rest.php:80 includes/class-rsv-rest.php:81 includes/class-rsv-rest.php:82 includes/class-rsv-rest.php:83 includes/class-rsv-rest.php:84
+#: includes/class-rsv-reels.php:113 includes/class-rsv-reels.php:187 includes/class-rsv-reels.php:219 includes/class-rsv-reels.php:318 includes/class-rsv-reels.php:333 includes/class-rsv-reels.php:455 includes/class-rsv-reels.php:85 includes/class-rsv-rest.php:72 includes/class-rsv-rest.php:79 includes/class-rsv-rest.php:80 includes/class-rsv-rest.php:81 includes/class-rsv-rest.php:82 includes/class-rsv-rest.php:83 includes/class-rsv-rest.php:84
 msgid "Reel not found."
 msgstr ""
 
@@ -460,7 +490,7 @@ msgstr ""
 msgid "Reel reports and appeals"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:74
+#: includes/class-rsv-frontend.php:99
 msgid "Reel unavailable"
 msgstr ""
 
@@ -468,7 +498,7 @@ msgstr ""
 msgid "Reel viewing history"
 msgstr ""
 
-#: includes/class-rsv-admin.php:14 includes/class-rsv-admin.php:14 includes/class-rsv-frontend.php:122
+#: includes/class-rsv-admin.php:14 includes/class-rsv-frontend.php:171
 msgid "Reels"
 msgstr ""
 
@@ -480,7 +510,7 @@ msgstr ""
 msgid "Reels Diagnostics"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:126
+#: includes/class-rsv-frontend.php:187
 msgid "Reels feed. Use Up and Down Arrow keys or the Previous and Next buttons."
 msgstr ""
 
@@ -492,15 +522,23 @@ msgstr ""
 msgid "Reels Operations"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:165
+#: includes/class-rsv-frontend.php:284
 msgid "Reels watched while signed in will appear here."
+msgstr ""
+
+#: includes/class-rsv-frontend.php:33
+msgid "Reference"
+msgstr ""
+
+#: includes/class-rsv-frontend.php:234 includes/class-rsv-frontend.php:305
+msgid "Reference:"
 msgstr ""
 
 #: includes/class-rsv-privacy.php:81
 msgid "Relationship"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:143
+#: includes/class-rsv-frontend.php:224
 msgid "Report"
 msgstr ""
 
@@ -508,7 +546,7 @@ msgstr ""
 msgid "Report not found."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:37
+#: includes/class-rsv-frontend.php:41
 msgid "Report submitted."
 msgstr ""
 
@@ -516,11 +554,11 @@ msgstr ""
 msgid "Restart playback before saving progress."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:33
+#: includes/class-rsv-frontend.php:37
 msgid "Resume feed"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:151
+#: includes/class-rsv-frontend.php:239
 msgid "Resume/completion tracking is available only when File 10 supplies verified player progress."
 msgstr ""
 
@@ -540,19 +578,19 @@ msgstr ""
 msgid "Safe Mode"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:142
+#: includes/class-rsv-frontend.php:223
 msgid "Save"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:31
+#: includes/class-rsv-frontend.php:35
 msgid "Saved."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:142
+#: includes/class-rsv-frontend.php:223
 msgid "Share"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:165
+#: includes/class-rsv-frontend.php:280
 msgid "Sign in required"
 msgstr ""
 
@@ -568,19 +606,19 @@ msgstr ""
 msgid "Sign in to save Reel history."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:30 includes/class-rsv-reels.php:310
+#: includes/class-rsv-frontend.php:34 includes/class-rsv-reels.php:310
 msgid "Sign in to use this action."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:165
+#: includes/class-rsv-frontend.php:280
 msgid "Sign in to view private Reel history."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:29
+#: includes/class-rsv-frontend.php:32
 msgid "Something went wrong. Please retry."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:124
+#: includes/class-rsv-frontend.php:181
 msgid "Sort Reels"
 msgstr ""
 
@@ -588,11 +626,11 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:143
+#: includes/class-rsv-frontend.php:224
 msgid "Submit report"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:123
+#: includes/class-rsv-frontend.php:174
 msgid "Take regular pauses. Autoplay is off until you choose it, and this feed never uses streaks, shame or forced infinite scrolling."
 msgstr ""
 
@@ -700,7 +738,7 @@ msgstr ""
 msgid "This Reel changed. Refresh and try again."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:74
+#: includes/class-rsv-frontend.php:98
 msgid "This Reel is unavailable or restricted."
 msgstr ""
 
@@ -712,7 +750,7 @@ msgstr ""
 msgid "This report is no longer open for moderation."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:162 includes/class-rsv-privacy.php:97
+#: includes/class-rsv-frontend.php:272 includes/class-rsv-privacy.php:97
 msgid "Title"
 msgstr ""
 
@@ -724,8 +762,12 @@ msgstr ""
 msgid "Too many requests. Please wait and try again."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:162 includes/class-rsv-privacy.php:98
+#: includes/class-rsv-frontend.php:176 includes/class-rsv-frontend.php:272 includes/class-rsv-privacy.php:98
 msgid "Topic"
+msgstr ""
+
+#: includes/class-rsv-frontend.php:190
+msgid "Try another approved topic or return later after new Reels are reviewed."
 msgstr ""
 
 #: includes/class-rsv-admin.php:20
@@ -760,12 +802,16 @@ msgstr ""
 msgid "Viewing progress is temporarily unavailable."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:167
+#: includes/class-rsv-frontend.php:296
 msgid "Views"
 msgstr ""
 
-#: includes/class-rsv-frontend.php:162 includes/class-rsv-privacy.php:100
+#: includes/class-rsv-frontend.php:272 includes/class-rsv-privacy.php:100
 msgid "Visibility"
+msgstr ""
+
+#: includes/class-rsv-frontend.php:222
+msgid "Why this Reel?"
 msgstr ""
 
 #: includes/class-rsv-reels.php:511
@@ -792,6 +838,7 @@ msgstr ""
 msgid "You cannot run this rollback."
 msgstr ""
 
-#: includes/class-rsv-frontend.php:154
+#: includes/class-rsv-frontend.php:247
 msgid "Your browser does not support video playback."
 msgstr ""
+

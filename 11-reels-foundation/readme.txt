@@ -3,7 +3,7 @@ Contributors: sabrihomeopathy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.0.0-rc2
+Stable tag: 1.0.0-rc3
 License: GPLv2 or later
 
 Canonical File 11 educational Reels implementation for the Sabri Social Homeopathy Platform.
@@ -58,6 +58,10 @@ No. Autoplay begins only after explicit user choice and remains disabled for red
 No. This package is a repository release candidate. Hostinger staging acceptance, real cross-file integration, browser/device evidence, restore/rollback rehearsal, Founder sign-off and controlled live deployment remain separate evidence gates.
 
 == Changelog ==
+
+= 1.0.0-rc3 =
+* Harmonized with the third central Top-20 value plan.
+* Added canonical package root, topic filtering, recommendation explanations, traceable UI errors, scoped design tokens and versioned File 21/25/26 read-only provider contracts.
 
 = 1.0.0-rc2 =
 * Corrected the RC1 forensic defects in authorization, visibility, progress integrity, moderation, privacy, migration, routes, accessibility and deterministic release evidence.
