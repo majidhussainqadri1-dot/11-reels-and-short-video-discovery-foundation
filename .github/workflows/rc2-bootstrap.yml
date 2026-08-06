@@ -17,11 +17,37 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Assemble diagnostic archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat \
+            .bootstrap/rc2part00 .bootstrap/rc2part01 \
+            .bootstrap/rc2part02 .bootstrap/rc2part03 \
+            .bootstrap/rc2part04 .bootstrap/rc2part05 \
+            .bootstrap/rc2part06 .bootstrap/rc2part07 \
+            .bootstrap/rc2part08 .bootstrap/rc2part09 \
+            .bootstrap/rc2part10a .bootstrap/rc2part10b \
+            .bootstrap/rc2part11 > /tmp/file11rc2-source.b64
+          base64 -d /tmp/file11rc2-source.b64 > /tmp/file11rc2-source.tar.gz
+          sha256sum /tmp/file11rc2-source.b64 /tmp/file11rc2-source.tar.gz
+          cp /tmp/file11rc2-source.b64 current-file11rc2-source.b64
+          cp /tmp/file11rc2-source.tar.gz current-file11rc2-source.tar.gz
+
+      - name: Upload diagnostic archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: file11-rc2-bootstrap-diagnostic
+          path: |
+            current-file11rc2-source.b64
+            current-file11rc2-source.tar.gz
+          if-no-files-found: error
+          retention-days: 1
+
       - name: Reconstruct and verify canonical RC2 tree
         shell: bash
         run: |
           set -euo pipefail
-          LC_ALL=C cat .bootstrap/rc2part* | base64 -d > /tmp/file11rc2-source.tar.gz
           echo "3cc0001b8b059d4c70230197cfb335b2beeafaec851caf6c7b075a8445e3bbf5  /tmp/file11rc2-source.tar.gz" | sha256sum -c -
           tar -xzf /tmp/file11rc2-source.tar.gz
 
