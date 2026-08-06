@@ -1,7 +1,12 @@
-# File 11 Release Manifest
+# Release Manifest — File 11 v1.1.0-rc4
 
-Current candidate: `1.0.0-rc3`
-
-The candidate is built deterministically by `tools/build-package.sh` into the canonical root `reels-foundation-11/`. Its local reviewed checksum is recorded in `CHECKSUMS.sha256`. GitHub Actions must independently rebuild and publish the exact-head artifact before staging.
-
-Repository completion does not substitute for Hostinger staging, Founder acceptance, production deployment or operational acceptance.
+- Source directory: `11-reels-foundation`
+- Installable root: `reels-foundation-11`
+- Package: `reels-foundation-11-1.1.0-rc4.zip`
+- Plugin version: `1.1.0-rc4`
+- Main schema: `1.2.0`
+- Top-20 schema: `1.0.0`
+- Contract/event version: `3`
+- Required File 10: `>=1.0.0-rc1` plus compatible provider contract
+- Package checksum: generated and verified by exact-head deterministic workflow; never copied from RC3
+- Status: repository release candidate; staging/Founder/live/operational gates pending

@@ -1,15 +1,17 @@
-# File 11 — Exact Status 1.0.0-rc3
+# File 11 Status — 1.1.0-rc4
 
-## Seven-status release model
-
-| Status | State |
+| Gate | Status |
 |---|---|
-| Specified | Complete |
-| Coded | Complete for approved repository scope |
-| Packaged | Complete; deterministic RC3 package |
-| Automated-QA Green | Local complete; exact-head GitHub CI required after commit |
-| Staging-Accepted | Pending external Hostinger evidence |
-| Live-Deployed | Pending |
-| Operational | Pending |
+| Four governing plans reconciled | Complete in source/specification |
+| F11-FR-001–015 / F11-NFR-001–010 | Implemented and traceable |
+| CV-119–CV-129 | Implemented and traceable |
+| Four fresh review/fix rounds | Documented |
+| Repository source | Release-candidate complete |
+| Exact-head automated QA | Must be green on RC4 head |
+| Deterministic ZIP/checksum | Produced by exact-head workflow |
+| Hostinger staging | Pending external execution |
+| Founder acceptance | Pending |
+| Live deployment | Not performed |
+| Operational acceptance | Not performed |
 
-Known unresolved critical/high repository defects at the reviewed local candidate: **zero**. This is not an assertion of absolute infallibility; new evidence reopens review.
+**Claim boundary:** no ZIP, CI result or document is treated as production completion.

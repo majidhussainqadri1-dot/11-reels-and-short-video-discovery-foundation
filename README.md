@@ -1,44 +1,38 @@
 # File 11 — Reels and Short Video Discovery
 
-Canonical repository for **File 11** of the Sabri Social Homeopathy Platform.
+**Release candidate:** `1.1.0-rc4`  
+**Branch:** `codex/file-11-four-plan-complete-v1.1.0-rc4`  
+**Canonical package root:** `reels-foundation-11`
 
-## Current release candidate
+File 11 is the canonical owner of vertical educational Reel entities, the 60–600-second rule, swipe discovery, ranking guardrails, moderation, private progress/history, maximum-24-hour Stories/Status, durable consent-current Highlights, attributed Reel-to-Reel Response/Remix relationships, source/safety context, user-controlled well-being settings, youth-safe discovery and privacy-minimized creator value insights.
 
-- Software: `1.0.0-rc3`
-- Schema: `1.1.0`
-- Contract: `2`
-- Source folder: `11-reels-foundation/`
-- Canonical installable package root: `reels-foundation-11/`
-- Canonical package: `reels-foundation-11-1.0.0-rc3.zip`
-- Package SHA-256: `3b0064d032224a29231afaf98d92ff69cfffd03eac2c60dba24cbb75195d0438`
+File 10 remains the sole owner of raw upload, transcoding, storage, playback, caption objects, media rights, patient-media consent and secure delivery. File 11 does not duplicate that backend.
 
-RC3 supersedes RC2 after reconciliation with the Definitive Master Plan v3.0, the recovered directives and the third Continuous-Value/Top-20 Superset plan.
+## Governing plans
 
-## Ownership boundary
+1. Definitive Integrated Master Plan v3.0;
+2. Consolidated All-Chats Recovered Directives v2.1;
+3. Continuous Value / Top-20 Superset Master Plan v1.0;
+4. File 11 Complete Master Plan v1.0.
 
-File 11 owns Reel metadata/state, educational taxonomy, vertical discovery, bounded ranking signals, private Reel progress/history, Reel moderation/appeals and privacy-safe aggregate insights. File 10 remains the sole owner of upload, scanning, processing, captions, playback, media rights/consent truth and secure delivery. File 00 remains the identity, membership, suspension, guardian and publishing-assertion authority. File 21, File 25 and File 26 consume versioned read-only provider contracts; they do not become parallel Reel owners.
+## RC4 corrections
 
-## RC3 harmonization
+- implements CV-119 through CV-129: source/safety, transcripts, Stories/Status, Highlights, attributed responses, creator value insights, well-being controls and youth-safe mode;
+- makes File 00 claims contract-aware and keeps authorization filters deny-only;
+- binds cursors to topic and youth-safety context and provides signed private-history cursors;
+- consumes versioned File 10 secure-download, transcript and interaction adapters without manufacturing media URLs or counts;
+- fail-closes public visibility for legacy Reels missing reviewed source/safety and caption/transcript evidence while preserving owner/operator repair access;
+- adds four review records, migration, threat model, traceability, deterministic packaging and exact-head CI.
 
-- canonical package root aligned to `reels-foundation-11`;
-- approved-topic filtering with cursor/filter binding and no-JavaScript continuity;
-- explainable “Why this Reel?” reasons and explicit Recommended/Latest user control;
-- no paid-placement claim and no follower-count-only ranking;
-- scoped CSS tokens that consume File 20/25 platform tokens with safe green fallbacks;
-- accessible inline SVG icons with visible text labels;
-- safe trace/reference IDs in frontend error states;
-- File 21 Home cards, File 25 public timeline and File 26 search/recommendation read-only provider contracts;
-- post-load keyboard/inert-state correction for dynamically appended Reels.
-
-## Automated verification
+## Verification
 
 ```bash
 bash tests/run-all.sh
-bash tools/build-package.sh packages/reels-foundation-11-1.0.0-rc3.zip
+bash tools/build-package.sh
 ```
 
-The suite performs PHP lint, JavaScript syntax validation, state-machine tests, context-bound signed-cursor tests, forensic contract checks, secret-pattern checks, deterministic double build, archive integrity, canonical-root verification and source/package byte parity.
+The suite covers PHP/JavaScript syntax, state/helper tests, forensic/static/Top-20 contracts, deterministic double build, ZIP integrity and source/package byte parity.
 
-## Release truth
+## Claim boundary
 
-Repository-controlled statuses are complete for this candidate: **Specified, Coded, Packaged and Automated-QA Green**. Hostinger staging acceptance, real companion-module integration, browser/device/accessibility evidence, restore/rollback rehearsal, Founder acceptance, controlled live deployment and operational monitoring remain separate external gates.
+RC4 is a **repository release candidate**, not production completion. Hostinger staging, real companion contracts, real roles/media, browsers/devices/RTL/accessibility, migration/restore/rollback rehearsal, Founder acceptance, controlled deployment and operational monitoring remain separate mandatory gates.

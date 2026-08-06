@@ -1,29 +1,25 @@
 # Changelog
 
-## 1.0.0-rc3 — 2026-08-06
+## 1.1.0-rc4 — 2026-08-06
 
-### Three-plan harmonization
-- Reconciled File 11 with the Definitive Master Plan v3.0, recovered directives v2.1 and the Continuous-Value/Top-20 Superset plan.
-- Aligned the deterministic installable package root to `reels-foundation-11` without creating a second runtime.
-- Added versioned read-only provider contracts for File 21 Home cards, File 25 timelines and File 26 search/recommendation consumption.
+### Four-plan completion
+- Harmonized Definitive Master Plan v3.0, Recovered Directives v2.1, Continuous Value / Top-20 Superset v1.0 and File 11 Master Plan v1.0.
+- Retained F11-FR-001–015 / F11-NFR-001–010 and implemented CV-119–CV-129.
 
-### Discovery, transparency and user control
-- Added approved-topic filtering and preserved topic state across sort, REST pagination and no-JavaScript continuation.
-- Bound signed cursors to sort and topic context to prevent cross-filter pagination drift.
-- Added “Why this Reel?” explanations, explicit Recommended/Latest choice and a no-paid-placement disclosure.
-- Corrected dynamically appended Reel focus/inert states.
+### Added
+- Maximum-24-hour Stories/Status linked to eligible Reels, with request-time expiry and rights/consent snapshots.
+- Consent-current Highlights and attributed Reel-to-Reel Response/Remix relationships with patient-reuse consent gates.
+- Source label, source URL, transcript adapter, safety summary and response policy context.
+- Youth-safe mode, private-history pause, session limit, natural stop and one late-night reminder.
+- Signed history cursor and privacy-minimized value insights covering completion, source opens, shares, provider saves/comments and harm reports.
+- File 21/25/26 and File 22 read-only/provider contracts for new File 11 entities.
 
-### Visual, accessibility and supportability
-- Replaced decorative emoji controls with accessible inline SVG icons plus visible labels.
-- Scoped File 11 CSS variables to the module and consumed platform design tokens with green fallbacks.
-- Added safe trace/reference IDs to frontend API and media error states.
-- Regenerated the POT template for RC3.
+### Security and correctness
+- Identity contract compatibility; authorization filters may deny but cannot manufacture authority.
+- Public fail-closed gate for missing source/safety and caption/transcript evidence.
+- Topic/youth cursor isolation and bounded eligible-neighbor scans.
+- Versioned File 10 secure-delivery/transcript/interaction adapters.
+- Top-20 schema, privacy exporter/eraser, deterministic build and four review records.
 
-## 1.0.0-rc2 — 2026-08-06
-
-- Completed the plan-mapped canonical Reel lifecycle, File 00/File 10 contracts, privacy, moderation, migration/rollback, deterministic packaging and PHP 8.1/8.3/8.4 QA.
-- Superseded after the third central plan required a new harmonization review.
-
-## 1.0.0-rc1
-
-Initial plan-mapped release candidate; superseded after forensic review.
+## 1.0.0-rc3 — historical
+RC3 established the canonical Reel foundation. RC4 supersedes it.
