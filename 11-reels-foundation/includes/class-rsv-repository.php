@@ -76,24 +76,33 @@ final class RSV_Repository {
 		);
 	}
 
+	/**
+	 * Public feed. Unlisted/member/entitled Reels are intentionally excluded from discovery.
+	 * Cursor context includes topic and youth-safety mode, preventing cross-context replay.
+	 *
+	 * @return array<string,mixed>|WP_Error
+	 */
 	public static function feed( $args = array() ) {
 		global $wpdb;
 		$table  = RSV_Helpers::table( 'reels' );
 		$limit  = min( 50, max( 1, absint( $args['limit'] ?? 12 ) ) );
 		$sort   = RSV_Helpers::enum( $args['sort'] ?? 'recommended', array( 'recommended', 'latest' ), 'recommended' );
 		$topic  = RSV_Helpers::enum( $args['topic'] ?? '', RSV_Contracts::TOPICS, '' );
-		$youth  = array_key_exists( 'youth_safe', $args ) ? ! empty( $args['youth_safe'] ) : ( class_exists( 'RSV_Top20' ) && RSV_Top20::youth_mode() );
+		$requested_youth = array_key_exists( 'youth_safe', $args ) && ! empty( $args['youth_safe'] );
+		$youth  = $requested_youth || ( class_exists( 'RSV_Top20' ) && RSV_Top20::youth_mode() );
 		$context = sanitize_key( ( $topic ?: 'all' ) . '-' . ( $youth ? 'youth' : 'standard' ) );
 		$cursor = RSV_Helpers::cursor_decode( $args['cursor'] ?? '', $sort, $context );
 		if ( is_wp_error( $cursor ) ) {
 			return $cursor;
 		}
+
 		$where  = 'status=%s AND visibility=%s';
 		$params = array( 'published', 'public' );
 		if ( $topic ) {
 			$where   .= ' AND topic=%s';
 			$params[] = $topic;
 		}
+
 		if ( 'latest' === $sort ) {
 			$order = 'published_at DESC, id DESC';
 			if ( $cursor ) {
@@ -114,6 +123,7 @@ final class RSV_Repository {
 				$params[] = $cursor['id'];
 			}
 		}
+
 		$scan_limit = min( 200, max( $limit + 1, $limit * 4 ) );
 		$params[]   = $scan_limit;
 		$sql        = $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY $order LIMIT %d", $params );
@@ -136,7 +146,13 @@ final class RSV_Repository {
 				? RSV_Helpers::cursor_encode( $sort, $last['published_at'], '', $last['id'], $context )
 				: RSV_Helpers::cursor_encode( $sort, $last['rank_score'], $last['updated_at'], $last['id'], $context );
 		}
-		return array( 'items' => $items, 'next_cursor' => $next, 'sort' => $sort, 'topic' => $topic, 'youth_safe' => $youth );
+		return array(
+			'items' => $items,
+			'next_cursor' => $next,
+			'sort' => $sort,
+			'topic' => $topic,
+			'youth_safe' => $youth,
+		);
 	}
 
 	public static function update_versioned( $id, $expected_version, $changes ) {
@@ -176,17 +192,38 @@ final class RSV_Repository {
 		$reels    = RSV_Helpers::table( 'reels' );
 		$limit    = min( 200, max( 1, absint( $limit ) ) );
 		$offset   = min( 1000, max( 0, absint( $offset ) ) );
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT p.position_seconds,p.completed,p.replays,p.updated_at AS progress_updated_at,r.* FROM $progress p JOIN $reels r ON r.id=p.reel_id WHERE p.user_id=%d ORDER BY p.updated_at DESC,p.id DESC LIMIT %d OFFSET %d", absint( $user_id ), $limit, $offset ), ARRAY_A );
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT p.position_seconds,p.completed,p.replays,p.updated_at AS progress_updated_at,r.*
+				 FROM $progress p JOIN $reels r ON r.id=p.reel_id
+				 WHERE p.user_id=%d ORDER BY p.updated_at DESC,p.id DESC LIMIT %d OFFSET %d",
+				absint( $user_id ),
+				$limit,
+				$offset
+			),
+			ARRAY_A
+		);
 		$out = array();
 		foreach ( (array) $rows as $row ) {
-			$progress_dto = array( 'position_seconds' => absint( $row['position_seconds'] ), 'completed' => (bool) $row['completed'], 'replays' => absint( $row['replays'] ), 'updated_at' => $row['progress_updated_at'] );
+			$progress_dto = array(
+				'position_seconds' => absint( $row['position_seconds'] ),
+				'completed'        => (bool) $row['completed'],
+				'replays'          => absint( $row['replays'] ),
+				'updated_at'       => $row['progress_updated_at'],
+			);
 			if ( RSV_Security::can_view_reel( $row, absint( $user_id ) ) ) {
 				$dto = self::public_dto( $row );
 				$dto['available'] = true;
 				$dto['progress']  = $progress_dto;
 				$out[] = $dto;
 			} else {
-				$out[] = array( 'id' => 'unavailable-' . substr( hash( 'sha256', $row['public_id'] ), 0, 12 ), 'title' => __( 'Unavailable Reel', RSV_TEXT_DOMAIN ), 'available' => false, 'url' => '', 'progress' => $progress_dto );
+				$out[] = array(
+					'id'        => 'unavailable-' . substr( hash( 'sha256', $row['public_id'] ), 0, 12 ),
+					'title'     => __( 'Unavailable Reel', RSV_TEXT_DOMAIN ),
+					'available' => false,
+					'url'       => '',
+					'progress'  => $progress_dto,
+				);
 			}
 		}
 		return $out;
@@ -196,35 +233,56 @@ final class RSV_Repository {
 		global $wpdb;
 		$table     = RSV_Helpers::table( 'reels' );
 		$published = $reel['published_at'] ?: $reel['updated_at'];
-		$previous_rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE status='published' AND visibility='public' AND (published_at<%s OR (published_at=%s AND id<%d)) ORDER BY published_at DESC,id DESC LIMIT 50", $published, $published, $reel['id'] ), ARRAY_A );
-		$next_rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE status='published' AND visibility='public' AND (published_at>%s OR (published_at=%s AND id>%d)) ORDER BY published_at ASC,id ASC LIMIT 50", $published, $published, $reel['id'] ), ARRAY_A );
+		$previous_rows = (array) $wpdb->get_results(
+			$wpdb->prepare( "SELECT * FROM $table WHERE status='published' AND visibility='public' AND (published_at<%s OR (published_at=%s AND id<%d)) ORDER BY published_at DESC,id DESC LIMIT 50", $published, $published, $reel['id'] ),
+			ARRAY_A
+		);
+		$next_rows = (array) $wpdb->get_results(
+			$wpdb->prepare( "SELECT * FROM $table WHERE status='published' AND visibility='public' AND (published_at>%s OR (published_at=%s AND id>%d)) ORDER BY published_at ASC,id ASC LIMIT 50", $published, $published, $reel['id'] ),
+			ARRAY_A
+		);
 		$previous = self::first_viewable( $previous_rows );
 		$next     = self::first_viewable( $next_rows );
-		return array( 'previous' => $previous ? self::public_dto( $previous ) : null, 'next' => $next ? self::public_dto( $next ) : null );
+		return array(
+			'previous' => $previous ? self::public_dto( $previous ) : null,
+			'next'     => $next ? self::public_dto( $next ) : null,
+		);
 	}
 
 	private static function first_viewable( $rows ) {
 		foreach ( (array) $rows as $row ) {
-			if ( RSV_Security::can_view_reel( $row, 0 ) ) return $row;
+			if ( RSV_Security::can_view_reel( $row, 0 ) ) {
+				return $row;
+			}
 		}
 		return null;
 	}
 
+	/** Bounded public Reel projection for File 25 timelines. */
 	public static function public_by_author( $author_id, $limit = 20 ) {
 		global $wpdb;
 		$table = RSV_Helpers::table( 'reels' );
 		$limit = min( 50, max( 1, absint( $limit ) ) );
-		$rows  = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE owner_id=%d AND status=%s AND visibility=%s ORDER BY published_at DESC,id DESC LIMIT %d", absint( $author_id ), 'published', 'public', min( 150, $limit * 3 ) ), ARRAY_A );
+		$rows  = (array) $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM $table WHERE owner_id=%d AND status=%s AND visibility=%s ORDER BY published_at DESC,id DESC LIMIT %d",
+				absint( $author_id ), 'published', 'public', min( 150, $limit * 3 )
+			),
+			ARRAY_A
+		);
 		$out = array();
 		foreach ( $rows as $row ) {
 			if ( RSV_Security::can_view_reel( $row, 0 ) ) {
 				$out[] = $row;
-				if ( count( $out ) >= $limit ) break;
+				if ( count( $out ) >= $limit ) {
+					break;
+				}
 			}
 		}
 		return $out;
 	}
 
+	/** Bounded public search projection for File 26. */
 	public static function search_public( $query, $limit = 10, $topic = '' ) {
 		global $wpdb;
 		$table = RSV_Helpers::table( 'reels' );
@@ -236,16 +294,26 @@ final class RSV_Repository {
 		if ( '' !== $query ) {
 			$like   = '%' . $wpdb->esc_like( $query ) . '%';
 			$where .= ' AND (title LIKE %s OR caption LIKE %s OR topic LIKE %s)';
-			$args[] = $like; $args[] = $like; $args[] = $like;
+			$args[] = $like;
+			$args[] = $like;
+			$args[] = $like;
 		}
-		if ( $topic ) { $where .= ' AND topic=%s'; $args[] = $topic; }
+		if ( $topic ) {
+			$where .= ' AND topic=%s';
+			$args[] = $topic;
+		}
 		$args[] = min( 120, $limit * 4 );
-		$rows   = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY rank_score DESC,published_at DESC,id DESC LIMIT %d", $args ), ARRAY_A );
+		$rows   = (array) $wpdb->get_results(
+			$wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY rank_score DESC,published_at DESC,id DESC LIMIT %d", $args ),
+			ARRAY_A
+		);
 		$out = array();
 		foreach ( $rows as $row ) {
 			if ( RSV_Security::can_view_reel( $row, 0 ) ) {
 				$out[] = $row;
-				if ( count( $out ) >= $limit ) break;
+				if ( count( $out ) >= $limit ) {
+					break;
+				}
 			}
 		}
 		return $out;
