@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Assemble diagnostic archive
+      - name: Reconstruct and verify canonical RC2 tree
         shell: bash
         run: |
           set -euo pipefail
@@ -29,25 +29,12 @@ jobs:
             .bootstrap/rc2part08 .bootstrap/rc2part09 \
             .bootstrap/rc2part10a .bootstrap/rc2part10b \
             .bootstrap/rc2part11 > /tmp/file11rc2-source.b64
+
+          # Repair the single transport-case mutation proven by the diagnostic artifact.
+          printf 'T' | dd of=/tmp/file11rc2-source.b64 bs=1 seek=58683 count=1 conv=notrunc status=none
+
+          echo "69e3ed8b3e6abfdad96a26bbd2109527ce4dc1fa4bd7fc50c5983dc2ee862418  /tmp/file11rc2-source.b64" | sha256sum -c -
           base64 -d /tmp/file11rc2-source.b64 > /tmp/file11rc2-source.tar.gz
-          sha256sum /tmp/file11rc2-source.b64 /tmp/file11rc2-source.tar.gz
-          cp /tmp/file11rc2-source.b64 current-file11rc2-source.b64
-          cp /tmp/file11rc2-source.tar.gz current-file11rc2-source.tar.gz
-
-      - name: Upload diagnostic archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: file11-rc2-bootstrap-diagnostic
-          path: |
-            current-file11rc2-source.b64
-            current-file11rc2-source.tar.gz
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: Reconstruct and verify canonical RC2 tree
-        shell: bash
-        run: |
-          set -euo pipefail
           echo "3cc0001b8b059d4c70230197cfb335b2beeafaec851caf6c7b075a8445e3bbf5  /tmp/file11rc2-source.tar.gz" | sha256sum -c -
           tar -xzf /tmp/file11rc2-source.tar.gz
 
