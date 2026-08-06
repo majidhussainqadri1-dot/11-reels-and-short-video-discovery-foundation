@@ -1,0 +1,58 @@
+name: File 11 RC3 Source Bootstrap
+
+on:
+  push:
+    branches:
+      - codex/file-11-three-plan-harmonized-v1.0-rc3
+    paths:
+      - .github/workflows/rc3-bootstrap.yml
+
+permissions:
+  contents: write
+
+jobs:
+  reconstruct:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Install archive tools
+        run: sudo apt-get update && sudo apt-get install -y zip unzip
+      - name: Reconstruct and verify canonical RC3 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat \
+            .bootstrap/rc3part00 .bootstrap/rc3part01 \
+            .bootstrap/rc3part02 .bootstrap/rc3part03 \
+            .bootstrap/rc3part04 > /tmp/file11-rc3-source.b64
+          echo "5a55c92cdd8b817483448d694c0632cad2cd1749829b4f669ba1fd5899938e1c  /tmp/file11-rc3-source.b64" | sha256sum -c -
+          base64 -d /tmp/file11-rc3-source.b64 > /tmp/file11-rc3-source.tar.gz
+          echo "37917f24a2afca0f1a7484802c7190ff9dab25906fd82c495db0064c6fc78d96  /tmp/file11-rc3-source.tar.gz" | sha256sum -c -
+          rm -rf /tmp/file11-rc3-source
+          mkdir -p /tmp/file11-rc3-source
+          tar -xzf /tmp/file11-rc3-source.tar.gz -C /tmp/file11-rc3-source
+
+          rm -rf 11-reels-foundation docs tests tools
+          rm -f README.md CHANGELOG.md CHECKSUMS.sha256 RELEASE-CHECKSUMS.sha256 \
+            RELEASE-MANIFEST.md STATUS.md MANIFEST-1.0.0-rc2.md MANIFEST-1.0.0-rc3.md
+          cp -R /tmp/file11-rc3-source/. .
+          rm -rf .bootstrap
+
+          bash ./tests/run-all.sh
+          bash ./tools/build-package.sh /tmp/reels-foundation-11-1.0.0-rc3.zip >/dev/null
+          echo "3b0064d032224a29231afaf98d92ff69cfffd03eac2c60dba24cbb75195d0438  /tmp/reels-foundation-11-1.0.0-rc3.zip" | sha256sum -c -
+      - name: Commit canonical RC3 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Complete File 11 RC3 three-plan harmonization [skip ci]"
+          git push origin HEAD:codex/file-11-three-plan-harmonized-v1.0-rc3
