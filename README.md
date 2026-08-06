@@ -1,51 +1,20 @@
-# File 11 — Reels and Short Video Discovery Foundation
+# File 11 — Reels and Short Video Discovery
 
-Controlled repository for **File 11** of the **Sabri Social Homeopathy Platform**.
+Canonical source implementation for Sabri Social Homeopathy Platform **File 11**, governed by `SSH-F11-PLAN-2026-v1.0`.
 
-## Current development line
+## Release candidate
 
-- Original evidentiary baseline: `0.1.0`
-- Corrective release candidate: `0.2.0`
-- Original plugin directory: `reels/`
-- WordPress minimum: `6.0`
-- PHP minimum: `7.4`
-- Required upstream dependency: File 10 Video Wall through `SVW_Helpers` and `SVW_Interactions`
+- Version: `1.0.0-rc1`
+- Canonical plugin folder: `11-reels-foundation`
+- Text domain: `reels-short-video-discovery`
+- PHP prefix: `RSV_`
+- Required File 10 contract: `1.0.0-rc1+`
+- Source branch: `codex/file-11-complete-master-plan-v1.0-rc1`
 
-## 0.2.0 corrective scope
+File 11 owns Reel metadata, 60–600-second eligibility, educational taxonomy, discovery/ranking, private Reel history/progress, moderation and aggregate creator insights. File 10 remains the sole media pipeline and playback owner.
 
-The corrective release addresses the independent audit blockers: inert interactions, missing progress/history/replays, non-authoritative duration, weak source/upload validation, incomplete thumbnail enforcement, missing privacy rights, weak moderation integrity, unsafe page mapping, absent schema upgrades, incorrect list ordering, inaccurate author labels, and accessibility/performance omissions.
+## Evidence boundary
 
-Key controls include:
+The branch can establish source/package completion and automated QA. It cannot establish Hostinger staging, real WordPress/MySQL migration, real File 00 claims, browser/screen-reader acceptance, provider behavior, load/SLO evidence, backup restore, rollback rehearsal, Founder acceptance, live deployment or operations.
 
-- authoritative 60–600-second duration validation;
-- exact source/provider validation;
-- failed-upload cleanup;
-- File 10 reactions/saves/reports integration;
-- private watch history with export/erasure;
-- reviewer notes and audit history;
-- patient-case PII screening and attestations;
-- safe schema/page lifecycle;
-- keyboard, reduced-motion, responsive, and pagination support.
-
-See `CORRECTION-REPORT.md`, `CHANGELOG.md`, and `RELEASE-MANIFEST.md`.
-
-## Evidence separation
-
-The original 0.1.0 source evidence remains documented by:
-
-- `SOURCE-PROVENANCE.md`
-- `MANIFEST.md`
-- `CHECKSUMS.sha256`
-- `SOURCE-FILES.txt`
-
-The current corrective source is documented by:
-
-- `RELEASE-MANIFEST.md`
-- `RELEASE-CHECKSUMS.sha256`
-- `CORRECTION-REPORT.md`
-
-## Quality gates
-
-Corrective QA validates PHP 7.4/8.0/8.3/8.4 syntax, JavaScript syntax, release checksums, required security/privacy/functional contracts, and a deterministic installable ZIP artifact.
-
-Passing repository QA is necessary but not sufficient. File 10 compatibility, WordPress runtime, upgrade/rollback, Hostinger staging, responsive/accessibility, caching, external-provider, privacy, and Founder acceptance remain mandatory before production deployment.
+Keep the pull request Draft until `docs/STAGING-ACCEPTANCE-1.0.0-rc1.md` is supported by dated evidence.
