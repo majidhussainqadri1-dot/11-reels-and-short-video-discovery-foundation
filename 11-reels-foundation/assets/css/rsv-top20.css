@@ -1,0 +1,100 @@
+.rsv-top20-page,
+.rsv-context-card,
+.rsv-context-index,
+.rsv-wellbeing-choice {
+	--rsv-top20-accent: var(--sabri-color-primary, var(--sabri-primary, #167a3f));
+	--rsv-top20-surface: var(--sabri-color-surface, #fff);
+	--rsv-top20-border: var(--sabri-color-border, #d8e2dc);
+	--rsv-top20-text: var(--sabri-color-text, #17231c);
+	color: var(--rsv-top20-text);
+}
+.rsv-top20-page form,
+.rsv-top20-context-fields {
+	display: grid;
+	gap: .85rem;
+	max-width: 54rem;
+}
+.rsv-top20-page label,
+.rsv-top20-context-fields label {
+	display: grid;
+	gap: .35rem;
+}
+.rsv-top20-page input,
+.rsv-top20-page select,
+.rsv-top20-page textarea,
+.rsv-top20-context-fields input,
+.rsv-top20-context-fields select,
+.rsv-top20-context-fields textarea {
+	min-height: 44px;
+	max-width: 100%;
+	padding: .65rem;
+	border: 1px solid var(--rsv-top20-border);
+	border-radius: .55rem;
+	font: inherit;
+}
+.rsv-story,
+.rsv-highlight,
+.rsv-context-card,
+.rsv-context-index,
+.rsv-top20-context,
+.rsv-wellbeing-choice {
+	margin-block: 1rem;
+	padding: 1rem;
+	border: 1px solid var(--rsv-top20-border);
+	border-radius: .8rem;
+	background: var(--rsv-top20-surface);
+}
+.rsv-top20-context summary {
+	min-height: 44px;
+	cursor: pointer;
+	font-weight: 700;
+	color: var(--rsv-top20-accent);
+}
+.rsv-top20-context dl,
+.rsv-context-card dl {
+	display: grid;
+	grid-template-columns: minmax(7rem, auto) 1fr;
+	gap: .5rem 1rem;
+}
+.rsv-top20-context dt,
+.rsv-context-card dt {
+	font-weight: 700;
+}
+.rsv-top20-context dd,
+.rsv-context-card dd {
+	margin: 0;
+	overflow-wrap: anywhere;
+}
+.rsv-wellbeing-choice {
+	position: sticky;
+	inset-block-end: 1rem;
+	z-index: 20;
+	box-shadow: 0 .5rem 2rem rgb(0 0 0 / .15);
+	border-inline-start: .35rem solid var(--rsv-top20-accent);
+}
+.rsv-wellbeing-choice button,
+.rsv-top20-page button,
+.rsv-top20-response-link {
+	min-height: 44px;
+	min-width: 44px;
+	padding: .65rem 1rem;
+	border-radius: .55rem;
+}
+.rsv-top20-response-link {
+	display: inline-flex;
+	align-items: center;
+	background: var(--rsv-top20-accent);
+	color: #fff;
+	text-decoration: none;
+}
+.rsv-context-index ul {
+	padding-inline-start: 1.4rem;
+}
+@media (max-width: 520px) {
+	.rsv-top20-context dl,
+	.rsv-context-card dl { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.rsv-top20-page *,
+	.rsv-wellbeing-choice * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}
