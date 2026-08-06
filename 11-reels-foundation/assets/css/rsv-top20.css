@@ -1,6 +1,8 @@
 .rsv-top20-page,
 .rsv-context-card,
 .rsv-context-index,
+.rsv-top20-context,
+.rsv-top20-context-fields,
 .rsv-wellbeing-choice {
 	--rsv-top20-accent: var(--sabri-color-primary, var(--sabri-primary, #167a3f));
 	--rsv-top20-surface: var(--sabri-color-surface, #fff);
