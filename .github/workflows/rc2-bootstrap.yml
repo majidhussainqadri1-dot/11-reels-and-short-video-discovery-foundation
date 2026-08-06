@@ -1,0 +1,44 @@
+name: File 11 RC2 Bootstrap
+
+on:
+  push:
+    branches:
+      - codex/file-11-complete-master-plan-v1.0-rc2
+
+permissions:
+  contents: write
+
+jobs:
+  reconstruct:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reconstruct and verify canonical RC2 tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          LC_ALL=C cat .bootstrap/rc2part* | base64 -d > /tmp/file11rc2-source.tar.gz
+          echo "3cc0001b8b059d4c70230197cfb335b2beeafaec851caf6c7b075a8445e3bbf5  /tmp/file11rc2-source.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/file11rc2-source.tar.gz
+
+          rm -rf reels
+          rm -f .github/workflows/baseline-integrity.yml
+          rm -f .github/workflows/corrective-qa.yml
+          rm -rf .bootstrap
+          rm -f .github/workflows/rc2-bootstrap.yml
+
+          bash ./tests/run-all.sh
+
+      - name: Commit reconstructed RC2 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Complete File 11 RC2 forensic correction and release evidence"
+          git push origin HEAD:codex/file-11-complete-master-plan-v1.0-rc2
