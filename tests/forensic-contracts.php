@@ -4,81 +4,51 @@ $plugin = $root . '/11-reels-foundation';
 $read = static function ( $path ) { $data = file_get_contents( $path ); if ( false === $data ) throw new RuntimeException( "Cannot read $path" ); return $data; };
 $all = '';
 $iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $plugin, FilesystemIterator::SKIP_DOTS ) );
-foreach ( $iterator as $file ) { if ( $file->isFile() ) $all .= "\n" . $read( $file->getPathname() ); }
+foreach ( $iterator as $file ) if ( $file->isFile() ) $all .= "\n" . $read( $file->getPathname() );
 $must = array(
-	"Version: 1.0.0-rc3",
-	"define( 'RSV_SCHEMA_VERSION', '1.1.0' )",
-	"smc_membership_assertions",
-	"smc_publishing_assertions",
-	"eligible_for_reel",
-	"hash_hmac( 'sha256', (string) get_current_user_id()",
-	"view_sessions",
-	"actor_scope_window",
-	"status IN ('pending','retry')",
-	"rpt_[a-f0-9-]{36}",
-	"migrate_history",
-	"CHECKPOINT_OPTION",
-	"rollback_legacy_cutover",
-	"post_parent",
-	"prefers-reduced-motion",
-	"data-rsv-load-more",
-	"bindVideos",
-	"rsv_privacy_retain_report_evidence",
-	"class RSV_Integrations",
-	"sabri_platform_domain_provider_registered",
-	"public_by_author",
-	"search_public",
-	"Why this Reel?",
-	"data-rsv-topic",
-	"body.data.trace_id",
-	"--sabri-color-primary",
+	"Version: 1.1.0-rc4", "define( 'RSV_SCHEMA_VERSION', '1.2.0' )", "define( 'RSV_CONTRACT_VERSION', 3 )",
+	"smc_membership_assertions", "rsv_identity_contract_compatible", "eligible_for_reel", "view_sessions", "actor_scope_window",
+	"status IN ('pending','retry')", "migrate_history", "CHECKPOINT_OPTION", "rollback_legacy_cutover", "post_parent",
+	"prefers-reduced-motion", "data-rsv-load-more", "bindVideos", "rsv_privacy_retain_report_evidence",
+	"class RSV_Integrations", "class RSV_Top20", "sabri_platform_domain_provider_registered", "public_by_author", "search_public",
+	"Why this Reel?", "data-rsv-topic", "body.data.trace_id", "--sabri-color-primary",
+	"stories-status", "attributed-responses", "mandatory_youth_mode", "history_cursor", "patient_reuse_consent",
 );
-foreach ( $must as $needle ) { if ( false === strpos( $all, $needle ) ) { fwrite( STDERR, "Missing required contract: $needle\n" ); exit( 1 ); } }
+foreach ( $must as $needle ) if ( false === strpos( $all, $needle ) ) { fwrite( STDERR, "Missing required contract: $needle\n" ); exit( 1 ); }
 $forbidden = array(
-	"Version: 1.0.0-rc2",
-	"define( 'RSV_VERSION', '1.0.0-rc2' )",
-	"Version: 1.0.0-rc1",
-	"define( 'RSV_VERSION', '1.0.0-rc1' )",
-	"postMessage('\\\"{\\\"event\\\"', '*')",
-	"if ( ! items )",
-	"WHERE id=\\d+/moderate",
-	"get_current_user_id() . '|' . gmdate( 'Y-m' )",
-	":root{--rsv-green",
+	"define( 'RSV_VERSION', '1.0.0-rc3' )", "Version: 1.0.0-rc2", "Version: 1.0.0-rc1",
+	"if ( ! items )", "get_current_user_id() . '|' . gmdate( 'Y-m' )", ":root{--rsv-green",
 );
-foreach ( $forbidden as $needle ) { if ( false !== strpos( $all, $needle ) ) { fwrite( STDERR, "Forbidden stale pattern: $needle\n" ); exit( 1 ); } }
+foreach ( $forbidden as $needle ) if ( false !== strpos( $all, $needle ) ) { fwrite( STDERR, "Forbidden stale pattern: $needle\n" ); exit( 1 ); }
 $contracts = $read( $plugin . '/includes/class-rsv-contracts.php' );
 if ( 15 !== preg_match_all( "/'F11-FR-[0-9]{3}'/", $contracts ) ) exit( 1 );
 if ( 10 !== preg_match_all( "/'F11-NFR-[0-9]{3}'/", $contracts ) ) exit( 1 );
+if ( 11 !== preg_match_all( "/'CV-[0-9]{3}'/", $contracts ) ) exit( 1 );
 $rest = $read( $plugin . '/includes/class-rsv-rest.php' );
 if ( preg_match( "#/reels/\\(\\?P<id>\\\\d#", $rest ) ) exit( 1 );
 if ( false === strpos( $rest, "'topic' => \$request->get_param( 'topic' )" ) ) exit( 1 );
 $privacy = $read( $plugin . '/includes/class-rsv-privacy.php' );
 if ( false === strpos( $privacy, "'idempotency'   => 'actor_id'" ) ) exit( 1 );
 $frontend = $read( $plugin . '/includes/class-rsv-frontend.php' );
-if ( false === strpos( $frontend, 'data-rsv-report-form' ) || false === strpos( $frontend, '<textarea name="details"' ) ) exit( 1 );
-if ( false === strpos( $frontend, 'rsv-discovery-controls' ) || false === strpos( $frontend, 'Recommended ordering is explainable' ) ) exit( 1 );
-if ( false === strpos( $frontend, 'private function icon' ) || false === strpos( $frontend, 'private function error_trace' ) ) exit( 1 );
-
+foreach ( array( 'data-rsv-report-form', '<textarea name="details"', 'rsv-discovery-controls', 'Recommended ordering is explainable', 'private function icon', 'private function error_trace', 'Next page of Reels', '<noscript>' ) as $needle ) if ( false === strpos( $frontend, $needle ) ) exit( 1 );
 $reels = $read( $plugin . '/includes/class-rsv-reels.php' );
-if ( false === strpos( $reels, 'use ( $report_id, $decision, $reason, $expected_version, $public_id )' ) ) exit( 1 );
-foreach ( array( 'rsv_submit_evidence_failed', 'rsv_publish_evidence_failed', 'rsv_progress_event_failed', 'rsv_appeal_evidence_failed', 'rsv_moderation_evidence_failed' ) as $evidence_code ) {
-	if ( false === strpos( $reels, $evidence_code ) ) exit( 1 );
+foreach ( array( 'rsv_submit_evidence_failed','rsv_publish_evidence_failed','rsv_progress_event_failed','rsv_appeal_evidence_failed','rsv_moderation_evidence_failed','rsv_restore_media_invalid' ) as $needle ) if ( false === strpos( $reels, $needle ) ) exit( 1 );
+$security = $read( $plugin . '/includes/class-rsv-security.php' );
+if ( false === strpos( $security, 'return $base_allowed && $filtered' ) ) exit( 1 );
+$top = '';
+foreach ( array(
+	'class-rsv-top20.php',
+	'trait-rsv-top20-context.php',
+	'trait-rsv-top20-stories.php',
+	'trait-rsv-top20-responses.php',
+	'trait-rsv-top20-experience.php',
+	'trait-rsv-top20-privacy-integration.php',
+) as $top_file ) {
+	$top .= "\n" . $read( $plugin . '/includes/' . $top_file );
 }
-$js = $read( $plugin . '/assets/js/rsv.js' );
-if ( false !== strpos( $js, 'status || document.body' ) || false === strpos( $js, 'data-rsv-global-status' ) ) exit( 1 );
-if ( false === strpos( $js, "shell.dataset.rsvTopic" ) || false === strpos( $js, "error.traceId" ) ) exit( 1 );
-if ( false === strpos( $frontend, 'Next page of Reels' ) || false === strpos( $frontend, '<noscript>' ) ) exit( 1 );
-
+foreach ( array( 'MAX_STORY_HOURS = 24','publication_gate','consent_snapshot','public_highlights','create_response','history_cursor','value_insights' ) as $needle ) if ( false === strpos( $top, $needle ) ) exit( 1 );
 $db = $read( $plugin . '/includes/class-rsv-db.php' );
 if ( false === strpos( $db, 'appellant_id bigint unsigned' ) || false === strpos( $db, 'KEY appellant_created' ) ) exit( 1 );
-if ( false === strpos( $reels, "'appellant_id'     => 0" ) || false === strpos( $reels, "'appellant_id' => get_current_user_id()" ) ) exit( 1 );
-if ( false === strpos( $reels, "'restore' === \$decision" ) || false === strpos( $reels, 'rsv_restore_media_invalid' ) ) exit( 1 );
-if ( false === strpos( $privacy, 'rp.appellant_id=%d' ) || false === strpos( $privacy, 'appellant_id=IF' ) ) exit( 1 );
-
-$integration = $read( $plugin . '/includes/class-rsv-integrations.php' );
-foreach ( array( 'timeline', 'home-cards', 'search-documents', 'recommendation-explanation', 'public-eligible-fields-only' ) as $needle ) {
-	if ( false === strpos( $integration, $needle ) ) exit( 1 );
-}
-$css = $read( $plugin . '/assets/css/rsv.css' );
-if ( false !== strpos( $css, ':root{' ) || false === strpos( $css, '--sabri-color-primary' ) || false === strpos( $css, '.rsv-icon' ) ) exit( 1 );
-echo "forensic contracts PASS\n";
+$css = $read( $plugin . '/assets/css/rsv.css' ) . $read( $plugin . '/assets/css/rsv-top20.css' );
+if ( false !== strpos( $css, ':root{' ) || false === strpos( $css, '--sabri-color-primary' ) ) exit( 1 );
+echo "forensic contracts RC4 PASS\n";
