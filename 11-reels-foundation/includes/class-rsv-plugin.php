@@ -5,7 +5,9 @@ final class RSV_Plugin {
 	private static $instance;
 
 	public static function instance() {
-		if ( ! self::$instance ) self::$instance = new self();
+		if ( ! self::$instance ) {
+			self::$instance = new self();
+		}
 		return self::$instance;
 	}
 
@@ -36,41 +38,76 @@ final class RSV_Plugin {
 
 	private static function roles() {
 		$admin = get_role( 'administrator' );
-		if ( $admin ) foreach ( array( RSV_Contracts::CAP_SUBMIT, RSV_Contracts::CAP_PUBLISH, RSV_Contracts::CAP_MODERATE, RSV_Contracts::CAP_MANAGE, RSV_Contracts::CAP_INSIGHTS ) as $cap ) $admin->add_cap( $cap );
+		if ( $admin ) {
+			foreach ( array( RSV_Contracts::CAP_SUBMIT, RSV_Contracts::CAP_PUBLISH, RSV_Contracts::CAP_MODERATE, RSV_Contracts::CAP_MANAGE, RSV_Contracts::CAP_INSIGHTS ) as $cap ) {
+				$admin->add_cap( $cap );
+			}
+		}
 	}
 
 	private static function pages() {
 		$map = (array) get_option( 'rsv_page_map', array() );
-		$spec = array(
-			'feed' => array( 'Reels', 'reels', '[rsv_reels]' ),
-			'create' => array( 'Create Reel', 'reels/create', '[rsv_create]' ),
-			'history' => array( 'Reel History', 'account/reels/history', '[rsv_history]' ),
-			'insights' => array( 'Reel Insights', 'account/reels/insights', '[rsv_insights]' ),
-		);
-		foreach ( $spec as $key => $data ) {
-			$map[ $key ] = self::ensure_page( $map[ $key ] ?? 0, $data[0], $data[1], $data[2] );
-		}
+		$feed = self::ensure_page( $map['feed'] ?? 0, 'Reels', 'reels', '[rsv_reels]', 0 );
+		$map['feed']        = $feed;
+		$map['create']      = self::ensure_page( $map['create'] ?? 0, 'Create Reel', 'create', '[rsv_create]', $feed );
+		$map['history_url'] = home_url( '/account/reels/history/' );
+		$map['insights_url']= home_url( '/account/reels/insights/' );
 		update_option( 'rsv_page_map', $map, false );
-		do_action( 'rsv_routes_registered', $map, RSV_CONTRACT_VERSION );
+		$routes = array(
+			'feed'     => home_url( '/reels/' ),
+			'create'   => home_url( '/reels/create/' ),
+			'history'  => $map['history_url'],
+			'insights' => $map['insights_url'],
+		);
+		do_action( 'rsv_routes_registered', $routes, RSV_CONTRACT_VERSION );
+		do_action( 'sabri_platform_routes_registered', 'file11', $routes, RSV_CONTRACT_VERSION );
 	}
 
-	private static function ensure_page( $id, $title, $path, $shortcode ) {
-		$slug = basename( $path );
-		$page = $id ? get_post( absint( $id ) ) : get_page_by_path( $path );
+	private static function ensure_page( $id, $title, $slug, $shortcode, $parent_id = 0 ) {
+		$parent_id = absint( $parent_id );
+		$path      = $parent_id ? trim( get_page_uri( $parent_id ), '/' ) . '/' . $slug : $slug;
+		$page      = $id ? get_post( absint( $id ) ) : get_page_by_path( $path );
 		if ( $page instanceof WP_Post && get_post_meta( $page->ID, '_rsv_managed', true ) ) {
-			wp_update_post( array( 'ID' => $page->ID, 'post_title' => $title, 'post_content' => $shortcode, 'post_status' => 'publish' ) );
-			return (int) $page->ID;
+			$result = wp_update_post(
+				array(
+					'ID'           => $page->ID,
+					'post_title'   => $title,
+					'post_name'    => $slug,
+					'post_parent'  => $parent_id,
+					'post_content' => $shortcode,
+					'post_status'  => 'publish',
+				),
+				true
+			);
+			return is_wp_error( $result ) ? 0 : absint( $page->ID );
 		}
-		if ( $page instanceof WP_Post ) $slug .= '-sabri';
-		$new = wp_insert_post( array( 'post_title' => $title, 'post_name' => $slug, 'post_content' => $shortcode, 'post_status' => 'publish', 'post_type' => 'page' ), true );
-		if ( is_wp_error( $new ) ) return 0;
-		update_post_meta( $new, '_rsv_managed', 1 );
-		return (int) $new;
+		if ( $page instanceof WP_Post ) {
+			$slug .= '-sabri';
+		}
+		$new_id = wp_insert_post(
+			array(
+				'post_title'   => $title,
+				'post_name'    => $slug,
+				'post_parent'  => $parent_id,
+				'post_content' => $shortcode,
+				'post_status'  => 'publish',
+				'post_type'    => 'page',
+			),
+			true
+		);
+		if ( is_wp_error( $new_id ) ) {
+			return 0;
+		}
+		update_post_meta( $new_id, '_rsv_managed', 1 );
+		return absint( $new_id );
 	}
 
 	public function register() {
-		if ( (string) get_option( 'rsv_schema_version' ) !== RSV_SCHEMA_VERSION ) RSV_DB::install();
+		if ( (string) get_option( 'rsv_schema_version' ) !== RSV_SCHEMA_VERSION ) {
+			RSV_DB::install();
+		}
 		if ( (string) get_option( 'rsv_version' ) !== RSV_VERSION ) {
+			self::roles();
 			self::pages();
 			update_option( 'rsv_version', RSV_VERSION, false );
 		}
@@ -84,13 +121,16 @@ final class RSV_Plugin {
 	}
 
 	public function notices() {
-		if ( ! current_user_can( 'manage_options' ) ) return;
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
 		if ( get_transient( 'rsv_activation_notice' ) ) {
 			delete_transient( 'rsv_activation_notice' );
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'File 11 Reels activated. Complete staging acceptance before production use.', RSV_TEXT_DOMAIN ) . '</p></div>';
 		}
-		if ( ! RSV_File10::ready() ) {
-			echo '<div class="notice notice-error"><p>' . esc_html__( 'File 11 is in Safe Mode because the canonical File 10 contract is unavailable.', RSV_TEXT_DOMAIN ) . '</p></div>';
+		$health = RSV_Diagnostics::summary();
+		if ( ! empty( $health['safe_mode'] ) ) {
+			echo '<div class="notice notice-error"><p>' . esc_html__( 'File 11 is in Safe Mode. Open Reels Diagnostics for the exact dependency or data-integrity reason.', RSV_TEXT_DOMAIN ) . '</p></div>';
 		}
 	}
 }

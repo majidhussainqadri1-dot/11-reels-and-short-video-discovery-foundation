@@ -13,6 +13,7 @@ final class RSV_DB {
 			public_id varchar(80) NOT NULL,
 			video_id bigint unsigned NOT NULL,
 			owner_id bigint unsigned NOT NULL,
+			legacy_source_id bigint unsigned NOT NULL DEFAULT 0,
 			title varchar(255) NOT NULL,
 			slug varchar(200) NOT NULL,
 			topic varchar(80) NOT NULL,
@@ -34,7 +35,9 @@ final class RSV_DB {
 			UNIQUE KEY public_id (public_id),
 			UNIQUE KEY video_id (video_id),
 			UNIQUE KEY slug (slug),
-			KEY feed_status (status,visibility,rank_score,id),
+			KEY legacy_source (legacy_source_id),
+			KEY feed_status (status,visibility,rank_score,updated_at,id),
+			KEY latest_feed (status,visibility,published_at,id),
 			KEY owner_status (owner_id,status,updated_at)
 		) $c;";
 
@@ -45,12 +48,29 @@ final class RSV_DB {
 			position_seconds int unsigned NOT NULL DEFAULT 0,
 			completed tinyint unsigned NOT NULL DEFAULT 0,
 			replays int unsigned NOT NULL DEFAULT 0,
+			last_event_bucket int unsigned NOT NULL DEFAULT 0,
 			version bigint unsigned NOT NULL DEFAULT 1,
 			updated_at datetime NOT NULL,
 			PRIMARY KEY (id),
 			UNIQUE KEY user_reel (user_id,reel_id),
 			KEY reel_updated (reel_id,updated_at),
 			KEY user_updated (user_id,updated_at)
+		) $c;";
+
+		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'view_sessions' ) . " (
+			id bigint unsigned NOT NULL AUTO_INCREMENT,
+			public_id varchar(80) NOT NULL,
+			user_id bigint unsigned NOT NULL,
+			reel_id bigint unsigned NOT NULL,
+			started_at datetime NOT NULL,
+			last_position int unsigned NOT NULL DEFAULT 0,
+			last_ping_at datetime NOT NULL,
+			completed tinyint unsigned NOT NULL DEFAULT 0,
+			expires_at datetime NOT NULL,
+			PRIMARY KEY (id),
+			UNIQUE KEY public_id (public_id),
+			KEY user_reel_expiry (user_id,reel_id,expires_at),
+			KEY expiry (expires_at)
 		) $c;";
 
 		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'reports' ) . " (
@@ -62,15 +82,19 @@ final class RSV_DB {
 			details text NOT NULL,
 			status varchar(30) NOT NULL DEFAULT 'submitted',
 			action_code varchar(60) NOT NULL DEFAULT '',
+			resolution_reason text NOT NULL,
 			reviewer_id bigint unsigned NOT NULL DEFAULT 0,
 			appeal_text text NOT NULL,
+			appellant_id bigint unsigned NOT NULL DEFAULT 0,
+			appealed_at datetime NULL,
 			version bigint unsigned NOT NULL DEFAULT 1,
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
 			PRIMARY KEY (id),
 			UNIQUE KEY public_id (public_id),
 			KEY reel_status (reel_id,status,updated_at),
-			KEY reporter_created (reporter_id,created_at)
+			KEY reporter_created (reporter_id,created_at),
+			KEY appellant_created (appellant_id,created_at)
 		) $c;";
 
 		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'impressions' ) . " (
@@ -116,12 +140,15 @@ final class RSV_DB {
 			status varchar(20) NOT NULL DEFAULT 'pending',
 			attempts smallint unsigned NOT NULL DEFAULT 0,
 			available_at datetime NOT NULL,
+			lock_token varchar(80) NOT NULL DEFAULT '',
+			locked_at datetime NULL,
 			last_error varchar(500) NOT NULL DEFAULT '',
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
 			PRIMARY KEY (id),
 			UNIQUE KEY event_id (event_id),
-			KEY delivery (status,available_at,id)
+			KEY delivery (status,available_at,id),
+			KEY stale_lock (status,locked_at)
 		) $c;";
 
 		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'idempotency' ) . " (
@@ -140,6 +167,19 @@ final class RSV_DB {
 			KEY expiry (expires_at)
 		) $c;";
 
+		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'rate_limits' ) . " (
+			id bigint unsigned NOT NULL AUTO_INCREMENT,
+			actor_key char(64) NOT NULL,
+			scope_key varchar(80) NOT NULL,
+			window_start bigint unsigned NOT NULL,
+			request_count int unsigned NOT NULL DEFAULT 1,
+			expires_at datetime NOT NULL,
+			updated_at datetime NOT NULL,
+			PRIMARY KEY (id),
+			UNIQUE KEY actor_scope_window (actor_key,scope_key,window_start),
+			KEY expiry (expires_at)
+		) $c;";
+
 		foreach ( $sql as $statement ) {
 			dbDelta( $statement );
 		}
@@ -151,7 +191,7 @@ final class RSV_DB {
 		global $wpdb;
 		$wpdb->query( 'START TRANSACTION' );
 		try {
-			$result = $callback();
+			$result = call_user_func( $callback );
 			if ( is_wp_error( $result ) ) {
 				$wpdb->query( 'ROLLBACK' );
 				return $result;
@@ -162,5 +202,11 @@ final class RSV_DB {
 			$wpdb->query( 'ROLLBACK' );
 			return RSV_Helpers::error( 'rsv_transaction_failed', __( 'The operation could not be completed safely.', RSV_TEXT_DOMAIN ), 500 );
 		}
+	}
+
+	public static function table_exists( $logical_name ) {
+		global $wpdb;
+		$table = RSV_Helpers::table( $logical_name );
+		return $table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) );
 	}
 }

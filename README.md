@@ -1,20 +1,31 @@
 # File 11 — Reels and Short Video Discovery
 
-Canonical source implementation for Sabri Social Homeopathy Platform **File 11**, governed by `SSH-F11-PLAN-2026-v1.0`.
+Canonical repository for **File 11** of the Sabri Social Homeopathy Platform.
 
-## Release candidate
+## Current release candidate
 
-- Version: `1.0.0-rc1`
-- Canonical plugin folder: `11-reels-foundation`
-- Text domain: `reels-short-video-discovery`
-- PHP prefix: `RSV_`
-- Required File 10 contract: `1.0.0-rc1+`
-- Source branch: `codex/file-11-complete-master-plan-v1.0-rc1`
+- Software: `1.0.0-rc2`
+- Schema: `1.1.0`
+- Contract: `2`
+- Canonical plugin folder: `11-reels-foundation/`
+- Canonical package: `11-reels-foundation-1.0.0-rc2.zip`
+- Package SHA-256: `9fc1a3f34e2a275c0755bf06de5900ebd86d9d2a6d9f358f5eeb6cd5a43325ed`
 
-File 11 owns Reel metadata, 60–600-second eligibility, educational taxonomy, discovery/ranking, private Reel history/progress, moderation and aggregate creator insights. File 10 remains the sole media pipeline and playback owner.
+RC2 supersedes RC1 after two fresh review-and-correction rounds. The legacy `reels/` implementation is removed from the RC2 branch to preserve one canonical runtime.
 
-## Evidence boundary
+## Ownership boundary
 
-The branch can establish source/package completion and automated QA. It cannot establish Hostinger staging, real WordPress/MySQL migration, real File 00 claims, browser/screen-reader acceptance, provider behavior, load/SLO evidence, backup restore, rollback rehearsal, Founder acceptance, live deployment or operations.
+File 11 owns Reel metadata/state, educational taxonomy, discovery/ranking, Reel progress/history, Reel moderation/appeals and privacy-safe aggregate insights. File 10 remains the sole owner of upload, scanning, processing, captions, playback, media rights/consent truth, secure delivery and video-level interactions. File 00 remains the sole identity, membership, suspension, guardian and publishing-assertion authority.
 
-Keep the pull request Draft until `docs/STAGING-ACCEPTANCE-1.0.0-rc1.md` is supported by dated evidence.
+## Automated verification
+
+```bash
+bash tests/run-all.sh
+bash tools/build-package.sh packages/11-reels-foundation-1.0.0-rc2.zip
+```
+
+The suite performs PHP lint, JavaScript syntax validation, state-machine tests, signed-cursor/tamper tests, forensic contract checks, secret-pattern checks, deterministic double build, archive integrity, one-folder verification and source/package byte parity.
+
+## Release truth
+
+Repository-controlled stages are complete for this release candidate: **Specified, Coded, Packaged and Automated-QA Green**. Hostinger staging acceptance, real File 00/File 10 integration, browser/device and accessibility evidence, backup/restore and rollback rehearsal, Founder sign-off, controlled live deployment and operational monitoring remain separate external gates. See `STATUS.md` and `docs/STAGING-ACCEPTANCE-1.0.0-rc2.md`.

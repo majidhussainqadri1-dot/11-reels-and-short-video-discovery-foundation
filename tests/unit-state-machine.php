@@ -1,16 +1,31 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) define( 'ABSPATH', __DIR__ . '/' );
-if ( ! function_exists( 'sanitize_key' ) ) { function sanitize_key( $v ) { return preg_replace( '/[^a-z0-9_\-]/', '', strtolower( $v ) ); } }
-if ( ! function_exists( '__' ) ) { function __( $v ) { return $v; } }
-if ( ! class_exists( 'WP_Error' ) ) { class WP_Error { public function __construct( public $code = '', public $message = '', public $data = array() ) {} } }
-if ( ! class_exists( 'RSV_Helpers' ) ) { class RSV_Helpers { public static function error( $c, $m, $s = 400 ) { return new WP_Error( $c, $m, array( 'status' => $s ) ); } } }
-define( 'RSV_TEXT_DOMAIN', 'test' );
-require __DIR__ . '/../11-reels-foundation/includes/class-rsv-state-machine.php';
-$valid = array(
-	array( 'draft','review' ), array( 'review','published' ), array( 'published','restricted' ),
-	array( 'restricted','published' ), array( 'published','removed' ), array( 'removed','archived' ),
+require __DIR__ . '/bootstrap.php';
+require dirname( __DIR__ ) . '/11-reels-foundation/includes/class-rsv-helpers.php';
+require dirname( __DIR__ ) . '/11-reels-foundation/includes/class-rsv-state-machine.php';
+
+$allowed = array(
+	array( 'draft', 'review' ),
+	array( 'review', 'published' ),
+	array( 'published', 'restricted' ),
+	array( 'restricted', 'published' ),
+	array( 'removed', 'published' ),
+	array( 'removed', 'archived' ),
 );
-foreach ( $valid as $pair ) if ( ! RSV_State_Machine::allowed( $pair[0], $pair[1] ) ) exit( "invalid valid transition\n" );
-$invalid = array( array( 'draft','published' ), array( 'removed','published' ), array( 'archived','published' ) );
-foreach ( $invalid as $pair ) if ( RSV_State_Machine::allowed( $pair[0], $pair[1] ) ) exit( "accepted invalid transition\n" );
-echo "state-machine tests PASS\n";
+foreach ( $allowed as $pair ) {
+	if ( true !== RSV_State_Machine::assert( $pair[0], $pair[1] ) ) {
+		fwrite( STDERR, "Expected Reel transition {$pair[0]} -> {$pair[1]}\n" ); exit( 1 );
+	}
+}
+$blocked = array(
+	array( 'draft', 'published' ),
+	array( 'published', 'draft' ),
+	array( 'archived', 'published' ),
+);
+foreach ( $blocked as $pair ) {
+	if ( ! is_wp_error( RSV_State_Machine::assert( $pair[0], $pair[1] ) ) ) {
+		fwrite( STDERR, "Expected blocked Reel transition {$pair[0]} -> {$pair[1]}\n" ); exit( 1 );
+	}
+}
+if ( true !== RSV_State_Machine::assert_report( 'action', 'appealed' ) ) exit( 1 );
+if ( ! is_wp_error( RSV_State_Machine::assert_report( 'closed', 'appealed' ) ) ) exit( 1 );
+echo "state machine PASS\n";

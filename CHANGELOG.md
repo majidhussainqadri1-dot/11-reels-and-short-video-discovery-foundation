@@ -1,40 +1,33 @@
 # Changelog
 
-## 0.2.0 — Corrective release candidate
+## 1.0.0-rc2 — 2026-08-06
 
-### Functional
+### Canonical architecture
+- Removed the second legacy `reels/` runtime from the release branch.
+- Enforced File 11 Reel ownership, File 10 media ownership and File 00 identity/publishing ownership.
+- Added contract/schema/version separation and fail-closed dependency diagnostics.
 
-- Restored File 10 Like, Dislike, Save, and Report actions on Reels pages.
-- Implemented private watch history, bounded progress, completion, and replay persistence.
-- Preserved saved/history ordering and added bounded Reels pagination.
-- Added permanent empty, loading-feedback, and media-unavailable states.
+### Security and integrity
+- Added opaque Reel/report/view/event IDs and signed sort-bound cursors.
+- Added current File 00 membership/publishing assertions, object ownership, guardian, suspension and step-up checks.
+- Added optimistic concurrency, atomic rate limiting, idempotency and transactional audit/outbox evidence.
+- Added server-issued view sessions and server-bounded progress/completion.
 
-### Media integrity
+### Product and accessibility
+- Added public vertical feed, permanent Reel route, previous/next, touch swipe and keyboard controls.
+- Added explicit autoplay opt-in, reduced-motion/data-saver behavior, pause controls and no forced infinite scrolling.
+- Added no-JavaScript next-page continuation, safe live regions and RTL/logical CSS.
+- Added caption tracks, error/degraded states and File 10 secure download adapter.
 
-- Removed trust in a submitted duration field.
-- Added authoritative local duration inspection with WordPress video metadata.
-- Added Vimeo duration verification through Vimeo oEmbed.
-- Added YouTube duration verification through the YouTube Data API.
-- Added support for YouTube watch, embed, short-link, and Shorts URLs.
-- Added exact HTTPS provider validation and fail-closed behavior.
-- Added server-side cover-image validation and complete failed-upload cleanup.
+### Moderation and privacy
+- Added reports, restriction/removal/restoration, reporter/owner appeals and appellant attribution.
+- Added private history reset/export/erasure, report holds/redaction and thresholded creator insights.
+- Added bounded retention cleanup for impressions, sessions, rate limits and idempotency records.
 
-### Security, privacy, and moderation
+### Migration and operations
+- Added checkpointed legacy Reel/history migration, quarantine, reconciliation and rollback-preserving cutover.
+- Added Safe Mode, diagnostics, repair, queue retry/backoff/dead-letter and operational health data.
+- Added POT extraction, deterministic package, checksum, source parity and PHP 8.1/8.3/8.4 CI.
 
-- Added nonce, object-type, publication-state, duration-bound, and rate-limit controls to progress writes.
-- Added WordPress personal-data export and erasure for Reels history.
-- Added no-cache and noindex/noarchive/nofollow protection for private Reels pages.
-- Added patient-case anonymization and consent attestations with obvious-PII screening.
-- Added moderation object validation, mandatory reviewer notes, bounded audit history, and author notification.
-- Prevented unrelated-page overwrite and added explicit opt-in destructive uninstall behavior.
-
-### Lifecycle and compatibility
-
-- Bumped plugin version to `0.2.0` and database schema to `2`.
-- Added idempotent schema/version upgrades and useful history-table indexes.
-- Added strict File 10 dependency-contract checks.
-- Added PHP 7.4, 8.0, 8.3, and 8.4 CI; JavaScript syntax validation; static corrective contracts; and deterministic ZIP packaging.
-
-### Accessibility and responsive behavior
-
-- Added keyboard feed navigation, visible focus, 44-pixel controls, reduced-motion behavior, accessible status announcements, responsive forms, and mobile-safe overlays.
+## 1.0.0-rc1
+Initial plan-mapped release candidate. Superseded after fresh forensic review identified authorization, visibility, progress-integrity, moderation, privacy, migration, route, accessibility and QA gaps.

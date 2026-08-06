@@ -1,31 +1,12 @@
-# Source Provenance — File 11
+# Source Provenance
 
-## Supplied source archive
+RC2 was derived from the repository RC1 head and corrected against:
 
-- **Archive:** `11-reels-and-short-video-discovery-foundation-0.1.0.zip`
-- **Archive size:** `7,377 bytes`
-- **SHA-256:** `4f8a8ada4084fcc2234e4009e05efbdf08a8162a183371d00c65e99c1121b4ff`
-- **Original top-level directory:** `reels/`
-- **Import date:** 29 July 2026
-- **Repository:** `majidhussainqadri1-dot/11-reels-and-short-video-discovery-foundation`
-- **Baseline branch:** `baseline/file-11-original-import`
+1. File 01 Definitive Master Plan v3.0;
+2. File 11 Reels and Short Video Discovery Complete Master Plan v1.0;
+3. consolidated Founder-approved chat directives through 2026-08-05;
+4. File 00 current membership/publishing contract implementation;
+5. File 10 RC1 repository contracts (`VWLB_Repository`, `VWLB_Videos`, `VWLB_Contracts`);
+6. historical File 11 foundation/corrective source solely for migration compatibility and defect discovery.
 
-## Import method
-
-The supplied ZIP was inspected, tested, and extracted. The six source files under `reels/` were copied into this repository without editing their contents.
-
-No correction, formatting change, namespace change, dependency change, version bump, feature addition, or deletion was made during the baseline import.
-
-## Pre-import evidence
-
-- ZIP archive integrity test: **PASS**
-- Unsafe absolute or parent-traversal entries: **none detected**
-- Source files: **6**
-- PHP files: **3**
-- JavaScript files: **1**
-- CSS files: **1**
-- Text/readme files: **1**
-- PHP syntax check using PHP `8.4.16`: **PASS for 3/3 files**
-- JavaScript syntax check using Node.js `22.16.0`: **PASS for 1/1 file**
-
-These checks establish archive readability and elementary syntax only. They do not establish compatibility with the declared minimum versions or WordPress runtime correctness.
+No secrets, provider credentials, private incident playbooks or production user/media data are included.

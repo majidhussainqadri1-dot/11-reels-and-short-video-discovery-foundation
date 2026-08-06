@@ -1,52 +1,24 @@
-# Status — File 11
+# File 11 Status — 1.0.0-rc2
 
-## Current state
+**Evidence timestamp:** 2026-08-06 18:12 Asia/Karachi  
+**Candidate:** `1.0.0-rc2`  
+**Schema:** `1.1.0`  
+**Contract:** `2`
 
-**Corrective release candidate 0.2.0 completed at repository level; automated corrective QA is green. Hostinger staging acceptance remains mandatory.**
+| Governing stage | Status | Evidence |
+|---|---|---|
+| Specified | Complete | File 11 master plan; 15 FR + 10 NFR traceability |
+| Coded | Complete for RC2 | Canonical `11-reels-foundation/` source tree; legacy duplicate removed |
+| Packaged | Complete | Deterministic ZIP, exact top-level folder, checksum, source/package parity |
+| Automated-QA Green | Complete locally; GitHub confirmation required after push | `tests/run-all.sh`; PHP 8.1/8.3/8.4 CI matrix |
+| Staging-Accepted | Pending external evidence | Hostinger-equivalent WordPress, real File 00/File 10, roles, browsers/devices, migration/rollback |
+| Live-Deployed | Not performed | Founder approval and staging acceptance required first |
+| Operational | Not performed | Production monitoring, support, content/media and SLO evidence required |
 
-The immutable original source snapshot remains on `baseline/file-11-original-import`. Corrections are isolated on `fix/file-11-corrective-release-0.2.0` and proposed through Draft Pull Request #2. The corrective branch remains unmerged until every staging and Founder-acceptance gate passes.
+## Repository-controlled completion
 
-## Repository QA evidence
+All currently known repository-controlled critical/high defects found in the two RC2 review rounds were corrected and regression-guarded. The release gate is **zero known unresolved critical/high source defects**, not a claim of infallibility.
 
-- Exact six-file source checksum verification: **PASS**
-- PHP syntax and corrective contracts on PHP 7.4: **PASS**
-- PHP syntax and corrective contracts on PHP 8.0: **PASS**
-- PHP syntax and corrective contracts on PHP 8.3: **PASS**
-- PHP syntax and corrective contracts on PHP 8.4: **PASS**
-- JavaScript syntax: **PASS**
-- Deterministic ZIP build and archive test: **PASS**
-- Workflow artifact upload: **PASS**
-- Corrective QA run: `30484673037`
-- Corrective QA commit: `c93b1209e09cbfab39539b9c6e1f9453f2729357`
-- Package SHA-256: `502f2dc4448009b10803d6012e60659070af16fbdf65ae7f3ceeee57ae880798`
+## External blockers
 
-## Corrected in 0.2.0
-
-- File 10 interactions on Reels pages;
-- watch history, progress, completion, and replay persistence;
-- authoritative duration validation;
-- exact remote-provider and local-upload validation;
-- server-side cover-image enforcement and cleanup;
-- privacy export/erasure and no-cache/noindex controls;
-- progress endpoint object/data/rate-limit integrity;
-- saved/history ordering;
-- accurate author labels;
-- moderation object validation, notes, audit log, and author notification;
-- safe page ownership and schema upgrades;
-- YouTube Shorts support and provider playback control;
-- accessibility, reduced motion, pagination, and empty/error states.
-
-## Still not accepted or proven
-
-- runtime compatibility with the exact accepted File 10 build;
-- fresh-install and 0.1.0 upgrade behavior in WordPress;
-- Hostinger staging activation and database migration;
-- real local/Vimeo/YouTube submissions;
-- external API, email, cache, browser, mobile, and accessibility behavior;
-- privacy export/erasure under WordPress admin tools;
-- backup restore and rollback;
-- production deployment and Founder acceptance.
-
-## Merge gate
-
-Do not merge or deploy while any staging defect or acceptance failure remains unresolved and unverified.
+The repository cannot itself produce truthful evidence for Hostinger administrator access, deployed encryption/provider configuration, real media processing, real Founder/doctor/viewer accounts, manual screen-reader/browser/device results, backup restoration, rollback rehearsal, Founder visual/operational approval or live monitoring.

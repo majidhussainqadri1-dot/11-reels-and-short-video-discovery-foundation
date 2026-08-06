@@ -3,17 +3,21 @@ defined( 'ABSPATH' ) || exit;
 
 final class RSV_Contracts {
 	const API_NAMESPACE = 'rsv/v1';
-	const EVENT_VERSION = 1;
+	const EVENT_VERSION = 2;
 
-	const CAP_SUBMIT = 'rsv_submit_reel';
-	const CAP_PUBLISH = 'rsv_publish_reel';
+	const CAP_SUBMIT   = 'rsv_submit_reel';
+	const CAP_PUBLISH  = 'rsv_publish_reel';
 	const CAP_MODERATE = 'rsv_moderate_reel';
-	const CAP_MANAGE = 'rsv_manage_reels';
+	const CAP_MANAGE   = 'rsv_manage_reels';
 	const CAP_INSIGHTS = 'rsv_view_reel_insights';
 
-	const REEL_STATES = array( 'draft', 'media_processing', 'review', 'published', 'restricted', 'removed', 'archived' );
+	const REEL_STATES   = array( 'draft', 'media_processing', 'review', 'published', 'restricted', 'removed', 'archived' );
 	const REPORT_STATES = array( 'submitted', 'triaged', 'action', 'no_action', 'appealed', 'closed' );
-	const VISIBILITIES = array( 'public', 'unlisted', 'member', 'entitled' );
+	const VISIBILITIES  = array( 'public', 'unlisted', 'member', 'entitled' );
+	const INTERACTIONS  = array( 'like', 'dislike', 'save' );
+	const REPORT_REASONS = array( 'medical-claim', 'patient-privacy', 'harassment', 'copyright', 'spam', 'other' );
+	const MODERATION_DECISIONS = array( 'no_action', 'restrict', 'remove', 'close', 'restore' );
+
 	const TOPICS = array(
 		'homeopathy-foundations',
 		'materia-medica',

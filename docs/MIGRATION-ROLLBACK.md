@@ -1,16 +1,27 @@
-# Migration and Rollback
+# Migration, Upgrade and Rollback
 
-## Migration
-Legacy `svw_video` Reel posts are inventory records only. A legacy post must carry `_rsv_vwlb_video_id` pointing to the canonical File 10 video. The dry run reports found/created/quarantined/skipped counts. Missing, invalid-duration, restricted or unauthorized mappings are quarantined rather than guessed.
+## Sources
 
-## Cutover
-1. Freeze legacy Reel writes.
-2. Back up database/files/configuration and prove restore.
-3. Run dry-run and approve counts/samples.
-4. Run bounded migration.
-5. Reconcile canonical URLs, File 10 links and interactions.
-6. Enable File 11 reads, then writes.
-7. Keep legacy records read-only during the rollback window.
+RC2 recognizes approved legacy Reel posts and the legacy `srl_history` table. A Reel is migrated only when it has an explicit File 10 mapping and File 10 currently validates owner, duration, status, rights and consent. Invalid sources are quarantined rather than guessed.
 
-## Rollback
-Disable File 11 writes, preserve post-cutover File 11 rows, restore prior plugin/routes, and reconcile any new File 10 media created during the window. Never drop File 11 tables during routine rollback.
+## Controls
+
+- non-overlapping migration lock with expiry;
+- bounded batch size and resumable Reel/history checkpoints;
+- dry-run before mutation;
+- source snapshot and migration status markers;
+- unique File 10 video ownership and duplicate suppression;
+- audit evidence for migrated records;
+- request/cron reconciliation after provider changes;
+- rollback disables the new cutover while preserving newly created RC2 data.
+
+## Staging sequence
+
+1. clone production-like database and files to approved staging;
+2. verify backup restoration before migration;
+3. run dry-run and record counts/quarantines/errors;
+4. run bounded batches until checkpoints stabilize;
+5. reconcile File 10 states and compare source/target counts;
+6. exercise rollback and confirm legacy reading resumes without deleting new data;
+7. re-run migration idempotently and complete role/privacy/browser acceptance;
+8. obtain Founder approval before production cutover.
