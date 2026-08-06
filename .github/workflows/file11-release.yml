@@ -1,5 +1,10 @@
 name: File 11 RC4 Release QA
 on:
+  push:
+    branches:
+      - 'codex/**'
+      - 'fix/**'
+      - 'main'
   pull_request:
   workflow_dispatch:
 permissions:
