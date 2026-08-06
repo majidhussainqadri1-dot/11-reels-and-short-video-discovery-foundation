@@ -30,19 +30,17 @@ jobs:
             .bootstrap/rc2part10a .bootstrap/rc2part10b \
             .bootstrap/rc2part11 > /tmp/file11rc2-source.b64
 
-          # Repair the single transport-case mutation proven by the diagnostic artifact.
           printf 'T' | dd of=/tmp/file11rc2-source.b64 bs=1 seek=58683 count=1 conv=notrunc status=none
-
           echo "69e3ed8b3e6abfdad96a26bbd2109527ce4dc1fa4bd7fc50c5983dc2ee862418  /tmp/file11rc2-source.b64" | sha256sum -c -
           base64 -d /tmp/file11rc2-source.b64 > /tmp/file11rc2-source.tar.gz
           echo "3cc0001b8b059d4c70230197cfb335b2beeafaec851caf6c7b075a8445e3bbf5  /tmp/file11rc2-source.tar.gz" | sha256sum -c -
           tar -xzf /tmp/file11rc2-source.tar.gz
 
+          # Preserve workflow paths during the bot push; the authorized connector
+          # performs the final workflow cleanup/update in a separate audited step.
+          git checkout HEAD -- .github/workflows
           rm -rf reels
-          rm -f .github/workflows/baseline-integrity.yml
-          rm -f .github/workflows/corrective-qa.yml
           rm -rf .bootstrap
-          rm -f .github/workflows/rc2-bootstrap.yml
 
           bash ./tests/run-all.sh
 
