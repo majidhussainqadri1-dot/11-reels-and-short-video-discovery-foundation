@@ -23,23 +23,23 @@ jobs:
       - name: Run complete automated suite
         run: bash ./tests/run-all.sh
       - name: Build canonical package
-        run: bash ./tools/build-package.sh packages/11-reels-foundation-1.0.0-rc2.zip
+        run: bash ./tools/build-package.sh packages/reels-foundation-11-1.0.0-rc3.zip
       - name: Verify checksum and archive
         run: |
           cd packages
-          sha256sum --check 11-reels-foundation-1.0.0-rc2.zip.sha256
-          unzip -t 11-reels-foundation-1.0.0-rc2.zip
+          sha256sum --check reels-foundation-11-1.0.0-rc3.zip.sha256
+          unzip -t reels-foundation-11-1.0.0-rc3.zip
       - name: Verify package/source parity
         run: |
           rm -rf /tmp/rsv-extract
           mkdir -p /tmp/rsv-extract
-          unzip -q packages/11-reels-foundation-1.0.0-rc2.zip -d /tmp/rsv-extract
-          diff -ru 11-reels-foundation /tmp/rsv-extract/11-reels-foundation
+          unzip -q packages/reels-foundation-11-1.0.0-rc3.zip -d /tmp/rsv-extract
+          diff -ru 11-reels-foundation /tmp/rsv-extract/reels-foundation-11
       - name: Publish release-candidate artifact
         if: matrix.php == '8.3'
         uses: actions/upload-artifact@v4
         with:
-          name: file11-reels-1.0.0-rc2
+          name: file11-reels-1.0.0-rc3
           path: |
-            packages/11-reels-foundation-1.0.0-rc2.zip
-            packages/11-reels-foundation-1.0.0-rc2.zip.sha256
+            packages/reels-foundation-11-1.0.0-rc3.zip
+            packages/reels-foundation-11-1.0.0-rc3.zip.sha256
