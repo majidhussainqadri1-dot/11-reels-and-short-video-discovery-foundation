@@ -2,61 +2,13 @@
 defined( 'ABSPATH' ) || exit;
 
 final class RSV_Privacy {
-	public function register() {
-		add_filter( 'wp_privacy_personal_data_exporters', array( $this, 'exporters' ) );
-		add_filter( 'wp_privacy_personal_data_erasers', array( $this, 'erasers' ) );
+	public function register(){add_filter('wp_privacy_personal_data_exporters',array($this,'exporters'));add_filter('wp_privacy_personal_data_erasers',array($this,'erasers'));}
+	public function exporters($e){$e['rsv-reels']=array('exporter_friendly_name'=>__('Reel history and reports',RSV_TEXT_DOMAIN),'callback'=>array($this,'export'));return $e;}
+	public function erasers($e){$e['rsv-reels']=array('eraser_friendly_name'=>__('Reel history and reports',RSV_TEXT_DOMAIN),'callback'=>array($this,'erase'));return $e;}
+	private function user_id($email){$u=get_user_by('email',$email);return $u?(int)$u->ID:0;}
+	public function export($email,$page=1){$user=$this->user_id($email);if(!$user)return array('data'=>array(),'done'=>true);$page=max(1,absint($page));$history=RSV_Repository::history($user,100,($page-1)*100);$data=array();foreach($history as $row)$data[]=array('group_id'=>'rsv-history','group_label'=>__('Private Reel history',RSV_TEXT_DOMAIN),'item_id'=>'rsv-history-'.$row['id'],'data'=>array(array('name'=>__('Reel',RSV_TEXT_DOMAIN),'value'=>$row['title']),array('name'=>__('Position',RSV_TEXT_DOMAIN),'value'=>$row['progress']['position_seconds']),array('name'=>__('Completed',RSV_TEXT_DOMAIN),'value'=>$row['progress']['completed']?'yes':'no'),array('name'=>__('Updated',RSV_TEXT_DOMAIN),'value'=>$row['progress']['updated_at'])));
+		global $wpdb;$reports=$wpdb->get_results($wpdb->prepare('SELECT public_id,reason_code,details,status,created_at FROM '.RSV_Helpers::table('reports').' WHERE reporter_id=%d ORDER BY id ASC LIMIT 100 OFFSET %d',$user,($page-1)*100),ARRAY_A);foreach($reports as $report)$data[]=array('group_id'=>'rsv-reports','group_label'=>__('Reel reports',RSV_TEXT_DOMAIN),'item_id'=>$report['public_id'],'data'=>array(array('name'=>__('Reason',RSV_TEXT_DOMAIN),'value'=>$report['reason_code']),array('name'=>__('Details',RSV_TEXT_DOMAIN),'value'=>$report['details']),array('name'=>__('Status',RSV_TEXT_DOMAIN),'value'=>$report['status']),array('name'=>__('Created',RSV_TEXT_DOMAIN),'value'=>$report['created_at'])));
+		return array('data'=>$data,'done'=>count($history)<100&&count($reports)<100);
 	}
-
-	public function exporters( $exporters ) {
-		$exporters['rsv-history'] = array(
-			'exporter_friendly_name' => __( 'Reel viewing history', RSV_TEXT_DOMAIN ),
-			'callback' => array( $this, 'export' ),
-		);
-		return $exporters;
-	}
-
-	public function erasers( $erasers ) {
-		$erasers['rsv-history'] = array(
-			'eraser_friendly_name' => __( 'Reel viewing history', RSV_TEXT_DOMAIN ),
-			'callback' => array( $this, 'erase' ),
-		);
-		return $erasers;
-	}
-
-	private function user_id( $email ) {
-		$user = get_user_by( 'email', $email );
-		return $user ? (int) $user->ID : 0;
-	}
-
-	public function export( $email, $page = 1 ) {
-		$user_id = $this->user_id( $email );
-		if ( ! $user_id ) return array( 'data' => array(), 'done' => true );
-		$rows = RSV_Repository::history( $user_id, 200 );
-		$data = array();
-		foreach ( $rows as $row ) {
-			$data[] = array(
-				'group_id' => 'rsv-history',
-				'group_label' => __( 'Reel viewing history', RSV_TEXT_DOMAIN ),
-				'item_id' => 'rsv-history-' . $row['id'],
-				'data' => array(
-					array( 'name' => __( 'Reel', RSV_TEXT_DOMAIN ), 'value' => $row['title'] ),
-					array( 'name' => __( 'Position', RSV_TEXT_DOMAIN ), 'value' => $row['progress']['position_seconds'] ),
-					array( 'name' => __( 'Completed', RSV_TEXT_DOMAIN ), 'value' => $row['progress']['completed'] ? 'yes' : 'no' ),
-					array( 'name' => __( 'Updated', RSV_TEXT_DOMAIN ), 'value' => $row['progress']['updated_at'] ),
-				),
-			);
-		}
-		return array( 'data' => $data, 'done' => true );
-	}
-
-	public function erase( $email, $page = 1 ) {
-		$user_id = $this->user_id( $email );
-		if ( ! $user_id ) return array( 'items_removed' => false, 'items_retained' => false, 'messages' => array(), 'done' => true );
-		global $wpdb;
-		$removed = $wpdb->delete( RSV_Helpers::table( 'progress' ), array( 'user_id' => $user_id ), array( '%d' ) );
-		// Reports are retained only as moderation evidence; reporter identity is anonymized.
-		$wpdb->update( RSV_Helpers::table( 'reports' ), array( 'reporter_id' => 0 ), array( 'reporter_id' => $user_id ), array( '%d' ), array( '%d' ) );
-		RSV_Helpers::audit( 'privacy', $user_id, 'erase', '', 'complete', 'User history erased; retained reports anonymized' );
-		return array( 'items_removed' => (bool) $removed, 'items_retained' => true, 'messages' => array( __( 'Moderation evidence was retained in anonymized form.', RSV_TEXT_DOMAIN ) ), 'done' => true );
-	}
+	public function erase($email,$page=1){$user=$this->user_id($email);if(!$user)return array('items_removed'=>false,'items_retained'=>false,'messages'=>array(),'done'=>true);if(RSV_Security::legal_hold('user',$user))return array('items_removed'=>false,'items_retained'=>true,'messages'=>array(__('An active legal hold prevents deletion.',RSV_TEXT_DOMAIN)),'done'=>true);global $wpdb;$removed=$wpdb->delete(RSV_Helpers::table('progress'),array('user_id'=>$user),array('%d'));$reports=(int)$wpdb->get_var($wpdb->prepare('SELECT COUNT(*) FROM '.RSV_Helpers::table('reports').' WHERE reporter_id=%d',$user));if($reports)$wpdb->update(RSV_Helpers::table('reports'),array('reporter_id'=>0),array('reporter_id'=>$user),array('%d'),array('%d'));RSV_Helpers::audit('privacy',$user,'erase','','complete','Private Reel history erased; moderation evidence anonymized');return array('items_removed'=>(bool)$removed,'items_retained'=>$reports>0,'messages'=>$reports?array(__('Moderation evidence was retained in anonymized form.',RSV_TEXT_DOMAIN)):array(),'done'=>true);}
 }

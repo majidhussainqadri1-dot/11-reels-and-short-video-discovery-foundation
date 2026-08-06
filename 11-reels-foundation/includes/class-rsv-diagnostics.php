@@ -1,30 +1,5 @@
 <?php
 defined( 'ABSPATH' ) || exit;
-
 final class RSV_Diagnostics {
-	public static function summary() {
-		global $wpdb;
-		$reels = RSV_Helpers::table( 'reels' );
-		$reports = RSV_Helpers::table( 'reports' );
-		$outbox = RSV_Helpers::table( 'outbox' );
-		$tables = array( 'reels','progress','reports','impressions','audit','outbox','idempotency' );
-		$missing = array();
-		foreach ( $tables as $table ) {
-			$name = RSV_Helpers::table( $table );
-			if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $name ) ) !== $name ) $missing[] = $table;
-		}
-		return array(
-			'version' => RSV_VERSION,
-			'schema_version' => get_option( 'rsv_schema_version' ),
-			'contract_version' => RSV_CONTRACT_VERSION,
-			'file10_ready' => RSV_File10::ready(),
-			'schema_ok' => empty( $missing ),
-			'missing_tables' => $missing,
-			'published_reels' => empty( $missing ) ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM $reels WHERE status='published'" ) : 0,
-			'open_reports' => empty( $missing ) ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM $reports WHERE status IN ('submitted','triaged','appealed')" ) : 0,
-			'dead_events' => empty( $missing ) ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM $outbox WHERE status='dead'" ) : 0,
-			'requirements' => count( RSV_Contracts::REQUIREMENTS ),
-			'safe_mode' => ! RSV_File10::ready() || ! empty( $missing ),
-		);
-	}
+	public static function summary(){global $wpdb;$tables=array('reels','progress','reports','report_events','impressions','audit','outbox','inbox','legal_holds','idempotency');$missing=array();foreach($tables as $table){$name=RSV_Helpers::table($table);if($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s',$name))!==$name)$missing[]=$table;}$safe=empty($missing);$reels=RSV_Helpers::table('reels');$reports=RSV_Helpers::table('reports');$outbox=RSV_Helpers::table('outbox');return array('version'=>RSV_VERSION,'schema_version'=>get_option('rsv_schema_version'),'contract_version'=>RSV_CONTRACT_VERSION,'file10_ready'=>RSV_File10::ready(),'file10_version'=>RSV_File10::version(),'schema_ok'=>$safe,'missing_tables'=>$missing,'published_reels'=>$safe?(int)$wpdb->get_var("SELECT COUNT(*) FROM $reels WHERE status='published'"):0,'open_reports'=>$safe?(int)$wpdb->get_var("SELECT COUNT(*) FROM $reports WHERE status IN ('submitted','triaged','appealed')"):0,'pending_events'=>$safe?(int)$wpdb->get_var("SELECT COUNT(*) FROM $outbox WHERE status IN ('pending','retry','processing')"):0,'dead_events'=>$safe?(int)$wpdb->get_var("SELECT COUNT(*) FROM $outbox WHERE status='dead'"):0,'oldest_pending_event'=>$safe?$wpdb->get_var("SELECT MIN(created_at) FROM $outbox WHERE status IN ('pending','retry','processing')"):null,'requirements'=>count(RSV_Contracts::REQUIREMENTS),'routes'=>RSV_Migration::routes_health(),'cron_scheduled'=>(bool)wp_next_scheduled(RSV_Jobs::CRON),'legacy_migration'=>RSV_Migration::legacy_dry_run(),'safe_mode'=>!RSV_File10::ready()||!$safe,'timestamp'=>RSV_Helpers::now());}
 }

@@ -1,20 +1,20 @@
 # File 11 — Reels and Short Video Discovery
 
-Canonical source implementation for Sabri Social Homeopathy Platform **File 11**, governed by `SSH-F11-PLAN-2026-v1.0`.
+Canonical File 11 repository for the Sabri Social Homeopathy Platform.
 
-## Release candidate
+## Current source candidate
 
-- Version: `1.0.0-rc1`
-- Canonical plugin folder: `11-reels-foundation`
+- Version: `1.0.0-rc2`
+- Governing plan: `SSH-F11-PLAN-2026-v1.0`
+- Plugin folder: `11-reels-foundation`
 - Text domain: `reels-short-video-discovery`
 - PHP prefix: `RSV_`
-- Required File 10 contract: `1.0.0-rc1+`
-- Source branch: `codex/file-11-complete-master-plan-v1.0-rc1`
+- File 10 minimum candidate: `1.0.0-rc1`
 
-File 11 owns Reel metadata, 60–600-second eligibility, educational taxonomy, discovery/ranking, private Reel history/progress, moderation and aggregate creator insights. File 10 remains the sole media pipeline and playback owner.
+File 10 owns raw media, playback, captions and core video interactions. File 11 owns the Reel entity, educational discovery, access policy, private Reel progress, ranking, report/moderation workflow and creator aggregates.
+
+The repository includes deterministic packaging, signed keyset cursors, object/field authorization, unlisted-token/member/entitlement visibility, File 10 publication gates, report appeals, privacy export/erasure/legal holds, leased outbox processing, migration/rollback documentation and automated PHP 8.1/8.3 QA.
 
 ## Evidence boundary
 
-The branch can establish source/package completion and automated QA. It cannot establish Hostinger staging, real WordPress/MySQL migration, real File 00 claims, browser/screen-reader acceptance, provider behavior, load/SLO evidence, backup restore, rollback rehearsal, Founder acceptance, live deployment or operations.
-
-Keep the pull request Draft until `docs/STAGING-ACCEPTANCE-1.0.0-rc1.md` is supported by dated evidence.
+`Specified`, `Coded`, `Packaged`, `Automated-QA Green`, `Staging-Accepted`, `Live-Deployed` and `Operational` are distinct statuses. Hostinger staging, real File 00/File 10/File 20/File 21/File 25 integration, browser/device/accessibility evidence, backup restoration, rollback rehearsal, Founder acceptance and live deployment remain external gates until documented.

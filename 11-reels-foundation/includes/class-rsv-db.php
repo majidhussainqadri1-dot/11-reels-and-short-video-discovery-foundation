@@ -6,7 +6,6 @@ final class RSV_DB {
 		global $wpdb;
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		$c = $wpdb->get_charset_collate();
-
 		$sql = array();
 		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'reels' ) . " (
 			id bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -21,12 +20,17 @@ final class RSV_DB {
 			disclosure varchar(500) NOT NULL DEFAULT '',
 			cover_id bigint unsigned NOT NULL DEFAULT 0,
 			visibility varchar(20) NOT NULL DEFAULT 'public',
+			share_token_hash char(64) NOT NULL DEFAULT '',
 			status varchar(30) NOT NULL DEFAULT 'draft',
 			rights_status varchar(30) NOT NULL DEFAULT 'declared',
 			consent_status varchar(30) NOT NULL DEFAULT 'not_patient_case',
+			captions_status varchar(30) NOT NULL DEFAULT 'unknown',
 			safety_labels_json longtext NOT NULL,
+			review_note text NOT NULL,
+			restricted_reason varchar(120) NOT NULL DEFAULT '',
 			rank_score decimal(12,4) NOT NULL DEFAULT 0,
 			version bigint unsigned NOT NULL DEFAULT 1,
+			published_by bigint unsigned NOT NULL DEFAULT 0,
 			published_at datetime NULL,
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
@@ -34,10 +38,10 @@ final class RSV_DB {
 			UNIQUE KEY public_id (public_id),
 			UNIQUE KEY video_id (video_id),
 			UNIQUE KEY slug (slug),
-			KEY feed_status (status,visibility,rank_score,id),
+			KEY feed_rank (status,visibility,rank_score,published_at,id),
+			KEY feed_latest (status,visibility,published_at,id),
 			KEY owner_status (owner_id,status,updated_at)
 		) $c;";
-
 		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'progress' ) . " (
 			id bigint unsigned NOT NULL AUTO_INCREMENT,
 			user_id bigint unsigned NOT NULL,
@@ -45,14 +49,16 @@ final class RSV_DB {
 			position_seconds int unsigned NOT NULL DEFAULT 0,
 			completed tinyint unsigned NOT NULL DEFAULT 0,
 			replays int unsigned NOT NULL DEFAULT 0,
+			last_session_hash char(64) NOT NULL DEFAULT '',
+			event_bucket smallint unsigned NOT NULL DEFAULT 0,
 			version bigint unsigned NOT NULL DEFAULT 1,
+			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
 			PRIMARY KEY (id),
 			UNIQUE KEY user_reel (user_id,reel_id),
 			KEY reel_updated (reel_id,updated_at),
 			KEY user_updated (user_id,updated_at)
 		) $c;";
-
 		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'reports' ) . " (
 			id bigint unsigned NOT NULL AUTO_INCREMENT,
 			public_id varchar(80) NOT NULL,
@@ -63,8 +69,13 @@ final class RSV_DB {
 			status varchar(30) NOT NULL DEFAULT 'submitted',
 			action_code varchar(60) NOT NULL DEFAULT '',
 			reviewer_id bigint unsigned NOT NULL DEFAULT 0,
+			moderator_note text NOT NULL,
 			appeal_text text NOT NULL,
 			version bigint unsigned NOT NULL DEFAULT 1,
+			triaged_at datetime NULL,
+			decided_at datetime NULL,
+			appealed_at datetime NULL,
+			closed_at datetime NULL,
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
 			PRIMARY KEY (id),
@@ -72,7 +83,18 @@ final class RSV_DB {
 			KEY reel_status (reel_id,status,updated_at),
 			KEY reporter_created (reporter_id,created_at)
 		) $c;";
-
+		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'report_events' ) . " (
+			id bigint unsigned NOT NULL AUTO_INCREMENT,
+			report_id bigint unsigned NOT NULL,
+			actor_id bigint unsigned NOT NULL DEFAULT 0,
+			event_name varchar(60) NOT NULL,
+			from_state varchar(30) NOT NULL DEFAULT '',
+			to_state varchar(30) NOT NULL DEFAULT '',
+			reason text NOT NULL,
+			created_at datetime NOT NULL,
+			PRIMARY KEY (id),
+			KEY report_history (report_id,created_at)
+		) $c;";
 		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'impressions' ) . " (
 			id bigint unsigned NOT NULL AUTO_INCREMENT,
 			reel_id bigint unsigned NOT NULL,
@@ -82,12 +104,12 @@ final class RSV_DB {
 			swiped_rapidly tinyint unsigned NOT NULL DEFAULT 0,
 			day_key date NOT NULL,
 			created_at datetime NOT NULL,
+			updated_at datetime NOT NULL,
 			PRIMARY KEY (id),
 			UNIQUE KEY reel_viewer_day (reel_id,viewer_hash,day_key),
-			KEY expiry (created_at),
+			KEY expiry (updated_at),
 			KEY reel_day (reel_id,day_key)
 		) $c;";
-
 		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'audit' ) . " (
 			id bigint unsigned NOT NULL AUTO_INCREMENT,
 			trace_id varchar(40) NOT NULL,
@@ -105,7 +127,6 @@ final class RSV_DB {
 			KEY object_history (object_type,object_id,created_at),
 			KEY actor_created (actor_id,created_at)
 		) $c;";
-
 		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'outbox' ) . " (
 			id bigint unsigned NOT NULL AUTO_INCREMENT,
 			event_id varchar(80) NOT NULL,
@@ -116,14 +137,42 @@ final class RSV_DB {
 			status varchar(20) NOT NULL DEFAULT 'pending',
 			attempts smallint unsigned NOT NULL DEFAULT 0,
 			available_at datetime NOT NULL,
+			lease_token varchar(80) NOT NULL DEFAULT '',
+			lease_expires_at datetime NULL,
 			last_error varchar(500) NOT NULL DEFAULT '',
 			created_at datetime NOT NULL,
 			updated_at datetime NOT NULL,
 			PRIMARY KEY (id),
 			UNIQUE KEY event_id (event_id),
-			KEY delivery (status,available_at,id)
+			KEY delivery (status,available_at,id),
+			KEY lease (status,lease_expires_at)
 		) $c;";
-
+		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'inbox' ) . " (
+			id bigint unsigned NOT NULL AUTO_INCREMENT,
+			event_id varchar(120) NOT NULL,
+			event_name varchar(100) NOT NULL,
+			status varchar(20) NOT NULL DEFAULT 'processing',
+			processed_at datetime NULL,
+			created_at datetime NOT NULL,
+			PRIMARY KEY (id),
+			UNIQUE KEY event_id (event_id),
+			KEY event_status (event_name,status)
+		) $c;";
+		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'legal_holds' ) . " (
+			id bigint unsigned NOT NULL AUTO_INCREMENT,
+			public_id varchar(80) NOT NULL,
+			subject_type varchar(40) NOT NULL,
+			subject_id bigint unsigned NOT NULL,
+			reason varchar(500) NOT NULL,
+			status varchar(20) NOT NULL DEFAULT 'active',
+			created_by bigint unsigned NOT NULL,
+			expires_at datetime NULL,
+			created_at datetime NOT NULL,
+			updated_at datetime NOT NULL,
+			PRIMARY KEY (id),
+			UNIQUE KEY public_id (public_id),
+			KEY subject_status (subject_type,subject_id,status)
+		) $c;";
 		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'idempotency' ) . " (
 			id bigint unsigned NOT NULL AUTO_INCREMENT,
 			actor_id bigint unsigned NOT NULL,
@@ -139,11 +188,7 @@ final class RSV_DB {
 			UNIQUE KEY actor_scope_key (actor_id,scope_key,idem_key),
 			KEY expiry (expires_at)
 		) $c;";
-
-		foreach ( $sql as $statement ) {
-			dbDelta( $statement );
-		}
-
+		foreach ( $sql as $statement ) dbDelta( $statement );
 		update_option( 'rsv_schema_version', RSV_SCHEMA_VERSION, false );
 	}
 
@@ -152,11 +197,8 @@ final class RSV_DB {
 		$wpdb->query( 'START TRANSACTION' );
 		try {
 			$result = $callback();
-			if ( is_wp_error( $result ) ) {
-				$wpdb->query( 'ROLLBACK' );
-				return $result;
-			}
-			$wpdb->query( 'COMMIT' );
+			if ( is_wp_error( $result ) ) { $wpdb->query( 'ROLLBACK' ); return $result; }
+			if ( false === $wpdb->query( 'COMMIT' ) ) return RSV_Helpers::error( 'rsv_commit_failed', __( 'The operation could not be committed.', RSV_TEXT_DOMAIN ), 500 );
 			return $result;
 		} catch ( Throwable $e ) {
 			$wpdb->query( 'ROLLBACK' );

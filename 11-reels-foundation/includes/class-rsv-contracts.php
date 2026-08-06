@@ -14,18 +14,14 @@ final class RSV_Contracts {
 	const REEL_STATES = array( 'draft', 'media_processing', 'review', 'published', 'restricted', 'removed', 'archived' );
 	const REPORT_STATES = array( 'submitted', 'triaged', 'action', 'no_action', 'appealed', 'closed' );
 	const VISIBILITIES = array( 'public', 'unlisted', 'member', 'entitled' );
+	const INTERACTIONS = array( 'like', 'dislike', 'save' );
+	const REPORT_REASONS = array( 'medical-claim', 'patient-privacy', 'harassment', 'copyright', 'spam', 'impersonation', 'other' );
+	const MODERATION_DECISIONS = array( 'triage', 'restrict', 'remove', 'restore', 'no_action', 'close' );
+	const SAFETY_LABELS = array( 'medical-education', 'patient-case', 'minor-sensitive', 'graphic-clinical', 'sponsored-disclosure', 'ai-assisted', 'correction', 'urgent-safety' );
 	const TOPICS = array(
-		'homeopathy-foundations',
-		'materia-medica',
-		'repertory',
-		'philosophy',
-		'case-taking',
-		'clinical-learning',
-		'remedy-study',
-		'miasms',
-		'research',
-		'public-health-education',
-		'platform-guidance',
+		'homeopathy-foundations', 'materia-medica', 'repertory', 'philosophy',
+		'case-taking', 'clinical-learning', 'remedy-study', 'miasms', 'research',
+		'public-health-education', 'platform-guidance',
 	);
 
 	const REQUIREMENTS = array(
@@ -37,6 +33,16 @@ final class RSV_Contracts {
 	);
 
 	public static function event( $name ) {
-		return sanitize_key( $name ) . '.v' . self::EVENT_VERSION;
+		$name = preg_replace( '/[^A-Za-z0-9_.-]/', '', (string) $name );
+		return $name . '.v' . self::EVENT_VERSION;
+	}
+
+	public static function routes() {
+		return array(
+			'reels' => '/reels/',
+			'reel' => '/reel/{public_id}/{slug}/',
+			'create' => '/reels/create/',
+			'history' => '/account/reels/history/',
+		);
 	}
 }

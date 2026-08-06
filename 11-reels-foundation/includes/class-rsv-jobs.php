@@ -2,76 +2,23 @@
 defined( 'ABSPATH' ) || exit;
 
 final class RSV_Jobs {
+	const CRON = 'rsv_process_jobs';
 	public function register() {
-		add_action( 'rsv_hourly', array( $this, 'hourly' ) );
-		add_action( 'rsv_process_outbox', array( $this, 'outbox' ) );
-		add_action( 'vwlb_event_VideoRestricted', array( $this, 'video_restricted' ), 10, 2 );
-		add_action( 'vwlb_event_VideoAssetReady', array( $this, 'video_ready' ), 10, 2 );
+		add_action(self::CRON,array($this,'run'));
+		add_filter('cron_schedules',array($this,'schedule'));
+		foreach(array('VideoAssetReady','videoassetready','VideoAssetReady.v1','videoassetready.v1') as $name)add_action('vwlb_event_'.$name,array($this,'video_ready'),10,3);
+		foreach(array('VideoRestricted','videorestricted','VideoRestricted.v1','videorestricted.v1') as $name)add_action('vwlb_event_'.$name,array($this,'video_restricted'),10,3);
+		add_action('rsv_dependency_event',array($this,'consume_dependency'),10,3);
 	}
-
-	public static function schedule() {
-		if ( ! wp_next_scheduled( 'rsv_hourly' ) ) wp_schedule_event( time() + 300, 'hourly', 'rsv_hourly' );
-		if ( ! wp_next_scheduled( 'rsv_process_outbox' ) ) wp_schedule_event( time() + 120, 'rsv_five_minutes', 'rsv_process_outbox' );
-	}
-
-	public static function unschedule() {
-		wp_clear_scheduled_hook( 'rsv_hourly' );
-		wp_clear_scheduled_hook( 'rsv_process_outbox' );
-	}
-
-	public static function intervals( $schedules ) {
-		$schedules['rsv_five_minutes'] = array( 'interval' => 300, 'display' => 'Every five minutes' );
-		return $schedules;
-	}
-
-	public function hourly() {
-		global $wpdb;
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . RSV_Helpers::table( 'impressions' ) . ' WHERE created_at < %s', gmdate( 'Y-m-d H:i:s', time() - 90 * DAY_IN_SECONDS ) ) );
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . RSV_Helpers::table( 'idempotency' ) . ' WHERE expires_at < %s', RSV_Helpers::now() ) );
-		RSV_Migration::reconcile( 100 );
-	}
-
-	public function outbox() {
-		global $wpdb;
-		$table = RSV_Helpers::table( 'outbox' );
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE status IN ('pending','retry') AND available_at<=%s ORDER BY id ASC LIMIT 50", RSV_Helpers::now() ), ARRAY_A );
-		foreach ( $rows as $row ) {
-			try {
-				do_action( 'rsv_event', $row['event_name'], RSV_Helpers::json_decode( $row['payload_json'] ), $row['event_id'] );
-				$wpdb->update( $table, array( 'status' => 'delivered', 'updated_at' => RSV_Helpers::now() ), array( 'id' => $row['id'] ) );
-			} catch ( Throwable $e ) {
-				$attempts = (int) $row['attempts'] + 1;
-				$status = $attempts >= 8 ? 'dead' : 'retry';
-				$delay = min( DAY_IN_SECONDS, 60 * ( 2 ** min( 8, $attempts ) ) );
-				$wpdb->update( $table, array( 'status' => $status, 'attempts' => $attempts, 'available_at' => gmdate( 'Y-m-d H:i:s', time() + $delay ), 'last_error' => RSV_Helpers::text( $e->getMessage(), 500 ), 'updated_at' => RSV_Helpers::now() ), array( 'id' => $row['id'] ) );
-			}
-		}
-	}
-
-	public function video_restricted( $video_id, $payload = array() ) {
-		$this->set_by_video( $video_id, 'restricted', 'File 10 video restricted' );
-	}
-
-	public function video_ready( $video_id, $payload = array() ) {
-		global $wpdb;
-		$table = RSV_Helpers::table( 'reels' );
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE video_id=%d AND status='media_processing'", absint( $video_id ) ), ARRAY_A );
-		foreach ( $rows as $row ) {
-			if ( ! is_wp_error( RSV_File10::validate_for_reel( $video_id, $row['owner_id'] ) ) ) {
-				RSV_Repository::update_versioned( $row['id'], $row['version'], array( 'status' => 'review' ) );
-			}
-		}
-	}
-
-	private function set_by_video( $video_id, $state, $reason ) {
-		global $wpdb;
-		$table = RSV_Helpers::table( 'reels' );
-		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE video_id=%d", absint( $video_id ) ), ARRAY_A );
-		foreach ( $rows as $row ) {
-			if ( RSV_State_Machine::allowed( $row['status'], $state ) ) {
-				RSV_Repository::update_versioned( $row['id'], $row['version'], array( 'status' => $state ) );
-				RSV_Helpers::audit( 'reel', $row['id'], 'dependency_state', $row['status'], $state, $reason );
-			}
-		}
-	}
+	public function schedule($s){$s['rsv_five_minutes']=array('interval'=>300,'display'=>__('Every five minutes',RSV_TEXT_DOMAIN));return $s;}
+	public static function ensure(){if(!wp_next_scheduled(self::CRON))wp_schedule_event(time()+60,'rsv_five_minutes',self::CRON);}
+	public function run(){if(!RSV_Migration::lock('jobs',240))return;try{$this->process_outbox();$this->reconcile();$this->recalculate_ranking();$this->cleanup();}finally{RSV_Migration::unlock('jobs');}}
+	private function claim_events($limit=25){global $wpdb;$table=RSV_Helpers::table('outbox');$now=RSV_Helpers::now();$rows=$wpdb->get_results($wpdb->prepare("SELECT id FROM $table WHERE ((status IN ('pending','retry') AND available_at<=%s) OR (status='processing' AND lease_expires_at<%s)) ORDER BY id ASC LIMIT %d",$now,$now,$limit),ARRAY_A);$claimed=array();foreach($rows as $row){$token=RSV_Helpers::public_id('lease');$updated=$wpdb->query($wpdb->prepare("UPDATE $table SET status='processing',lease_token=%s,lease_expires_at=%s,updated_at=%s WHERE id=%d AND ((status IN ('pending','retry') AND available_at<=%s) OR (status='processing' AND lease_expires_at<%s))",$token,gmdate('Y-m-d H:i:s',time()+180),$now,(int)$row['id'],$now,$now));if(1===$updated){$event=$wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id=%d AND lease_token=%s",(int)$row['id'],$token),ARRAY_A);if($event)$claimed[]=$event;}}return $claimed;}
+	private function process_outbox(){global $wpdb;$table=RSV_Helpers::table('outbox');foreach($this->claim_events() as $event){try{$payload=RSV_Helpers::json_decode($event['payload_json']);do_action('rsv_event_'.$event['event_name'],$payload,$event['event_id'],$event);$wpdb->update($table,array('status'=>'complete','lease_token'=>'','lease_expires_at'=>null,'updated_at'=>RSV_Helpers::now()),array('id'=>(int)$event['id'],'lease_token'=>$event['lease_token']));}catch(Throwable $e){$attempts=(int)$event['attempts']+1;$dead=$attempts>=8;$wpdb->update($table,array('status'=>$dead?'dead':'retry','attempts'=>$attempts,'available_at'=>gmdate('Y-m-d H:i:s',time()+min(DAY_IN_SECONDS,(int)pow(2,$attempts)*60)),'lease_token'=>'','lease_expires_at'=>null,'last_error'=>RSV_Helpers::text($e->getMessage(),500),'updated_at'=>RSV_Helpers::now()),array('id'=>(int)$event['id'],'lease_token'=>$event['lease_token']));}}}
+	private function reconcile(){global $wpdb;$table=RSV_Helpers::table('reels');$rows=$wpdb->get_results("SELECT * FROM $table WHERE status IN ('media_processing','review','published','restricted') ORDER BY updated_at ASC LIMIT 100",ARRAY_A);foreach($rows as $reel){$video=RSV_File10::video((int)$reel['video_id']);if(!$video||in_array($video['status']??'',array('restricted','removed'),true)){if(!in_array($reel['status'],array('restricted','removed'),true)){$updated=RSV_Repository::update_versioned($reel['id'],$reel['version'],array('status'=>'restricted','restricted_reason'=>'file10_restricted'));if(!is_wp_error($updated))RSV_Helpers::audit('reel',$reel['id'],'reconcile',$reel['status'],'restricted','File 10 media unavailable');}continue;}if('media_processing'===$reel['status']&&'published'===($video['status']??'')){$updated=RSV_Repository::update_versioned($reel['id'],$reel['version'],array('status'=>'review','captions_status'=>RSV_File10::captions_ready($reel['video_id'])?'ready':'missing'));if(!is_wp_error($updated)){RSV_Helpers::audit('reel',$reel['id'],'media_ready','media_processing','review');RSV_Helpers::outbox('ReelMediaReady','reel',$reel['id'],array('public_id'=>$reel['public_id']));}}}}
+	private function recalculate_ranking(){global $wpdb;$reels=RSV_Helpers::table('reels');$imp=RSV_Helpers::table('impressions');$reports=RSV_Helpers::table('reports');$rows=$wpdb->get_results("SELECT * FROM $reels WHERE status='published' ORDER BY updated_at ASC LIMIT 200",ARRAY_A);foreach($rows as $reel){$metrics=$wpdb->get_row($wpdb->prepare("SELECT COUNT(*) views,COALESCE(AVG(completed),0) completion_rate FROM $imp WHERE reel_id=%d AND day_key>=DATE_SUB(UTC_DATE(),INTERVAL 30 DAY)",$reel['id']),ARRAY_A);$metrics['open_reports']=(int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $reports WHERE reel_id=%d AND status IN ('submitted','triaged','appealed')",$reel['id']));$score=RSV_Ranking::score($reel,RSV_File10::video($reel['video_id']),$metrics);if(abs($score-(float)$reel['rank_score'])>.0001)$wpdb->update($reels,array('rank_score'=>$score,'updated_at'=>RSV_Helpers::now()),array('id'=>$reel['id']),array('%f','%s'),array('%d'));}}
+	private function cleanup(){global $wpdb;$wpdb->query($wpdb->prepare('DELETE FROM '.RSV_Helpers::table('impressions').' WHERE updated_at<%s',gmdate('Y-m-d H:i:s',time()-90*DAY_IN_SECONDS)));$wpdb->query($wpdb->prepare('DELETE FROM '.RSV_Helpers::table('idempotency').' WHERE expires_at<%s',RSV_Helpers::now()));$wpdb->query($wpdb->prepare("DELETE FROM ".RSV_Helpers::table('outbox')." WHERE status='complete' AND updated_at<%s",gmdate('Y-m-d H:i:s',time()-30*DAY_IN_SECONDS)));}
+	public function consume_dependency($name,$event_id,$payload){global $wpdb;$inbox=RSV_Helpers::table('inbox');$inserted=$wpdb->insert($inbox,array('event_id'=>RSV_Helpers::text($event_id,120),'event_name'=>RSV_Helpers::text($name,100),'status'=>'processing','created_at'=>RSV_Helpers::now()));if(!$inserted)return;try{if(false!==stripos($name,'VideoRestricted'))$this->video_restricted($payload,$event_id,$name);elseif(false!==stripos($name,'VideoAssetReady'))$this->video_ready($payload,$event_id,$name);$wpdb->update($inbox,array('status'=>'complete','processed_at'=>RSV_Helpers::now()),array('event_id'=>$event_id));}catch(Throwable $e){$wpdb->update($inbox,array('status'=>'failed'),array('event_id'=>$event_id));}}
+	public function video_ready($payload=array(),$event_id='',$name=''){global $wpdb;$video_id=absint($payload['video_id']??$payload['id']??0);if(!$video_id)return;$rows=$wpdb->get_results($wpdb->prepare('SELECT * FROM '.RSV_Helpers::table('reels').' WHERE video_id=%d AND status=%s',$video_id,'media_processing'),ARRAY_A);foreach($rows as $reel){$updated=RSV_Repository::update_versioned($reel['id'],$reel['version'],array('status'=>'review','captions_status'=>RSV_File10::captions_ready($video_id)?'ready':'missing'));if(!is_wp_error($updated))RSV_Helpers::audit('reel',$reel['id'],'video_ready','media_processing','review');}}
+	public function video_restricted($payload=array(),$event_id='',$name=''){global $wpdb;$video_id=absint($payload['video_id']??$payload['id']??0);if(!$video_id)return;$rows=$wpdb->get_results($wpdb->prepare("SELECT * FROM ".RSV_Helpers::table('reels')." WHERE video_id=%d AND status NOT IN ('removed','archived')",$video_id),ARRAY_A);foreach($rows as $reel){if('restricted'===$reel['status'])continue;$updated=RSV_Repository::update_versioned($reel['id'],$reel['version'],array('status'=>'restricted','restricted_reason'=>'file10_restricted'));if(!is_wp_error($updated))RSV_Helpers::audit('reel',$reel['id'],'video_restricted',$reel['status'],'restricted');}}
 }

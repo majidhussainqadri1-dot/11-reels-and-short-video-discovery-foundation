@@ -1,0 +1,3 @@
+# Review/Fix Round 3 — rc2
+
+The rc1 source was reviewed against the complete File 11 plan. Corrected defects included: runtime undefined constant, malformed heading, broken load-more, unsigned/wrong pagination cursor, post-filter pagination loss, visibility bypass, numeric identifier leakage, non-atomic progress, client-forced completion, event flooding, incomplete report lifecycle, read-only moderation, outbox races, lowercased event contracts, incomplete dependency reconciliation, nested route failure, private-cache timing, unsafe iframe messaging, repeated progress calls, weak data-saver/offline behavior and incomplete privacy pagination.
