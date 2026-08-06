@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Reels and Short Video Discovery
- * Description: Canonical educational Reels domain for the Sabri Social Homeopathy Platform. File 10 owns media; File 11 owns Reel metadata, discovery, progress and moderation.
- * Version: 1.0.0-rc3
+ * Description: Canonical educational Reels, Stories/Status, Highlights and attributed Response/Remix domain for the Sabri Social Homeopathy Platform. File 10 remains the sole raw-media owner.
+ * Version: 1.1.0-rc4
  * Requires at least: 6.7
  * Requires PHP: 8.1
  * Author: Dr. Allamah Majid Hussain Sabri
@@ -11,9 +11,9 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'RSV_VERSION', '1.0.0-rc3' );
-define( 'RSV_SCHEMA_VERSION', '1.1.0' );
-define( 'RSV_CONTRACT_VERSION', 2 );
+define( 'RSV_VERSION', '1.1.0-rc4' );
+define( 'RSV_SCHEMA_VERSION', '1.2.0' );
+define( 'RSV_CONTRACT_VERSION', 3 );
 define( 'RSV_FILE', __FILE__ );
 define( 'RSV_DIR', plugin_dir_path( __FILE__ ) );
 define( 'RSV_URL', plugin_dir_url( __FILE__ ) );
@@ -36,6 +36,12 @@ $files = array(
 	'class-rsv-migration.php',
 	'class-rsv-diagnostics.php',
 	'class-rsv-integrations.php',
+	'trait-rsv-top20-context.php',
+	'trait-rsv-top20-stories.php',
+	'trait-rsv-top20-responses.php',
+	'trait-rsv-top20-experience.php',
+	'trait-rsv-top20-privacy-integration.php',
+	'class-rsv-top20.php',
 	'class-rsv-plugin.php',
 );
 foreach ( $files as $file ) {

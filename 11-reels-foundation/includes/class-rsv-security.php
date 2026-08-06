@@ -6,7 +6,8 @@ final class RSV_Security {
 		$user_id = $user_id ? absint( $user_id ) : get_current_user_id();
 		$claims  = apply_filters( 'rsv_identity_claims', null, $user_id, RSV_CONTRACT_VERSION );
 		if ( is_array( $claims ) ) {
-			return self::normalize_claims( $claims, $user_id, 'filter' );
+			$normalized = self::normalize_claims( $claims, $user_id, 'filter' );
+			return self::contract_compatible( $normalized, 'filter' ) ? $normalized : self::unavailable_claims( $user_id, 'filter-incompatible' );
 		}
 
 		if ( function_exists( 'smc_membership_assertions' ) ) {
@@ -29,14 +30,17 @@ final class RSV_Security {
 					'is_founder'           => 'founder' === ( $membership['account_class'] ?? '' ),
 					'is_verified_doctor'   => in_array( 'doctor', $approved_types, true ) && ! empty( $membership['professional_verified'] ),
 					'is_suspended'         => ! empty( $membership['suspended'] ),
-					'guardian_required'    => array_key_exists( 'guardian_verified', $membership ) && empty( $membership['guardian_verified'] ),
+					'is_minor'             => ! empty( $membership['is_minor'] ) || 'minor' === sanitize_key( $membership['age_band'] ?? '' ),
+					'age_band'             => sanitize_key( $membership['age_band'] ?? '' ),
+					'guardian_required'    => ! empty( $membership['guardian_required'] ),
 					'guardian_ok'          => ! array_key_exists( 'guardian_verified', $membership ) || ! empty( $membership['guardian_verified'] ),
 					'session_two_factor'   => ! empty( $membership['session_two_factor'] ),
 					'membership_approved'  => ! empty( $membership['approved'] ),
 					'entitlements'         => (array) ( $membership['entitlements'] ?? array() ),
 					'capabilities'         => $capabilities,
 				);
-				return self::normalize_claims( $mapped, $user_id, 'file00' );
+				$normalized = self::normalize_claims( $mapped, $user_id, 'file00' );
+				return self::contract_compatible( $normalized, 'file00' ) ? $normalized : self::unavailable_claims( $user_id, 'file00-incompatible' );
 			}
 		}
 
@@ -44,11 +48,14 @@ final class RSV_Security {
 		return self::normalize_claims(
 			array(
 				'user_id'            => $user_id,
+				'contract_version'    => 'wordpress-recovery-v1',
 				'source'              => 'recovery',
 				'status'              => $is_admin ? 'active' : 'unavailable',
 				'is_founder'          => false,
 				'is_verified_doctor'  => false,
 				'is_suspended'        => ! $is_admin,
+				'is_minor'            => false,
+				'guardian_required'   => false,
 				'guardian_ok'         => $is_admin,
 				'session_two_factor'  => $is_admin,
 				'membership_approved' => $is_admin,
@@ -57,6 +64,25 @@ final class RSV_Security {
 			$user_id,
 			'recovery'
 		);
+	}
+
+	private static function unavailable_claims( $user_id, $source ) {
+		return self::normalize_claims(
+			array(
+				'user_id' => $user_id,
+				'source' => $source,
+				'status' => 'unavailable',
+				'is_suspended' => true,
+			),
+			$user_id,
+			$source
+		);
+	}
+
+	private static function contract_compatible( $claims, $source ) {
+		$declared = trim( (string) ( $claims['contract_version'] ?? '' ) );
+		$default  = 'recovery' === $source ? true : '' !== $declared;
+		return (bool) apply_filters( 'rsv_identity_contract_compatible', $default, $declared, RSV_CONTRACT_VERSION, $source, $claims );
 	}
 
 	private static function normalize_claims( $claims, $user_id, $source ) {
@@ -68,6 +94,8 @@ final class RSV_Security {
 			'is_founder'          => false,
 			'is_verified_doctor'  => false,
 			'is_suspended'        => true,
+			'is_minor'            => false,
+			'age_band'            => '',
 			'guardian_required'   => false,
 			'guardian_ok'         => false,
 			'session_two_factor'  => false,
@@ -76,10 +104,16 @@ final class RSV_Security {
 			'capabilities'        => array(),
 		);
 		$claims = wp_parse_args( $claims, $defaults );
-		$claims['user_id']      = absint( $claims['user_id'] );
-		$claims['status']       = sanitize_key( $claims['status'] );
-		$claims['capabilities'] = array_values( array_unique( array_filter( array_map( 'sanitize_key', (array) $claims['capabilities'] ) ) ) );
-		$claims['entitlements'] = is_array( $claims['entitlements'] ) ? $claims['entitlements'] : array();
+		$claims['user_id']          = absint( $claims['user_id'] );
+		$claims['contract_version'] = RSV_Helpers::text( $claims['contract_version'], 80 );
+		$claims['source']           = sanitize_key( $claims['source'] );
+		$claims['status']           = sanitize_key( $claims['status'] );
+		$claims['age_band']         = sanitize_key( $claims['age_band'] );
+		$claims['capabilities']     = array_values( array_unique( array_filter( array_map( 'sanitize_key', (array) $claims['capabilities'] ) ) ) );
+		$claims['entitlements']     = is_array( $claims['entitlements'] ) ? $claims['entitlements'] : array();
+		foreach ( array( 'is_founder', 'is_verified_doctor', 'is_suspended', 'is_minor', 'guardian_required', 'guardian_ok', 'session_two_factor', 'membership_approved' ) as $flag ) {
+			$claims[ $flag ] = ! empty( $claims[ $flag ] );
+		}
 		return $claims;
 	}
 
@@ -87,13 +121,13 @@ final class RSV_Security {
 		if ( ! is_user_logged_in() ) {
 			return false;
 		}
-		$claims = self::claims();
-		if ( ! empty( $claims['is_suspended'] ) || 'active' !== ( $claims['status'] ?? '' ) || empty( $claims['membership_approved'] ) ) {
+		$capability = sanitize_key( $capability );
+		$purpose    = sanitize_key( $purpose );
+		$claims     = self::claims();
+		if ( ! empty( $claims['is_suspended'] ) || 'active' !== ( $claims['status'] ?? '' ) || empty( $claims['membership_approved'] ) || empty( $claims['guardian_ok'] ) ) {
 			return false;
 		}
-		if ( empty( $claims['guardian_ok'] ) ) {
-			return false;
-		}
+
 		$sensitive = in_array( $capability, array( RSV_Contracts::CAP_SUBMIT, RSV_Contracts::CAP_PUBLISH, RSV_Contracts::CAP_MODERATE, RSV_Contracts::CAP_MANAGE ), true );
 		if ( $sensitive && empty( $claims['session_two_factor'] ) && ! current_user_can( 'manage_options' ) ) {
 			return false;
@@ -112,34 +146,45 @@ final class RSV_Security {
 				return false;
 			}
 		}
-		return (bool) apply_filters( 'rsv_authorize', $native || $asserted, $capability, $object, sanitize_key( $purpose ), $claims );
+
+		$base_allowed = $native || $asserted;
+		// Integration filters may narrow authorization, never manufacture it.
+		$filtered = (bool) apply_filters( 'rsv_authorize', $base_allowed, $capability, $object, $purpose, $claims );
+		return $base_allowed && $filtered;
 	}
 
-	public static function can_view_reel( $reel, $user_id = 0 ) {
+	public static function can_view_reel( $reel, $user_id = null ) {
 		if ( ! is_array( $reel ) || 'published' !== ( $reel['status'] ?? '' ) || ! RSV_File10::eligible_for_reel( absint( $reel['video_id'] ?? 0 ) ) ) {
 			return false;
 		}
+		$explicit_user = null !== $user_id;
 		$visibility = RSV_Helpers::enum( $reel['visibility'] ?? '', RSV_Contracts::VISIBILITIES, '' );
+		$allowed    = false;
 		if ( in_array( $visibility, array( 'public', 'unlisted' ), true ) ) {
-			return RSV_File10::publicly_eligible( absint( $reel['video_id'] ?? 0 ) );
+			$allowed = RSV_File10::publicly_eligible( absint( $reel['video_id'] ?? 0 ) );
+		} else {
+			$user_id = $explicit_user ? absint( $user_id ) : get_current_user_id();
+			if ( $user_id && ( user_can( $user_id, 'manage_options' ) || absint( $reel['owner_id'] ?? 0 ) === $user_id ) ) {
+				$allowed = true;
+			} elseif ( $user_id ) {
+				$claims = self::claims( $user_id );
+				if ( 'active' === $claims['status'] && empty( $claims['is_suspended'] ) && ! empty( $claims['membership_approved'] ) && ! empty( $claims['guardian_ok'] ) ) {
+					if ( 'member' === $visibility ) {
+						$allowed = true;
+					} else {
+						$entitlements = (array) $claims['entitlements'];
+						$explicit = ! empty( $entitlements['reels'] ) || ! empty( $entitlements['base_services']['reels'] );
+						$allowed = (bool) apply_filters( 'rsv_reel_entitled', $explicit, $user_id, $reel, $claims );
+					}
+				}
+			}
 		}
-		$user_id = $user_id ? absint( $user_id ) : get_current_user_id();
-		if ( ! $user_id ) {
+		if ( ! $allowed ) {
 			return false;
 		}
-		if ( user_can( $user_id, 'manage_options' ) || absint( $reel['owner_id'] ?? 0 ) === $user_id ) {
-			return true;
-		}
-		$claims = self::claims( $user_id );
-		if ( 'active' !== $claims['status'] || ! empty( $claims['is_suspended'] ) || empty( $claims['membership_approved'] ) || empty( $claims['guardian_ok'] ) ) {
-			return false;
-		}
-		if ( 'member' === $visibility ) {
-			return true;
-		}
-		$entitlements = (array) $claims['entitlements'];
-		$explicit = ! empty( $entitlements['reels'] ) || ! empty( $entitlements['base_services']['reels'] );
-		return (bool) apply_filters( 'rsv_reel_entitled', $explicit, $user_id, $reel, $claims );
+		$user_id  = $explicit_user ? absint( $user_id ) : get_current_user_id();
+		$filtered = (bool) apply_filters( 'rsv_can_view_reel', true, $reel, $user_id );
+		return $allowed && $filtered;
 	}
 
 	public static function publisher_label( $user_id ) {
@@ -166,7 +211,7 @@ final class RSV_Security {
 		$key    = hash_hmac( 'sha256', $actor . '|' . $ip, wp_salt( 'auth' ) );
 		$bucket = (int) floor( time() / $window ) * $window;
 		$table  = RSV_Helpers::table( 'rate_limits' );
-		$now    = RSV_Helpers::now();
+		$now   = RSV_Helpers::now();
 		$sql    = $wpdb->prepare(
 			"INSERT INTO $table (actor_key,scope_key,window_start,request_count,expires_at,updated_at)
 			 VALUES (%s,%s,%d,1,%s,%s)
