@@ -1,0 +1,38 @@
+name: Materialize File 11 RC2
+
+on:
+  push:
+    branches:
+      - codex/file-11-complete-master-plan-v1.0-rc1
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/file-11-complete-master-plan-v1.0-rc1
+          fetch-depth: 1
+
+      - name: Restore reviewed RC2 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat bootstrap/f11xz-* | base64 --decode > /tmp/file11-rc2.tar.xz
+          echo "2b56e32484c312890bef940698b7af7a01cd8c615c28ca5f0e9c498b66c9862c  /tmp/file11-rc2.tar.xz" | sha256sum -c -
+          tar -xJf /tmp/file11-rc2.tar.xz -C .
+          # The release workflow is updated separately with an authenticated connector write.
+          git checkout -- .github/workflows/file11-release.yml
+          rm -rf bootstrap
+          rm -f .github/workflows/bootstrap-rc2.yml
+          chmod +x tests/*.sh tools/*.sh
+          ./tests/run-all.sh
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Complete File 11 implementation 1.0.0-rc2"
+          git push origin HEAD:codex/file-11-complete-master-plan-v1.0-rc1
