@@ -10,7 +10,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.1','8.3']
+        php: ['8.1','8.3','8.4']
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,23 +23,23 @@ jobs:
       - name: Run complete automated suite
         run: bash ./tests/run-all.sh
       - name: Build canonical package
-        run: bash ./tools/build-package.sh packages/11-reels-foundation-1.0.0-rc1.zip
+        run: bash ./tools/build-package.sh packages/11-reels-foundation-1.0.0-rc2.zip
       - name: Verify checksum and archive
         run: |
           cd packages
-          sha256sum --check 11-reels-foundation-1.0.0-rc1.zip.sha256
-          unzip -t 11-reels-foundation-1.0.0-rc1.zip
+          sha256sum --check 11-reels-foundation-1.0.0-rc2.zip.sha256
+          unzip -t 11-reels-foundation-1.0.0-rc2.zip
       - name: Verify package/source parity
         run: |
           rm -rf /tmp/rsv-extract
           mkdir -p /tmp/rsv-extract
-          unzip -q packages/11-reels-foundation-1.0.0-rc1.zip -d /tmp/rsv-extract
+          unzip -q packages/11-reels-foundation-1.0.0-rc2.zip -d /tmp/rsv-extract
           diff -ru 11-reels-foundation /tmp/rsv-extract/11-reels-foundation
       - name: Publish release-candidate artifact
         if: matrix.php == '8.3'
         uses: actions/upload-artifact@v4
         with:
-          name: file11-reels-1.0.0-rc1
+          name: file11-reels-1.0.0-rc2
           path: |
-            packages/11-reels-foundation-1.0.0-rc1.zip
-            packages/11-reels-foundation-1.0.0-rc1.zip.sha256
+            packages/11-reels-foundation-1.0.0-rc2.zip
+            packages/11-reels-foundation-1.0.0-rc2.zip.sha256
