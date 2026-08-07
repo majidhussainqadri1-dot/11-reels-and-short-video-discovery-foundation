@@ -20,11 +20,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(find .github -maxdepth 1 -type f -name 'rc5-payload.part-*' | wc -l)" -eq 10
+          count="$(find .github -maxdepth 1 -type f -name 'rc5-payload.part-*' | wc -l)"
+          if [ "$count" -eq 0 ]; then
+            echo "RC5 payload already applied."
+            exit 0
+          fi
+          test "$count" -eq 10
+          cp .github/workflows/file11-release.yml /tmp/file11-release.yml
           cat .github/rc5-payload.part-* | base64 -d > /tmp/rc5-payload.tar.xz
           test "$(sha256sum /tmp/rc5-payload.tar.xz | cut -d' ' -f1)" = "84cad2e1da33056dd87eb04b435ba46c2b718ffe05dfe0bde5b94314b3f9f01f"
           tar -xJf /tmp/rc5-payload.tar.xz -C .
-          rm -f .github/rc5-payload.part-* .github/rc5-payload.tar.xz.b64 .github/workflows/apply-rc5-payload.yml
+          cp /tmp/file11-release.yml .github/workflows/file11-release.yml
+          rm -f .github/rc5-payload.part-* .github/rc5-payload.tar.xz.b64
           chmod +x tests/run-all.sh tests/static-contracts.sh tools/build-package.sh
           git config user.name "majidhussainqadri1-dot"
           git config user.email "majidhussainqadri1@gmail.com"
