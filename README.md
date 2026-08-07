@@ -1,7 +1,7 @@
 # File 11 — Reels and Short Video Discovery
 
-**Release candidate:** `1.1.0-rc4`  
-**Branch:** `codex/file-11-four-plan-complete-v1.1.0-rc4`  
+**Release candidate:** `1.1.0-rc5`  
+**Branch:** `codex/file-11-four-plan-complete-v1.1.0-rc5`  
 **Canonical package root:** `reels-foundation-11`
 
 File 11 is the canonical owner of vertical educational Reel entities, the 60–600-second rule, swipe discovery, ranking guardrails, moderation, private progress/history, maximum-24-hour Stories/Status, durable consent-current Highlights, attributed Reel-to-Reel Response/Remix relationships, source/safety context, user-controlled well-being settings, youth-safe discovery and privacy-minimized creator value insights.
@@ -15,14 +15,19 @@ File 10 remains the sole owner of raw upload, transcoding, storage, playback, ca
 3. Continuous Value / Top-20 Superset Master Plan v1.0;
 4. File 11 Complete Master Plan v1.0.
 
-## RC4 corrections
+## RC5 corrective completion
 
-- implements CV-119 through CV-129: source/safety, transcripts, Stories/Status, Highlights, attributed responses, creator value insights, well-being controls and youth-safe mode;
-- makes File 00 claims contract-aware and keeps authorization filters deny-only;
-- binds cursors to topic and youth-safety context and provides signed private-history cursors;
-- consumes versioned File 10 secure-download, transcript and interaction adapters without manufacturing media URLs or counts;
-- fail-closes public visibility for legacy Reels missing reviewed source/safety and caption/transcript evidence while preserving owner/operator repair access;
-- adds four review records, migration, threat model, traceability, deterministic packaging and exact-head CI.
+RC5 re-opened the four-plan audit after RC4 and corrected additional repository-scope defects:
+
+- permission-safe REST pre-dispatch without unauthorized object/readiness oracles;
+- private history/preferences/insights no-store and noindex response headers;
+- atomic, evidence-complete, rate-limited and idempotent Response, Story and Highlight mutations;
+- explicit review-state publication gates and optimistic concurrency checks;
+- no-JavaScript Story/Highlight/Response forms with client idempotency keys;
+- partial preference updates that preserve omitted fields;
+- complete paginated privacy export and accurate batched erasure evidence;
+- complete client localization keys and safe external links;
+- checked compensation failures rather than silently returning the original error.
 
 ## Verification
 
@@ -31,8 +36,8 @@ bash tests/run-all.sh
 bash tools/build-package.sh
 ```
 
-The suite covers PHP/JavaScript syntax, state/helper tests, forensic/static/Top-20 contracts, deterministic double build, ZIP integrity and source/package byte parity.
+The suite covers PHP/JavaScript syntax, state/helper tests, forensic/static/Top-20/RC5 hardening contracts, deterministic double build, ZIP integrity and source/package byte parity.
 
 ## Claim boundary
 
-RC4 is a **repository release candidate**, not production completion. Hostinger staging, real companion contracts, real roles/media, browsers/devices/RTL/accessibility, migration/restore/rollback rehearsal, Founder acceptance, controlled deployment and operational monitoring remain separate mandatory gates.
+RC5 is a **repository-complete release candidate**, not production completion. Hostinger staging, real companion contracts, real roles/media, browsers/devices/RTL/accessibility, migration/restore/rollback rehearsal, Founder acceptance, controlled deployment and operational monitoring remain separate mandatory gates.

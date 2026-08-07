@@ -4,7 +4,7 @@ Tags: reels, educational-video, stories, highlights, accessibility, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.1.0-rc4
+Stable tag: 1.1.0-rc5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,16 +36,22 @@ No. File 10 exclusively owns raw media and player operations.
 No. Story/Status is a maximum-24-hour temporal projection of an already eligible Reel, with expiry and rights/consent revalidation.
 
 = Can patient-case media be remixed automatically? =
-No. Reuse is fail-closed unless the canonical consent owner verifies explicit reuse consent.
+No. Reuse is fail-closed unless the canonical consent owner verifies explicit reuse consent at creation, publication and every public read.
 
 = Does the plugin force autoplay or endless sessions? =
 No. Autoplay is user-controlled and muted; preferences provide session limits, natural stops, a single late-night reminder and private-history pause.
 
 == Changelog ==
 
+= 1.1.0-rc5 =
+* Four fresh adversarial review/fix rounds over all four governing plans.
+* Authorization-safe REST pre-dispatch and private REST no-store/noindex headers.
+* Atomic, rate-limited and idempotent Story, Highlight and Response mutations.
+* Publication audit/outbox evidence is now transactional and fail-closed.
+* Complete no-JavaScript Story/Highlight/Response forms with client idempotency keys.
+* Partial preference updates preserve omitted settings and remain versioned/audited.
+* Paginated privacy export now covers preferences, Stories, Highlights, Responses and source context; erasure reporting is accurate and batched.
+* Completed localized client labels and external-link safety attributes.
+
 = 1.1.0-rc4 =
-* Four-plan harmonization and four review/fix rounds.
-* Added Stories/Status, Highlights and attributed Response/Remix relationships.
-* Added source/safety context, transcript adapter and publication gates.
-* Added youth-safe discovery, well-being preferences and value insights.
-* Hardened File 00 authorization and File 10 versioned adapters.
+* Added Stories/Status, Highlights, attributed Response/Remix, source/safety context, youth-safe discovery, well-being preferences and value insights.
