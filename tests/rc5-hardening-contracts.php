@@ -9,7 +9,7 @@ $context    = $read( $p . '/trait-rsv-top20-context.php' );
 $privacy    = $read( $p . '/trait-rsv-top20-privacy-integration.php' );
 $bootstrap  = $read( dirname( $p ) . '/11-reels-foundation.php' );
 $must = array(
-	array( $bootstrap, "define( 'RSV_CONTRACT_VERSION', 4 )" ),
+	array( $bootstrap, "define( 'RSV_CONTRACT_VERSION', 5 )" ),
 	array( $experience, 'Do not run object-dependent publication validation before authorization' ),
 	array( $experience, "RSV_Security::can( RSV_Contracts::CAP_PUBLISH, \$reel, 'publish_reel' )" ),
 	array( $experience, "private, no-store, max-age=0" ),
@@ -24,7 +24,7 @@ $must = array(
 	array( $privacy, 'LIMIT %d OFFSET %d' ), array( $privacy, "'rsv-source-context'" ),
 	array( $privacy, 'rsv_privacy_erasure_evidence_failed' ), array( $privacy, "RSV_DB::transaction" ),
 );
-foreach ( $must as $pair ) if ( false === strpos( $pair[0], $pair[1] ) ) { fwrite( STDERR, "Missing RC5 hardening marker: {$pair[1]}\n" ); exit( 1 ); }
+foreach ( $must as $pair ) if ( false === strpos( $pair[0], $pair[1] ) ) { fwrite( STDERR, "Missing inherited RC5 hardening marker: {$pair[1]}\n" ); exit( 1 ); }
 $forbidden = array(
 	array( $experience, "self::publication_gate(RSV_Repository::find" ),
 	array( $responses, "public static function create_response( \$source_public_id, \$data )" ),
@@ -32,5 +32,5 @@ $forbidden = array(
 	array( $privacy, "LIMIT 500" ),
 	array( $context, "'history_paused' => ! empty( \$data['history_paused'] ) ? 1 : 0" ),
 );
-foreach ( $forbidden as $pair ) if ( false !== strpos( $pair[0], $pair[1] ) ) { fwrite( STDERR, "Forbidden RC4 pattern remains: {$pair[1]}\n" ); exit( 1 ); }
-echo "RC5 hardening contracts PASS\n";
+foreach ( $forbidden as $pair ) if ( false !== strpos( $pair[0], $pair[1] ) ) { fwrite( STDERR, "Forbidden pre-RC5 pattern remains: {$pair[1]}\n" ); exit( 1 ); }
+echo "inherited RC5 hardening contracts PASS\n";
