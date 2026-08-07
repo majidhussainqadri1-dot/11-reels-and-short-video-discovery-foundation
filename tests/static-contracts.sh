@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euxo pipefail
+set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 P="$ROOT/11-reels-foundation"
 grep -F "Version: 1.1.0-rc5" "$P/11-reels-foundation.php" >/dev/null
@@ -34,7 +34,7 @@ grep -F "trace_id" "$P/assets/js/rsv.js" >/dev/null
 ! grep -F ":root" "$P/assets/css/rsv-top20.css"
 grep -F "smc_membership_assertions" "$P/includes/class-rsv-security.php" >/dev/null
 grep -F "wp_privacy_personal_data_exporters" "$P/includes/class-rsv-privacy.php" >/dev/null
-grep -RF "wp_privacy_personal_data_exporters" "$P/includes" --include='trait-rsv-top20-privacy-integration.php' >/dev/null
+grep -F "public static function privacy_exporters" "$P/includes/trait-rsv-top20-privacy-integration.php" >/dev/null
 grep -F "Cache-Control: private, no-store" "$P/includes/class-rsv-helpers.php" >/dev/null
 grep -F "Idempotency-Key" "$P/assets/js/rsv.js" >/dev/null
 grep -F "actor_scope_window" "$P/includes/class-rsv-db.php" >/dev/null
