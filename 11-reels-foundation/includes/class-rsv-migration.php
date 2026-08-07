@@ -262,20 +262,26 @@ final class RSV_Migration {
 			$video = RSV_File10::video( $row['video_id'] );
 			if ( ! $video || in_array( $video['status'] ?? '', array( 'restricted', 'removed', 'failed' ), true ) ) {
 				if ( RSV_State_Machine::allowed( $row['status'], 'restricted' ) ) {
-					$updated = RSV_Repository::update_versioned( $row['id'], $row['version'], array( 'status' => 'restricted' ) );
-					if ( ! is_wp_error( $updated ) ) {
-						$result['restricted']++;
-						RSV_Helpers::audit( 'reel', $row['id'], 'reconcile', $row['status'], 'restricted', 'File 10 unavailable or restricted', array(), 0 );
-					}
+					$changed = RSV_DB::transaction( static function () use ( $row ) {
+						$updated = RSV_Repository::update_versioned( $row['id'], $row['version'], array( 'status' => 'restricted' ) );
+						if ( is_wp_error( $updated ) ) return $updated;
+						if ( ! RSV_Helpers::audit( 'reel', $row['id'], 'reconcile', $row['status'], 'restricted', 'File 10 unavailable or restricted', array(), 0 ) || ! RSV_Helpers::outbox( 'ReelRestricted', 'reel', $row['id'], array( 'public_id' => $row['public_id'], 'reason' => 'file10_unavailable_or_restricted' ) ) ) return RSV_Helpers::error( 'rsv_reconcile_evidence_failed', __( 'The Reel reconciliation could not be recorded safely.', RSV_TEXT_DOMAIN ), 500 );
+						return true;
+					} );
+					if ( is_wp_error( $changed ) ) return $changed;
+					if ( true === $changed ) $result['restricted']++;
 				}
 				continue;
 			}
 			if ( 'media_processing' === $row['status'] && 'published' === ( $video['status'] ?? '' ) ) {
-				$updated = RSV_Repository::update_versioned( $row['id'], $row['version'], array( 'status' => 'review' ) );
-				if ( ! is_wp_error( $updated ) ) {
-					$result['advanced']++;
-					RSV_Helpers::audit( 'reel', $row['id'], 'reconcile', 'media_processing', 'review', 'File 10 media ready', array(), 0 );
-				}
+				$changed = RSV_DB::transaction( static function () use ( $row ) {
+					$updated = RSV_Repository::update_versioned( $row['id'], $row['version'], array( 'status' => 'review' ) );
+					if ( is_wp_error( $updated ) ) return $updated;
+					if ( ! RSV_Helpers::audit( 'reel', $row['id'], 'reconcile', 'media_processing', 'review', 'File 10 media ready', array(), 0 ) || ! RSV_Helpers::outbox( 'ReelMediaReadyForReview', 'reel', $row['id'], array( 'public_id' => $row['public_id'] ) ) ) return RSV_Helpers::error( 'rsv_reconcile_evidence_failed', __( 'The Reel reconciliation could not be recorded safely.', RSV_TEXT_DOMAIN ), 500 );
+					return true;
+				} );
+				if ( is_wp_error( $changed ) ) return $changed;
+				if ( true === $changed ) $result['advanced']++;
 			}
 		}
 		return $result;
@@ -288,7 +294,8 @@ final class RSV_Migration {
 		$affected = (int) apply_filters( 'rsv_before_legacy_rollback', 0 );
 		update_option( 'rsv_legacy_cutover_enabled', false, false );
 		delete_option( self::CHECKPOINT_OPTION );
-		RSV_Helpers::audit( 'migration', 0, 'rollback', 'cutover', 'legacy_read_enabled', '', array( 'downstream_affected' => $affected ) );
+		if ( false !== get_option( 'rsv_legacy_cutover_enabled', false ) || false !== get_option( self::CHECKPOINT_OPTION, false ) ) return RSV_Helpers::error( 'rsv_rollback_state_failed', __( 'The legacy rollback state could not be persisted safely.', RSV_TEXT_DOMAIN ), 500 );
+		if ( ! RSV_Helpers::audit( 'migration', 0, 'rollback', 'cutover', 'legacy_read_enabled', '', array( 'downstream_affected' => $affected ) ) ) return RSV_Helpers::error( 'rsv_rollback_evidence_failed', __( 'The legacy rollback could not be completed with audit evidence.', RSV_TEXT_DOMAIN ), 500 );
 		return array( 'rolled_back' => true, 'new_data_preserved' => true );
 	}
 }

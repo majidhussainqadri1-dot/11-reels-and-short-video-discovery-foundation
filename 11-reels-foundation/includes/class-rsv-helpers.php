@@ -37,6 +37,24 @@ final class RSV_Helpers {
 		return in_array( $value, (array) $allowed, true ) ? $value : $default;
 	}
 
+	public static function label( $value ) {
+		$value = sanitize_key( (string) $value );
+		$labels = array(
+			'homeopathy-foundations' => __( 'Homeopathy Foundations', RSV_TEXT_DOMAIN ),
+			'materia-medica' => __( 'Materia Medica', RSV_TEXT_DOMAIN ), 'repertory' => __( 'Repertory', RSV_TEXT_DOMAIN ),
+			'philosophy' => __( 'Philosophy', RSV_TEXT_DOMAIN ), 'case-taking' => __( 'Case Taking', RSV_TEXT_DOMAIN ),
+			'clinical-learning' => __( 'Clinical Learning', RSV_TEXT_DOMAIN ), 'remedy-study' => __( 'Remedy Study', RSV_TEXT_DOMAIN ),
+			'miasms' => __( 'Miasms', RSV_TEXT_DOMAIN ), 'research' => __( 'Research', RSV_TEXT_DOMAIN ),
+			'public-health-education' => __( 'Public Health Education', RSV_TEXT_DOMAIN ), 'platform-guidance' => __( 'Platform Guidance', RSV_TEXT_DOMAIN ),
+			'medical-claim' => __( 'Medical claim', RSV_TEXT_DOMAIN ), 'patient-privacy' => __( 'Patient privacy', RSV_TEXT_DOMAIN ),
+			'harassment' => __( 'Harassment', RSV_TEXT_DOMAIN ), 'copyright' => __( 'Copyright', RSV_TEXT_DOMAIN ), 'spam' => __( 'Spam', RSV_TEXT_DOMAIN ), 'other' => __( 'Other', RSV_TEXT_DOMAIN ),
+			'no_action' => __( 'No action', RSV_TEXT_DOMAIN ), 'restrict' => __( 'Restrict', RSV_TEXT_DOMAIN ), 'remove' => __( 'Remove', RSV_TEXT_DOMAIN ), 'close' => __( 'Close', RSV_TEXT_DOMAIN ), 'restore' => __( 'Restore', RSV_TEXT_DOMAIN ),
+			'public' => __( 'Public', RSV_TEXT_DOMAIN ), 'unlisted' => __( 'Unlisted', RSV_TEXT_DOMAIN ), 'member' => __( 'Members', RSV_TEXT_DOMAIN ), 'entitled' => __( 'Entitled users', RSV_TEXT_DOMAIN ),
+			'announcement' => __( 'Announcement', RSV_TEXT_DOMAIN ), 'event-reminder' => __( 'Event reminder', RSV_TEXT_DOMAIN ), 'clinic-update' => __( 'Clinic update', RSV_TEXT_DOMAIN ), 'course-prompt' => __( 'Course prompt', RSV_TEXT_DOMAIN ), 'status' => __( 'Status', RSV_TEXT_DOMAIN ),
+		);
+		return $labels[ $value ] ?? self::text( str_replace( array( '-', '_' ), ' ', $value ), 120 );
+	}
+
 	public static function json_encode( $value ) {
 		$json = wp_json_encode( $value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
 		return is_string( $json ) ? $json : '{}';

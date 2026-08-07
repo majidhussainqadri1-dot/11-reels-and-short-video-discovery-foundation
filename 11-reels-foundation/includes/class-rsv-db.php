@@ -189,17 +189,28 @@ final class RSV_DB {
 
 	public static function transaction( $callback ) {
 		global $wpdb;
-		$wpdb->query( 'START TRANSACTION' );
+		if ( false === $wpdb->query( 'START TRANSACTION' ) ) {
+			return RSV_Helpers::error( 'rsv_transaction_unavailable', __( 'The operation cannot start safely right now.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		try {
 			$result = call_user_func( $callback );
 			if ( is_wp_error( $result ) ) {
-				$wpdb->query( 'ROLLBACK' );
+				if ( false === $wpdb->query( 'ROLLBACK' ) ) {
+					return RSV_Helpers::error( 'rsv_rollback_failed', __( 'The operation failed and its rollback could not be verified.', RSV_TEXT_DOMAIN ), 500 );
+				}
 				return $result;
 			}
-			$wpdb->query( 'COMMIT' );
+			if ( false === $wpdb->query( 'COMMIT' ) ) {
+				if ( false === $wpdb->query( 'ROLLBACK' ) ) {
+					return RSV_Helpers::error( 'rsv_commit_and_rollback_failed', __( 'The operation could not be committed and its rollback could not be verified.', RSV_TEXT_DOMAIN ), 500 );
+				}
+				return RSV_Helpers::error( 'rsv_commit_failed', __( 'The operation could not be committed safely.', RSV_TEXT_DOMAIN ), 500 );
+			}
 			return $result;
 		} catch ( Throwable $e ) {
-			$wpdb->query( 'ROLLBACK' );
+			if ( false === $wpdb->query( 'ROLLBACK' ) ) {
+				return RSV_Helpers::error( 'rsv_rollback_failed', __( 'The operation failed and its rollback could not be verified.', RSV_TEXT_DOMAIN ), 500 );
+			}
 			return RSV_Helpers::error( 'rsv_transaction_failed', __( 'The operation could not be completed safely.', RSV_TEXT_DOMAIN ), 500 );
 		}
 	}

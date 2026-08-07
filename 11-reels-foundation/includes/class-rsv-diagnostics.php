@@ -85,8 +85,9 @@ final class RSV_Diagnostics {
 		if ( class_exists( 'RSV_Top20' ) ) RSV_Top20::install();
 		RSV_Jobs::schedule();
 		$reconciled = RSV_Migration::reconcile( 200 );
+		if ( is_wp_error( $reconciled ) ) return $reconciled;
 		$after = self::summary();
-		RSV_Helpers::audit( 'diagnostics', 0, 'repair', $before['safe_mode'] ? 'degraded' : 'healthy', $after['safe_mode'] ? 'degraded' : 'healthy', '', array( 'reconciled' => $reconciled ) );
+		if ( ! RSV_Helpers::audit( 'diagnostics', 0, 'repair', $before['safe_mode'] ? 'degraded' : 'healthy', $after['safe_mode'] ? 'degraded' : 'healthy', '', array( 'reconciled' => $reconciled ) ) ) return RSV_Helpers::error( 'rsv_repair_evidence_failed', __( 'File 11 repair completed incompletely because its audit evidence could not be persisted.', RSV_TEXT_DOMAIN ), 500 );
 		return array( 'before' => $before, 'after' => $after, 'reconciled' => $reconciled );
 	}
 

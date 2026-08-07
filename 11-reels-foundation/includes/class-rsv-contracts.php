@@ -3,7 +3,7 @@ defined( 'ABSPATH' ) || exit;
 
 final class RSV_Contracts {
 	const API_NAMESPACE = 'rsv/v1';
-	const EVENT_VERSION = 3;
+	const EVENT_VERSION = 4;
 
 	const CAP_SUBMIT   = 'rsv_submit_reel';
 	const CAP_PUBLISH  = 'rsv_publish_reel';

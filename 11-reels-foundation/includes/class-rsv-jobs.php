@@ -85,13 +85,14 @@ final class RSV_Jobs {
 				if ( ! $delivered ) {
 					throw new RuntimeException( 'Consumer reported delivery failure.' );
 				}
-				$wpdb->update(
+				$marked = $wpdb->update(
 					$table,
 					array( 'status' => 'delivered', 'lock_token' => '', 'locked_at' => null, 'updated_at' => RSV_Helpers::now() ),
 					array( 'id' => $row['id'], 'lock_token' => $token ),
 					array( '%s', '%s', '%s', '%s' ),
 					array( '%d', '%s' )
 				);
+				if ( 1 !== $marked ) throw new RuntimeException( 'Delivered event state could not be persisted.' );
 			} catch ( Throwable $exception ) {
 				$attempts = absint( $row['attempts'] ) + 1;
 				$status   = $attempts >= 8 ? 'dead' : 'retry';
@@ -128,13 +129,17 @@ final class RSV_Jobs {
 		global $wpdb;
 		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM " . RSV_Helpers::table( 'reels' ) . " WHERE video_id=%d AND status='media_processing'", absint( $video_id ) ), ARRAY_A );
 		foreach ( $rows as $row ) {
-			if ( is_wp_error( RSV_File10::validate_for_reel( $video_id, $row['owner_id'] ) ) ) {
-				continue;
-			}
-			$updated = RSV_Repository::update_versioned( $row['id'], $row['version'], array( 'status' => 'review' ) );
-			if ( ! is_wp_error( $updated ) ) {
-				RSV_Helpers::audit( 'reel', $row['id'], 'dependency_state', 'media_processing', 'review', 'File 10 asset ready', array(), 0 );
-			}
+			if ( is_wp_error( RSV_File10::validate_for_reel( $video_id, $row['owner_id'] ) ) ) continue;
+			RSV_DB::transaction(
+				static function () use ( $row ) {
+					$updated = RSV_Repository::update_versioned( $row['id'], $row['version'], array( 'status' => 'review' ) );
+					if ( is_wp_error( $updated ) ) return $updated;
+					if ( ! RSV_Helpers::audit( 'reel', $row['id'], 'dependency_state', 'media_processing', 'review', 'File 10 asset ready', array(), 0 ) || ! RSV_Helpers::outbox( 'ReelMediaReadyForReview', 'reel', $row['id'], array( 'public_id' => $row['public_id'] ) ) ) {
+						return RSV_Helpers::error( 'rsv_dependency_evidence_failed', __( 'The Reel dependency transition could not be recorded safely.', RSV_TEXT_DOMAIN ), 500 );
+					}
+					return true;
+				}
+			);
 		}
 	}
 
@@ -142,13 +147,18 @@ final class RSV_Jobs {
 		global $wpdb;
 		$rows = (array) $wpdb->get_results( $wpdb->prepare( 'SELECT * FROM ' . RSV_Helpers::table( 'reels' ) . ' WHERE video_id=%d', absint( $video_id ) ), ARRAY_A );
 		foreach ( $rows as $row ) {
-			if ( ! RSV_State_Machine::allowed( $row['status'], $state ) ) {
-				continue;
-			}
-			$updated = RSV_Repository::update_versioned( $row['id'], $row['version'], array( 'status' => $state ) );
-			if ( ! is_wp_error( $updated ) ) {
-				RSV_Helpers::audit( 'reel', $row['id'], 'dependency_state', $row['status'], $state, $reason, array(), 0 );
-			}
+			if ( ! RSV_State_Machine::allowed( $row['status'], $state ) ) continue;
+			RSV_DB::transaction(
+				static function () use ( $row, $state, $reason ) {
+					$updated = RSV_Repository::update_versioned( $row['id'], $row['version'], array( 'status' => $state ) );
+					if ( is_wp_error( $updated ) ) return $updated;
+					$event = 'restricted' === $state ? 'ReelRestricted' : 'ReelDependencyStateChanged';
+					if ( ! RSV_Helpers::audit( 'reel', $row['id'], 'dependency_state', $row['status'], $state, $reason, array(), 0 ) || ! RSV_Helpers::outbox( $event, 'reel', $row['id'], array( 'public_id' => $row['public_id'], 'reason' => $reason ) ) ) {
+						return RSV_Helpers::error( 'rsv_dependency_evidence_failed', __( 'The Reel dependency transition could not be recorded safely.', RSV_TEXT_DOMAIN ), 500 );
+					}
+					return true;
+				}
+			);
 		}
 	}
 }

@@ -344,7 +344,7 @@ trait RSV_Top20_Experience_Trait {
 
 	private static function render_story_form() {
 		$options = '';
-		foreach ( RSV_Contracts::STORY_TYPES as $type ) $options .= '<option value="' . esc_attr( $type ) . '">' . esc_html( ucwords( str_replace( '-', ' ', $type ) ) ) . '</option>';
+		foreach ( RSV_Contracts::STORY_TYPES as $type ) $options .= '<option value="' . esc_attr( $type ) . '">' . esc_html( RSV_Helpers::label( $type ) ) . '</option>';
 		return '<section class="rsv-story-create"><h2>' . esc_html__( 'Create Story / Status', RSV_TEXT_DOMAIN ) . '</h2><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="rsv_top20_story"><input type="hidden" name="idempotency_key" value="' . esc_attr( wp_generate_uuid4() ) . '">' . wp_nonce_field( 'rsv_top20_story', '_rsv_nonce', true, false ) . '<label>' . esc_html__( 'Source Reel public ID', RSV_TEXT_DOMAIN ) . '<input name="reel_id" required></label><label>' . esc_html__( 'Story type', RSV_TEXT_DOMAIN ) . '<select name="story_type">' . $options . '</select></label><label>' . esc_html__( 'Title', RSV_TEXT_DOMAIN ) . '<input name="title" maxlength="255" required></label><label>' . esc_html__( 'Body', RSV_TEXT_DOMAIN ) . '<textarea name="body" maxlength="2000"></textarea></label><label>' . esc_html__( 'Internal destination URL (optional)', RSV_TEXT_DOMAIN ) . '<input name="destination_url" type="url" maxlength="500"></label><label>' . esc_html__( 'Hours before expiry', RSV_TEXT_DOMAIN ) . '<input name="expires_in_hours" type="number" min="1" max="24" value="24"></label><button>' . esc_html__( 'Submit Story for review', RSV_TEXT_DOMAIN ) . '</button></form></section>';
 	}
 
@@ -459,5 +459,6 @@ trait RSV_Top20_Experience_Trait {
 		self::expire_stories();
 		global $wpdb;
 		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . RSV_Helpers::table( 'value_signals' ) . ' WHERE day_key<%s', gmdate( 'Y-m-d', time() - 180 * DAY_IN_SECONDS ) ) );
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM ' . RSV_Helpers::table( 'value_signal_receipts' ) . ' WHERE created_at<%s', gmdate( 'Y-m-d H:i:s', time() - 180 * DAY_IN_SECONDS ) ) );
 	}
 }

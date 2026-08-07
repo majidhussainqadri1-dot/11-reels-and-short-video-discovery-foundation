@@ -112,7 +112,7 @@ final class RSV_Reels {
 		if ( ! $reel || ! RSV_Security::can( RSV_Contracts::CAP_PUBLISH, $reel, 'publish_reel' ) ) {
 			return RSV_Helpers::error( 'rsv_not_found', __( 'Reel not found.', RSV_TEXT_DOMAIN ), 404 );
 		}
-		if ( ! in_array( $reel['status'], array( 'review', 'restricted' ), true ) ) {
+		if ( 'review' !== ( $reel['status'] ?? '' ) ) {
 			return RSV_Helpers::error( 'rsv_not_reviewable', __( 'The Reel is not ready for publication.', RSV_TEXT_DOMAIN ), 409 );
 		}
 		$video = RSV_File10::validate_for_reel( $reel['video_id'], $reel['owner_id'] );
@@ -166,6 +166,25 @@ final class RSV_Reels {
 		$imp = RSV_Helpers::table( 'impressions' );
 		$metrics = $wpdb->get_row( $wpdb->prepare( "SELECT COUNT(*) views,COALESCE(AVG(completed),0) completion_rate,COALESCE(AVG(swiped_rapidly),0) rapid_rate FROM $imp WHERE reel_id=%d", $id ), ARRAY_A );
 		$score = self::base_rank_score( $reel, $video );
+
+		// Freshness is a bounded signal, never a substitute for source quality or safety.
+		$published_ts = ! empty( $reel['published_at'] ) ? strtotime( (string) $reel['published_at'] . ' UTC' ) : 0;
+		if ( $published_ts ) {
+			$age_days = max( 0.0, ( time() - $published_ts ) / DAY_IN_SECONDS );
+			$score += max( 0.0, 8.0 * ( 1.0 - min( 30.0, $age_days ) / 30.0 ) );
+		}
+
+		// A small concentration penalty prevents one prolific creator from dominating discovery.
+		$creator_count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM " . RSV_Helpers::table( 'reels' ) . " WHERE owner_id=%d AND status='published' AND published_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 7 DAY)",
+				absint( $reel['owner_id'] )
+			)
+		);
+		if ( $creator_count > 3 ) {
+			$score -= min( 6.0, ( $creator_count - 3 ) * 0.75 );
+		}
+
 		if ( absint( $metrics['views'] ?? 0 ) >= 5 ) {
 			$score += min( 20, (float) $metrics['completion_rate'] * 20 );
 			$score -= min( 20, (float) $metrics['rapid_rate'] * 20 );
@@ -462,9 +481,16 @@ final class RSV_Reels {
 				if ( in_array( $decision, array( 'restrict', 'remove', 'restore' ), true ) ) {
 					$to = 'restrict' === $decision ? 'restricted' : ( 'remove' === $decision ? 'removed' : 'published' );
 					if ( 'restore' === $decision ) {
+						if ( ! in_array( $reel['status'], array( 'restricted', 'removed' ), true ) ) {
+							return RSV_Helpers::error( 'rsv_restore_state_invalid', __( 'Only a previously restricted or removed Reel can be restored.', RSV_TEXT_DOMAIN ), 409 );
+						}
 						$video = RSV_File10::validate_for_reel( $reel['video_id'], $reel['owner_id'] );
 						if ( is_wp_error( $video ) || 'published' !== ( $video['status'] ?? '' ) ) {
 							return is_wp_error( $video ) ? $video : RSV_Helpers::error( 'rsv_restore_media_invalid', __( 'The Reel cannot be restored until File 10 media is published and eligible.', RSV_TEXT_DOMAIN ), 422 );
+						}
+						if ( class_exists( 'RSV_Top20' ) ) {
+							$gate = RSV_Top20::publication_gate( $reel );
+							if ( is_wp_error( $gate ) ) return $gate;
 						}
 					}
 					$reel_assert = RSV_State_Machine::assert( $reel['status'], $to );
@@ -533,7 +559,7 @@ final class RSV_Reels {
 			absint( $owner_id )
 		);
 		$rows = (array) $wpdb->get_results( $sql, ARRAY_A );
-		$threshold = max( 3, absint( apply_filters( 'rsv_insights_privacy_threshold', 3 ) ) );
+		$threshold = max( 5, absint( apply_filters( 'rsv_insights_privacy_threshold', 5 ) ) );
 		foreach ( $rows as &$row ) {
 			$row['insufficient_data'] = absint( $row['views'] ) < $threshold;
 			if ( $row['insufficient_data'] ) {

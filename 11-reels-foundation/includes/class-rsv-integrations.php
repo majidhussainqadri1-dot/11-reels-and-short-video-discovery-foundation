@@ -3,7 +3,7 @@ defined( 'ABSPATH' ) || exit;
 
 /** Versioned read-only providers; companion modules never write File 11 tables. */
 final class RSV_Integrations {
-	const PROVIDER_VERSION = 2;
+	const PROVIDER_VERSION = 3;
 
 	public function register() {
 		add_filter( 'rsv_provider_manifest', array( __CLASS__, 'manifest' ) );
@@ -78,7 +78,7 @@ final class RSV_Integrations {
 			$reasons[] = __( 'Recommended ordering uses bounded quality, completion, freshness and diversity signals—not payment or follower count alone.', RSV_TEXT_DOMAIN );
 		}
 		if ( class_exists( 'RSV_Top20' ) && RSV_Top20::youth_mode() ) $reasons[] = __( 'Youth-safe mode removed age-inappropriate topics, labels and social actions before ranking.', RSV_TEXT_DOMAIN );
-		if ( ! empty( $reel['topic'] ) ) $reasons[] = sprintf( __( 'Its approved topic is %s.', RSV_TEXT_DOMAIN ), ucwords( str_replace( '-', ' ', (string) $reel['topic'] ) ) );
+		if ( ! empty( $reel['topic'] ) ) $reasons[] = sprintf( __( 'Its approved topic is %s.', RSV_TEXT_DOMAIN ), RSV_Helpers::label( (string) $reel['topic'] ) );
 		return (array) apply_filters( 'rsv_recommendation_explanation', $reasons, $reel, $sort );
 	}
 

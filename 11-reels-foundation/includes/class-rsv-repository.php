@@ -48,8 +48,8 @@ final class RSV_Repository {
 			'duration_seconds' => $video ? absint( $video['duration_seconds'] ?? 0 ) : 0,
 			'url'              => home_url( '/reel/' . rawurlencode( $row['public_id'] ) . '/' . rawurlencode( $row['slug'] ) . '/' ),
 			'video_url'        => $video && ! empty( $video['public_id'] ) ? home_url( '/video/' . rawurlencode( $video['public_id'] ) . '/' . rawurlencode( $video['slug'] ?? '' ) . '/' ) : '',
-			'comments_url'     => (string) apply_filters( 'rsv_comments_url', '', $row, $video ),
-			'follow_url'       => (string) apply_filters( 'rsv_follow_url', '', absint( $row['owner_id'] ), $row ),
+			'comments_url'     => self::safe_destination_url( apply_filters( 'rsv_comments_url', '', $row, $video ) ),
+			'follow_url'       => self::safe_destination_url( apply_filters( 'rsv_follow_url', '', absint( $row['owner_id'] ), $row ) ),
 			'download_url'     => RSV_File10::download_url( absint( $row['video_id'] ), $row ),
 			'published_at'     => $row['published_at'],
 			'updated_at'       => $row['updated_at'],
@@ -67,11 +67,17 @@ final class RSV_Repository {
 		return $data;
 	}
 
+	private static function safe_destination_url( $url ) {
+		$url = esc_url_raw( (string) $url, array( 'http', 'https' ) );
+		if ( ! $url ) return '';
+		return (string) wp_validate_redirect( $url, '' );
+	}
+
 	private static function owner_dto( $user_id ) {
 		$user = get_userdata( $user_id );
 		return array(
 			'name'        => $user ? $user->display_name : __( 'Publisher', RSV_TEXT_DOMAIN ),
-			'profile_url' => apply_filters( 'rsv_profile_url', get_author_posts_url( $user_id ), $user_id ),
+			'profile_url' => self::safe_destination_url( apply_filters( 'rsv_profile_url', get_author_posts_url( $user_id ), $user_id ) ),
 			'label'       => RSV_Security::publisher_label( $user_id ),
 		);
 	}
@@ -128,23 +134,30 @@ final class RSV_Repository {
 		$params[]   = $scan_limit;
 		$sql        = $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY $order LIMIT %d", $params );
 		$rows       = (array) $wpdb->get_results( $sql, ARRAY_A );
-		$items      = array();
-		$last       = null;
+		$items         = array();
+		$last_scanned  = null;
+		$last_returned = null;
+		$extra_eligible = false;
 		foreach ( $rows as $row ) {
-			$last = $row;
-			if ( RSV_Security::can_view_reel( $row, 0 ) ) {
-				$items[] = self::public_dto( $row );
-				if ( count( $items ) >= $limit ) {
-					break;
-				}
+			$last_scanned = $row;
+			if ( ! RSV_Security::can_view_reel( $row, 0 ) ) {
+				continue;
 			}
+			if ( count( $items ) >= $limit ) {
+				$extra_eligible = true;
+				break;
+			}
+			$items[] = self::public_dto( $row );
+			$last_returned = $row;
 		}
-		$has_more = count( $rows ) === $scan_limit || ( $last && count( $items ) >= $limit );
+
+		$has_more = $extra_eligible || ( ! $extra_eligible && count( $rows ) === $scan_limit );
+		$cursor_row = $extra_eligible ? $last_returned : $last_scanned;
 		$next = null;
-		if ( $has_more && $last ) {
+		if ( $has_more && $cursor_row ) {
 			$next = 'latest' === $sort
-				? RSV_Helpers::cursor_encode( $sort, $last['published_at'], '', $last['id'], $context )
-				: RSV_Helpers::cursor_encode( $sort, $last['rank_score'], $last['updated_at'], $last['id'], $context );
+				? RSV_Helpers::cursor_encode( $sort, $cursor_row['published_at'], '', $cursor_row['id'], $context )
+				: RSV_Helpers::cursor_encode( $sort, $cursor_row['rank_score'], $cursor_row['updated_at'], $cursor_row['id'], $context );
 		}
 		return array(
 			'items' => $items,

@@ -159,20 +159,43 @@ trait RSV_Top20_Stories_Trait {
 		$scan_limit = min( 200, $limit * 4 );
 		$args[] = $scan_limit;
 		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY published_at DESC,id DESC LIMIT %d", $args ), ARRAY_A );
-		$items = array(); $last = null;
+		$items = array(); $last_scanned = null; $last_returned = null; $extra_eligible = false;
 		foreach ( $rows as $row ) {
-			$last = $row; $dto = self::story_dto( $row );
-			if ( $dto ) { $items[] = $dto; if ( count( $items ) >= $limit ) break; }
+			$last_scanned = $row; $dto = self::story_dto( $row );
+			if ( ! $dto ) continue;
+			if ( count( $items ) >= $limit ) { $extra_eligible = true; break; }
+			$items[] = $dto; $last_returned = $row;
 		}
 		$next = null;
-		if ( $last && ( count( $rows ) === $scan_limit || count( $items ) >= $limit ) ) $next = RSV_Helpers::cursor_encode( 'latest', $last['published_at'], '', $last['id'], $context );
+		$cursor_row = $extra_eligible ? $last_returned : $last_scanned;
+		if ( $cursor_row && ( $extra_eligible || count( $rows ) === $scan_limit ) ) $next = RSV_Helpers::cursor_encode( 'latest', $cursor_row['published_at'], '', $cursor_row['id'], $context );
 		return array( 'items' => $items, 'next_cursor' => $next );
 	}
 
 	public static function expire_stories() {
 		global $wpdb;
 		$table = RSV_Helpers::table( 'stories' );
-		return false !== $wpdb->query( $wpdb->prepare( "UPDATE $table SET status='expired',version=version+1,updated_at=%s WHERE status='published' AND expires_at<=%s", RSV_Helpers::now(), RSV_Helpers::now() ) );
+		$rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id,public_id,version FROM $table WHERE status='published' AND expires_at<=%s ORDER BY expires_at ASC,id ASC LIMIT 200", RSV_Helpers::now() ), ARRAY_A );
+		foreach ( $rows as $row ) {
+			$result = RSV_DB::transaction(
+				static function () use ( $wpdb, $table, $row ) {
+					$changed = $wpdb->update(
+						$table,
+						array( 'status' => 'expired', 'version' => absint( $row['version'] ) + 1, 'updated_at' => RSV_Helpers::now() ),
+						array( 'id' => absint( $row['id'] ), 'status' => 'published', 'version' => absint( $row['version'] ) ),
+						array( '%s','%d','%s' ),
+						array( '%d','%s','%d' )
+					);
+					if ( 1 !== $changed ) return RSV_Helpers::error( 'rsv_story_expire_conflict', __( 'A Story changed while it was being expired.', RSV_TEXT_DOMAIN ), 409 );
+					if ( ! RSV_Helpers::audit( 'story', absint( $row['id'] ), 'expire', 'published', 'expired' ) || ! RSV_Helpers::outbox( 'StoryExpired', 'story', absint( $row['id'] ), array( 'public_id' => $row['public_id'] ) ) ) {
+						return RSV_Helpers::error( 'rsv_story_expire_evidence_failed', __( 'The Story could not be expired with complete evidence.', RSV_TEXT_DOMAIN ), 500 );
+					}
+					return true;
+				}
+			);
+			if ( is_wp_error( $result ) ) return $result;
+		}
+		return true;
 	}
 
 	private static function highlight_row( $id, $public = true ) {

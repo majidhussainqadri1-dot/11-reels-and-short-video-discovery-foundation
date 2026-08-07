@@ -8,7 +8,7 @@ if ( ! current_user_can( 'delete_plugins' ) ) return;
 global $wpdb;
 foreach ( array(
 	'reels','progress','view_sessions','reports','impressions','audit','outbox','idempotency','rate_limits',
-	'reel_context','stories','highlights','highlight_items','responses','preferences','value_signals',
+	'reel_context','stories','highlights','highlight_items','responses','preferences','value_signals','value_signal_receipts',
 ) as $table ) {
 	$wpdb->query( 'DROP TABLE IF EXISTS ' . $wpdb->prefix . 'rsv_' . $table ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 }

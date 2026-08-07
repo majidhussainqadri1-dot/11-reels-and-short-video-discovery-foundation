@@ -180,14 +180,24 @@
 	}
 
 	function scheduleWellbeing() {
+		if (!document.querySelector('[data-rsv-reel]')) return;
 		const minutes = Math.max(5, Math.min(60, Number(prefs.session_limit_minutes || 15)));
-		window.setTimeout(function () {
-			if (!sessionStopShown) { sessionStopShown = true; showChoice(cfg.i18n.sessionLimit, 'natural-stop'); }
-		}, minutes * 60 * 1000);
+		const targetSeconds = minutes * 60;
+		let activeSeconds = 0;
+		window.setInterval(function () {
+			if (sessionStopShown || document.hidden || !document.querySelector('[data-rsv-reel]')) return;
+			activeSeconds += 1;
+			if (activeSeconds >= targetSeconds) {
+				sessionStopShown = true;
+				showChoice(cfg.i18n.sessionLimit, 'natural-stop');
+			}
+		}, 1000);
 		const hour = new Date().getHours();
 		if (prefs.late_night_reminder && (hour >= 22 || hour < 5) && !lateNightShown) {
 			lateNightShown = true;
-			window.setTimeout(function () { showChoice(cfg.i18n.lateNight, ''); }, 1500);
+			window.setTimeout(function () {
+				if (!document.hidden && document.querySelector('[data-rsv-reel]')) showChoice(cfg.i18n.lateNight, '');
+			}, 1500);
 		}
 	}
 

@@ -171,15 +171,27 @@ trait RSV_Top20_Responses_Trait {
 	}
 
 	public static function record_signal( $reel, $signal ) {
+		if ( ! is_user_logged_in() ) return RSV_Helpers::error( 'rsv_signal_login_required', __( 'Sign in before recording creator-value signals.', RSV_TEXT_DOMAIN ), 401 );
 		$signal = RSV_Helpers::enum( $signal, RSV_Contracts::VALUE_SIGNALS, '' );
 		if ( ! $signal || ! RSV_Security::can_view_reel( $reel ) ) return RSV_Helpers::error( 'rsv_signal_invalid', __( 'The value signal could not be recorded.', RSV_TEXT_DOMAIN ), 422 );
-		$rate = RSV_Security::rate_limit( 'value_signal_' . $signal, 120, HOUR_IN_SECONDS );
+		$rate = RSV_Security::rate_limit( 'value_signal_' . $signal, 60, HOUR_IN_SECONDS );
 		if ( is_wp_error( $rate ) ) return $rate;
 		$column = array( 'source-open' => 'source_opens', 'share' => 'shares', 'natural-stop' => 'natural_stops' )[ $signal ];
-		global $wpdb;
-		$table = RSV_Helpers::table( 'value_signals' );
-		$sql = $wpdb->prepare( "INSERT INTO $table (reel_id,day_key,$column,updated_at) VALUES (%d,%s,1,%s) ON DUPLICATE KEY UPDATE $column=$column+1,updated_at=VALUES(updated_at)", absint( $reel['id'] ), gmdate( 'Y-m-d' ), RSV_Helpers::now() );
-		return false === $wpdb->query( $sql ) ? RSV_Helpers::error( 'rsv_signal_write_failed', __( 'The value signal could not be recorded.', RSV_TEXT_DOMAIN ), 500 ) : array( 'recorded' => true );
+		$viewer = hash_hmac( 'sha256', (string) get_current_user_id(), wp_salt( 'auth' ) );
+		$day = gmdate( 'Y-m-d' );
+		return RSV_DB::transaction(
+			static function () use ( $reel, $signal, $column, $viewer, $day ) {
+				global $wpdb;
+				$receipts = RSV_Helpers::table( 'value_signal_receipts' );
+				$inserted = $wpdb->query( $wpdb->prepare( "INSERT IGNORE INTO $receipts (reel_id,viewer_hash,signal_key,day_key,created_at) VALUES (%d,%s,%s,%s,%s)", absint( $reel['id'] ), $viewer, $signal, $day, RSV_Helpers::now() ) );
+				if ( false === $inserted ) return RSV_Helpers::error( 'rsv_signal_receipt_failed', __( 'The value signal could not be recorded safely.', RSV_TEXT_DOMAIN ), 500 );
+				if ( 0 === (int) $inserted ) return array( 'recorded' => false, 'deduplicated' => true );
+				$table = RSV_Helpers::table( 'value_signals' );
+				$sql = $wpdb->prepare( "INSERT INTO $table (reel_id,day_key,$column,updated_at) VALUES (%d,%s,1,%s) ON DUPLICATE KEY UPDATE $column=$column+1,updated_at=VALUES(updated_at)", absint( $reel['id'] ), $day, RSV_Helpers::now() );
+				if ( false === $wpdb->query( $sql ) ) return RSV_Helpers::error( 'rsv_signal_write_failed', __( 'The value signal could not be recorded.', RSV_TEXT_DOMAIN ), 500 );
+				return array( 'recorded' => true, 'deduplicated' => false );
+			}
+		);
 	}
 
 	public static function value_insights( $owner_id ) {

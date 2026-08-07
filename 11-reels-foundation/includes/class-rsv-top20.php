@@ -6,7 +6,7 @@ defined( 'ABSPATH' ) || exit;
  * File 10 remains the sole raw-media, player, caption-object, rights and secure-delivery owner.
  */
 final class RSV_Top20 {
-	const SCHEMA_VERSION = '1.0.0';
+	const SCHEMA_VERSION = '1.1.0';
 	const MAX_STORY_HOURS = 24;
 	const INSIGHT_MINIMUM = 5;
 
@@ -17,7 +17,7 @@ final class RSV_Top20 {
 	use RSV_Top20_Privacy_Integration_Trait;
 
 	public static function required_tables() {
-		return array( 'reel_context', 'stories', 'highlights', 'highlight_items', 'responses', 'preferences', 'value_signals' );
+		return array( 'reel_context', 'stories', 'highlights', 'highlight_items', 'responses', 'preferences', 'value_signals', 'value_signal_receipts' );
 	}
 
 	public function register() {
@@ -149,6 +149,15 @@ final class RSV_Top20 {
 			updated_at datetime NOT NULL,
 			PRIMARY KEY (id), UNIQUE KEY reel_day (reel_id,day_key), KEY updated_at (updated_at)
 		) $c;";
+		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'value_signal_receipts' ) . " (
+			id bigint unsigned NOT NULL AUTO_INCREMENT,
+			reel_id bigint unsigned NOT NULL,
+			viewer_hash char(64) NOT NULL,
+			signal_key varchar(40) NOT NULL,
+			day_key date NOT NULL,
+			created_at datetime NOT NULL,
+			PRIMARY KEY (id), UNIQUE KEY viewer_signal_day (reel_id,viewer_hash,signal_key,day_key), KEY created_at (created_at)
+		) $c;";
 		foreach ( $sql as $statement ) dbDelta( $statement );
 		update_option( 'rsv_top20_schema_version', self::SCHEMA_VERSION, false );
 	}
@@ -198,7 +207,7 @@ final class RSV_Top20 {
 			array( 'methods' => WP_REST_Server::READABLE, 'callback' => array( __CLASS__, 'rest_preferences' ), 'permission_callback' => 'is_user_logged_in' ),
 			array( 'methods' => WP_REST_Server::EDITABLE, 'callback' => array( __CLASS__, 'rest_preferences_update' ), 'permission_callback' => 'is_user_logged_in' ),
 		) );
-		register_rest_route( RSV_Contracts::API_NAMESPACE, '/reels/(?P<id>reel_[a-f0-9-]{36})/value-signal', array( 'methods' => WP_REST_Server::CREATABLE, 'callback' => array( __CLASS__, 'rest_signal' ), 'permission_callback' => '__return_true' ) );
+		register_rest_route( RSV_Contracts::API_NAMESPACE, '/reels/(?P<id>reel_[a-f0-9-]{36})/value-signal', array( 'methods' => WP_REST_Server::CREATABLE, 'callback' => array( __CLASS__, 'rest_signal' ), 'permission_callback' => 'is_user_logged_in' ) );
 		register_rest_route( RSV_Contracts::API_NAMESPACE, '/value-insights', array( 'methods' => WP_REST_Server::READABLE, 'callback' => array( __CLASS__, 'rest_value_insights' ), 'permission_callback' => array( __CLASS__, 'can_insights' ) ) );
 	}
 

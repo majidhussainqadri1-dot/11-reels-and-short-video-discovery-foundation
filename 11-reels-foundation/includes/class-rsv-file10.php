@@ -13,12 +13,20 @@ final class RSV_File10 {
 			&& version_compare( VWLB_VERSION, self::MIN_VERSION, '>=' )
 			&& class_exists( 'VWLB_Repository' )
 			&& class_exists( 'VWLB_Videos' )
-			&& class_exists( 'VWLB_Contracts' );
+			&& class_exists( 'VWLB_Contracts' )
+			&& is_callable( array( 'VWLB_Repository', 'find' ) )
+			&& is_callable( array( 'VWLB_Videos', 'playback' ) )
+			&& is_callable( array( 'VWLB_Videos', 'progress' ) )
+			&& is_callable( array( 'VWLB_Videos', 'interact' ) );
 		return $base && (bool) apply_filters( 'rsv_file10_contract_compatible', true, self::version(), self::contract_version(), RSV_CONTRACT_VERSION );
 	}
 
 	public static function version() { return defined( 'VWLB_VERSION' ) ? (string) VWLB_VERSION : ''; }
-	public static function contract_version() { return defined( 'VWLB_CONTRACT_VERSION' ) ? (string) VWLB_CONTRACT_VERSION : ''; }
+	public static function contract_version() {
+		if ( defined( 'VWLB_CONTRACT_VERSION' ) ) return (string) VWLB_CONTRACT_VERSION;
+		if ( defined( 'VWLB_Contracts::EVENT_VERSION' ) ) return 'event-v' . (string) constant( 'VWLB_Contracts::EVENT_VERSION' );
+		return '';
+	}
 
 	public static function video( $id ) {
 		if ( ! self::ready() ) return null;

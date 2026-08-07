@@ -56,11 +56,9 @@ final class RSV_Privacy {
 
 		global $wpdb;
 		$reports_table = RSV_Helpers::table( 'reports' );
-		$reels_table   = RSV_Helpers::table( 'reels' );
 		$reports = (array) $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT DISTINCT rp.* FROM $reports_table rp LEFT JOIN $reels_table rr ON rr.id=rp.reel_id WHERE rp.reporter_id=%d OR rp.appellant_id=%d OR rr.owner_id=%d ORDER BY rp.id ASC LIMIT %d OFFSET %d",
-				$user_id,
+				"SELECT DISTINCT rp.* FROM $reports_table rp WHERE rp.reporter_id=%d OR rp.appellant_id=%d ORDER BY rp.id ASC LIMIT %d OFFSET %d",
 				$user_id,
 				$user_id,
 				$limit,
@@ -78,7 +76,7 @@ final class RSV_Privacy {
 					array( 'name' => __( 'Details', RSV_TEXT_DOMAIN ), 'value' => $report['details'] ),
 					array( 'name' => __( 'Status', RSV_TEXT_DOMAIN ), 'value' => $report['status'] ),
 					array( 'name' => __( 'Appeal', RSV_TEXT_DOMAIN ), 'value' => $report['appeal_text'] ),
-					array( 'name' => __( 'Relationship', RSV_TEXT_DOMAIN ), 'value' => absint( $report['reporter_id'] ) === $user_id ? 'reporter' : ( absint( $report['appellant_id'] ) === $user_id ? 'appellant' : 'reel owner' ) ),
+					array( 'name' => __( 'Relationship', RSV_TEXT_DOMAIN ), 'value' => absint( $report['reporter_id'] ) === $user_id ? 'reporter' : 'appellant' ),
 					array( 'name' => __( 'Created', RSV_TEXT_DOMAIN ), 'value' => $report['created_at'] ),
 				),
 			);
@@ -115,50 +113,64 @@ final class RSV_Privacy {
 		if ( ! $user_id ) {
 			return array( 'items_removed' => false, 'items_retained' => false, 'messages' => array(), 'done' => true );
 		}
-		global $wpdb;
-		$removed  = false;
-		$retained = false;
-		$messages = array();
-		$tables = array(
-			'progress'      => 'user_id',
-			'view_sessions' => 'user_id',
-			'idempotency'   => 'actor_id',
-		);
-		foreach ( $tables as $table => $column ) {
-			$result = $wpdb->delete( RSV_Helpers::table( $table ), array( $column => $user_id ), array( '%d' ) );
-			$removed = $removed || ( false !== $result && $result > 0 );
-		}
-		$viewer = hash_hmac( 'sha256', (string) $user_id, wp_salt( 'auth' ) );
-		$impressions = $wpdb->delete( RSV_Helpers::table( 'impressions' ), array( 'viewer_hash' => $viewer ), array( '%s' ) );
-		$removed = $removed || ( false !== $impressions && $impressions > 0 );
+		$result = RSV_DB::transaction(
+			static function () use ( $user_id ) {
+				global $wpdb;
+				$removed  = false;
+				$retained = false;
+				$messages = array();
+				$tables = array(
+					'progress'      => 'user_id',
+					'view_sessions' => 'user_id',
+					'idempotency'   => 'actor_id',
+				);
+				foreach ( $tables as $table => $column ) {
+					$deleted = $wpdb->delete( RSV_Helpers::table( $table ), array( $column => $user_id ), array( '%d' ) );
+					if ( false === $deleted ) return RSV_Helpers::error( 'rsv_privacy_delete_failed', __( 'Private Reel data could not be erased safely.', RSV_TEXT_DOMAIN ), 500 );
+					$removed = $removed || $deleted > 0;
+				}
+				$viewer = hash_hmac( 'sha256', (string) $user_id, wp_salt( 'auth' ) );
+				foreach ( array( 'impressions', 'value_signal_receipts' ) as $viewer_table ) {
+					$deleted = $wpdb->delete( RSV_Helpers::table( $viewer_table ), array( 'viewer_hash' => $viewer ), array( '%s' ) );
+					if ( false === $deleted ) return RSV_Helpers::error( 'rsv_privacy_viewer_delete_failed', __( 'Private Reel audience data could not be erased safely.', RSV_TEXT_DOMAIN ), 500 );
+					$removed = $removed || $deleted > 0;
+				}
 
-		$retention = (bool) apply_filters( 'rsv_privacy_retain_report_evidence', false, $user_id );
-		$reports_table = RSV_Helpers::table( 'reports' );
-		if ( $retention ) {
-			$deidentified = $wpdb->query( $wpdb->prepare( "UPDATE $reports_table SET reporter_id=IF(reporter_id=%d,0,reporter_id),appellant_id=IF(appellant_id=%d,0,appellant_id) WHERE reporter_id=%d OR appellant_id=%d", $user_id, $user_id, $user_id, $user_id ) );
-			$retained = false !== $deidentified;
-			$messages[] = __( 'Moderation evidence was retained under an approved hold and de-identified.', RSV_TEXT_DOMAIN );
-		} else {
-			$redacted = $wpdb->query(
-				$wpdb->prepare(
-					"UPDATE $reports_table SET details=IF(reporter_id=%d,'[redacted by privacy erasure]',details),appeal_text=IF(appellant_id=%d,'[redacted by privacy erasure]',appeal_text),reporter_id=IF(reporter_id=%d,0,reporter_id),appellant_id=IF(appellant_id=%d,0,appellant_id) WHERE reporter_id=%d OR appellant_id=%d",
-					$user_id,
-					$user_id,
-					$user_id,
-					$user_id,
-					$user_id,
-					$user_id
-				)
-			);
-			$removed = $removed || ( false !== $redacted && $redacted > 0 );
+				$retention = (bool) apply_filters( 'rsv_privacy_retain_report_evidence', false, $user_id );
+				$reports_table = RSV_Helpers::table( 'reports' );
+				if ( $retention ) {
+					$deidentified = $wpdb->query( $wpdb->prepare( "UPDATE $reports_table SET reporter_id=IF(reporter_id=%d,0,reporter_id),appellant_id=IF(appellant_id=%d,0,appellant_id) WHERE reporter_id=%d OR appellant_id=%d", $user_id, $user_id, $user_id, $user_id ) );
+					if ( false === $deidentified ) return RSV_Helpers::error( 'rsv_privacy_report_deidentify_failed', __( 'Moderation evidence could not be de-identified safely.', RSV_TEXT_DOMAIN ), 500 );
+					$retained = $retained || $deidentified > 0;
+					$messages[] = __( 'Moderation evidence was retained under an approved hold and de-identified.', RSV_TEXT_DOMAIN );
+				} else {
+					$redacted = $wpdb->query(
+						$wpdb->prepare(
+							"UPDATE $reports_table SET details=IF(reporter_id=%d,'[redacted by privacy erasure]',details),appeal_text=IF(appellant_id=%d,'[redacted by privacy erasure]',appeal_text),reporter_id=IF(reporter_id=%d,0,reporter_id),appellant_id=IF(appellant_id=%d,0,appellant_id) WHERE reporter_id=%d OR appellant_id=%d",
+							$user_id, $user_id, $user_id, $user_id, $user_id, $user_id
+						)
+					);
+					if ( false === $redacted ) return RSV_Helpers::error( 'rsv_privacy_report_redact_failed', __( 'Moderation data could not be minimized safely.', RSV_TEXT_DOMAIN ), 500 );
+					$removed = $removed || $redacted > 0;
+				}
+
+				$audit_redaction = $wpdb->update( RSV_Helpers::table( 'audit' ), array( 'actor_id' => 0, 'context_json' => '{}' ), array( 'actor_id' => $user_id ), array( '%d', '%s' ), array( '%d' ) );
+				if ( false === $audit_redaction ) return RSV_Helpers::error( 'rsv_privacy_audit_redact_failed', __( 'Audit identifiers could not be minimized safely.', RSV_TEXT_DOMAIN ), 500 );
+				$removed = $removed || $audit_redaction > 0;
+
+				$owned = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . RSV_Helpers::table( 'reels' ) . ' WHERE owner_id=%d', $user_id ) );
+				if ( $owned ) {
+					$retained = true;
+					$messages[] = __( 'Published or governed Reel records were retained for editorial, rights and accountability review; request correction or withdrawal through the content workflow.', RSV_TEXT_DOMAIN );
+				}
+				if ( ! RSV_Helpers::audit( 'privacy', 0, 'erase', '', 'complete', 'Private history and identifiers erased or de-identified', array( 'subject_ref' => RSV_Helpers::opaque_user_ref( $user_id ) ), 0 ) ) {
+					return RSV_Helpers::error( 'rsv_privacy_evidence_failed', __( 'Privacy erasure could not be completed with audit evidence.', RSV_TEXT_DOMAIN ), 500 );
+				}
+				return array( 'removed' => $removed, 'retained' => $retained, 'messages' => $messages );
+			}
+		);
+		if ( is_wp_error( $result ) ) {
+			return array( 'items_removed' => false, 'items_retained' => false, 'messages' => array( $result->get_error_message() ), 'done' => false );
 		}
-		$wpdb->update( RSV_Helpers::table( 'audit' ), array( 'actor_id' => 0, 'context_json' => '{}' ), array( 'actor_id' => $user_id ), array( '%d', '%s' ), array( '%d' ) );
-		$owned = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . RSV_Helpers::table( 'reels' ) . ' WHERE owner_id=%d', $user_id ) );
-		if ( $owned ) {
-			$retained = true;
-			$messages[] = __( 'Published or governed Reel records were retained for editorial, rights and accountability review; request correction or withdrawal through the content workflow.', RSV_TEXT_DOMAIN );
-		}
-		RSV_Helpers::audit( 'privacy', 0, 'erase', '', 'complete', 'Private history and identifiers erased or de-identified', array( 'subject_ref' => RSV_Helpers::opaque_user_ref( $user_id ) ), 0 );
-		return array( 'items_removed' => $removed, 'items_retained' => $retained, 'messages' => $messages, 'done' => true );
-	}
-}
+		return array( 'items_removed' => (bool) $result['removed'], 'items_retained' => (bool) $result['retained'], 'messages' => $result['messages'], 'done' => true );
+	}}

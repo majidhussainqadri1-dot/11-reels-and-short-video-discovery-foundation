@@ -22,6 +22,8 @@ final class RSV_Security {
 				if ( ! empty( $publishing['can_direct_publish'] ) ) {
 					$capabilities[] = RSV_Contracts::CAP_PUBLISH;
 				}
+				$guardian_required = ! empty( $membership['guardian_required'] );
+				$guardian_verified = ! empty( $membership['guardian_verified'] );
 				$mapped = array(
 					'user_id'             => $user_id,
 					'contract_version'     => (string) ( $membership['contract_version'] ?? '' ),
@@ -32,8 +34,8 @@ final class RSV_Security {
 					'is_suspended'         => ! empty( $membership['suspended'] ),
 					'is_minor'             => ! empty( $membership['is_minor'] ) || 'minor' === sanitize_key( $membership['age_band'] ?? '' ),
 					'age_band'             => sanitize_key( $membership['age_band'] ?? '' ),
-					'guardian_required'    => ! empty( $membership['guardian_required'] ),
-					'guardian_ok'          => ! array_key_exists( 'guardian_verified', $membership ) || ! empty( $membership['guardian_verified'] ),
+					'guardian_required'    => $guardian_required,
+					'guardian_ok'          => ! $guardian_required || $guardian_verified,
 					'session_two_factor'   => ! empty( $membership['session_two_factor'] ),
 					'membership_approved'  => ! empty( $membership['approved'] ),
 					'entitlements'         => (array) ( $membership['entitlements'] ?? array() ),
@@ -164,17 +166,19 @@ final class RSV_Security {
 			$allowed = RSV_File10::publicly_eligible( absint( $reel['video_id'] ?? 0 ) );
 		} else {
 			$user_id = $explicit_user ? absint( $user_id ) : get_current_user_id();
-			if ( $user_id && ( user_can( $user_id, 'manage_options' ) || absint( $reel['owner_id'] ?? 0 ) === $user_id ) ) {
+			if ( $user_id && user_can( $user_id, 'manage_options' ) ) {
 				$allowed = true;
 			} elseif ( $user_id ) {
 				$claims = self::claims( $user_id );
-				if ( 'active' === $claims['status'] && empty( $claims['is_suspended'] ) && ! empty( $claims['membership_approved'] ) && ! empty( $claims['guardian_ok'] ) ) {
-					if ( 'member' === $visibility ) {
+				$active = 'active' === ( $claims['status'] ?? '' ) && empty( $claims['is_suspended'] ) && ! empty( $claims['membership_approved'] ) && ! empty( $claims['guardian_ok'] );
+				if ( $active ) {
+					$is_owner = absint( $reel['owner_id'] ?? 0 ) === $user_id;
+					if ( $is_owner || 'member' === $visibility ) {
 						$allowed = true;
-					} else {
+					} elseif ( 'entitled' === $visibility ) {
 						$entitlements = (array) $claims['entitlements'];
-						$explicit = ! empty( $entitlements['reels'] ) || ! empty( $entitlements['base_services']['reels'] );
-						$allowed = (bool) apply_filters( 'rsv_reel_entitled', $explicit, $user_id, $reel, $claims );
+						$entitled = ! empty( $entitlements['reels'] ) || ! empty( $entitlements['base_services']['reels'] );
+						$allowed = (bool) apply_filters( 'rsv_reel_entitled', $entitled, $user_id, $reel, $claims );
 					}
 				}
 			}
@@ -268,6 +272,10 @@ final class RSV_Security {
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE actor_id=%d AND scope_key=%s AND idem_key=%s", $actor, $scope, $key ), ARRAY_A );
 		if ( ! $row ) {
 			return RSV_Helpers::error( 'rsv_idempotency_unavailable', __( 'The request could not be safely deduplicated.', RSV_TEXT_DOMAIN ), 503 );
+		}
+		if ( ! empty( $row['expires_at'] ) && strtotime( $row['expires_at'] . ' UTC' ) < time() ) {
+			$deleted = $wpdb->delete( $table, array( 'id' => absint( $row['id'] ) ), array( '%d' ) );
+			return 1 === $deleted ? self::idempotency_begin( $scope, $key, $payload ) : RSV_Helpers::error( 'rsv_idempotency_unavailable', __( 'The expired request key could not be safely renewed.', RSV_TEXT_DOMAIN ), 503 );
 		}
 		if ( ! hash_equals( (string) $row['payload_hash'], $hash ) ) {
 			return RSV_Helpers::error( 'rsv_idempotency_conflict', __( 'The idempotency key was reused with different data.', RSV_TEXT_DOMAIN ), 409 );

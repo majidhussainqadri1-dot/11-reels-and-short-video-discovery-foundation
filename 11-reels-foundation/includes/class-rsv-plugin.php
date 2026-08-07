@@ -21,7 +21,11 @@ final class RSV_Plugin {
 		RSV_DB::install();
 		RSV_Top20::install();
 		self::roles();
-		self::pages();
+		$pages = self::pages();
+		if ( is_wp_error( $pages ) ) {
+			deactivate_plugins( plugin_basename( RSV_FILE ) );
+			wp_die( esc_html( $pages->get_error_message() ), esc_html__( 'File 11 activation failed', RSV_TEXT_DOMAIN ), array( 'response' => 500, 'back_link' => true ) );
+		}
 		add_filter( 'cron_schedules', array( 'RSV_Jobs', 'intervals' ) );
 		RSV_Jobs::schedule();
 		update_option( 'rsv_version', RSV_VERSION, false );
@@ -46,7 +50,9 @@ final class RSV_Plugin {
 		$map = (array) get_option( 'rsv_page_map', array() );
 		$feed = self::ensure_page( $map['feed'] ?? 0, 'Reels', 'reels', '[rsv_reels]', 0 );
 		$map['feed'] = $feed;
+		if ( ! $feed ) return RSV_Helpers::error( 'rsv_feed_page_failed', __( 'The managed Reels page could not be created or repaired.', RSV_TEXT_DOMAIN ), 500 );
 		$map['create'] = self::ensure_page( $map['create'] ?? 0, 'Create Reel', 'create', '[rsv_create]', $feed );
+		if ( ! $map['create'] ) return RSV_Helpers::error( 'rsv_create_page_failed', __( 'The managed Create Reel page could not be created or repaired.', RSV_TEXT_DOMAIN ), 500 );
 		$map['history_url'] = home_url( '/account/reels/history/' );
 		$map['insights_url'] = home_url( '/account/reels/insights/' );
 		$map['stories_url'] = home_url( '/reels/stories/' );
@@ -61,6 +67,7 @@ final class RSV_Plugin {
 		);
 		do_action( 'rsv_routes_registered', $routes, RSV_CONTRACT_VERSION );
 		do_action( 'sabri_platform_routes_registered', 'file11', $routes, RSV_CONTRACT_VERSION );
+		return $map;
 	}
 
 	private static function ensure_page( $id, $title, $slug, $shortcode, $parent_id = 0 ) {
@@ -82,7 +89,10 @@ final class RSV_Plugin {
 		if ( (string) get_option( 'rsv_schema_version' ) !== RSV_SCHEMA_VERSION ) RSV_DB::install();
 		if ( (string) get_option( 'rsv_top20_schema_version' ) !== RSV_Top20::SCHEMA_VERSION ) RSV_Top20::install();
 		if ( (string) get_option( 'rsv_version' ) !== RSV_VERSION ) {
-			self::roles(); self::pages(); update_option( 'rsv_version', RSV_VERSION, false ); update_option( 'rsv_contract_version', RSV_CONTRACT_VERSION, false );
+			self::roles();
+			$pages = self::pages();
+			if ( ! is_wp_error( $pages ) ) { update_option( 'rsv_version', RSV_VERSION, false ); update_option( 'rsv_contract_version', RSV_CONTRACT_VERSION, false ); }
+			else { set_transient( 'rsv_page_repair_error', $pages->get_error_message(), 300 ); }
 		}
 		add_filter( 'cron_schedules', array( 'RSV_Jobs', 'intervals' ) );
 		add_action( 'rest_api_init', array( new RSV_REST(), 'register' ) );
@@ -100,6 +110,11 @@ final class RSV_Plugin {
 		if ( get_transient( 'rsv_activation_notice' ) ) {
 			delete_transient( 'rsv_activation_notice' );
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'File 11 Reels activated. Complete staging acceptance before production use.', RSV_TEXT_DOMAIN ) . '</p></div>';
+		}
+		if ( get_transient( 'rsv_page_repair_error' ) ) {
+			$message = (string) get_transient( 'rsv_page_repair_error' );
+			delete_transient( 'rsv_page_repair_error' );
+			echo '<div class="notice notice-error"><p>' . esc_html( $message ) . '</p></div>';
 		}
 		$health = RSV_Diagnostics::summary();
 		if ( ! empty( $health['safe_mode'] ) ) echo '<div class="notice notice-error"><p>' . esc_html__( 'File 11 is in Safe Mode. Open Reels Diagnostics for the exact dependency or data-integrity reason.', RSV_TEXT_DOMAIN ) . '</p></div>';
