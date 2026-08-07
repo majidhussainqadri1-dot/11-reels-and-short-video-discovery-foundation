@@ -1,4 +1,4 @@
-name: File 11 RC5 Release QA
+name: File 11 RC6 Forty-Review Release QA
 on:
   push:
     branches:
@@ -10,7 +10,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: file11-rc5-${{ github.head_ref || github.ref_name }}
+  group: file11-rc6-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 jobs:
   source-package-qa:
@@ -40,21 +40,21 @@ jobs:
           coverage: none
       - name: Complete suite on PHP 8.4
         run: bash ./tests/run-all.sh
-      - name: Build canonical RC5 package
-        run: bash ./tools/build-package.sh packages/reels-foundation-11-1.1.0-rc5.zip
+      - name: Build canonical RC6 package
+        run: bash ./tools/build-package.sh packages/reels-foundation-11-1.1.0-rc6.zip
       - name: Verify checksum, archive and source parity
         run: |
           cd packages
-          sha256sum --check reels-foundation-11-1.1.0-rc5.zip.sha256
-          unzip -t reels-foundation-11-1.1.0-rc5.zip
+          sha256sum --check reels-foundation-11-1.1.0-rc6.zip.sha256
+          unzip -t reels-foundation-11-1.1.0-rc6.zip
           cd ..
-          rm -rf /tmp/rsv-rc5 && mkdir -p /tmp/rsv-rc5
-          unzip -q packages/reels-foundation-11-1.1.0-rc5.zip -d /tmp/rsv-rc5
-          diff -ru 11-reels-foundation /tmp/rsv-rc5/reels-foundation-11
-      - name: Publish exact-head RC5 artifact
+          rm -rf /tmp/rsv-rc6 && mkdir -p /tmp/rsv-rc6
+          unzip -q packages/reels-foundation-11-1.1.0-rc6.zip -d /tmp/rsv-rc6
+          diff -ru 11-reels-foundation /tmp/rsv-rc6/reels-foundation-11
+      - name: Publish exact-head RC6 artifact
         uses: actions/upload-artifact@v4
         with:
-          name: file11-reels-1.1.0-rc5
+          name: file11-reels-1.1.0-rc6
           path: |
-            packages/reels-foundation-11-1.1.0-rc5.zip
-            packages/reels-foundation-11-1.1.0-rc5.zip.sha256
+            packages/reels-foundation-11-1.1.0-rc6.zip
+            packages/reels-foundation-11-1.1.0-rc6.zip.sha256
