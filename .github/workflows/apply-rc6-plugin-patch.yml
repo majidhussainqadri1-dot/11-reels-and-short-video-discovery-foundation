@@ -44,3 +44,4 @@ jobs:
           git add 11-reels-foundation
           git commit -m "Apply File 11 RC6 forty-review corrections [rc6-plugin-applied]"
           git push origin HEAD:codex/file-11-40-review-v1.1.0-rc6
+# Trigger after all four verified chunks are present.
