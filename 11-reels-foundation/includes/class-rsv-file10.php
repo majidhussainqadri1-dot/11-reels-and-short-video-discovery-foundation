@@ -10,6 +10,8 @@ final class RSV_File10 {
 
 	public static function contract_compatible() {
 		$base = defined( 'VWLB_VERSION' )
+			&& defined( 'VWLB_CONTRACT_VERSION' )
+			&& '' !== trim( (string) VWLB_CONTRACT_VERSION )
 			&& version_compare( VWLB_VERSION, self::MIN_VERSION, '>=' )
 			&& class_exists( 'VWLB_Repository' )
 			&& class_exists( 'VWLB_Videos' )
