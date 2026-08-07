@@ -8,11 +8,12 @@
 | Four fresh RC5 review/fix rounds | Documented |
 | Known repository blocker/critical | Zero after Round 4 |
 | Repository source | Release-candidate complete |
-| Exact-head automated QA | Must be green on RC5 head |
-| Deterministic ZIP/checksum | Produced by exact-head workflow |
+| Exact-head automated QA | Green: PHP 8.1, 8.3 and 8.4 complete suites |
+| Deterministic ZIP/checksum | Green: double build, checksum, archive and source/package parity |
+| RC5 artifact | Published by the exact-head workflow |
 | Hostinger staging | Pending external execution |
 | Founder acceptance | Pending |
 | Live deployment | Not performed |
 | Operational acceptance | Not performed |
 
-**Claim boundary:** source completion is not staging, live or operational completion.
+**Claim boundary:** repository source, deterministic packaging and automated QA completion are not staging, live or operational completion.
