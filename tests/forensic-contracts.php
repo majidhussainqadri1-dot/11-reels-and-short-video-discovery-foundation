@@ -6,7 +6,7 @@ $all = '';
 $iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $plugin, FilesystemIterator::SKIP_DOTS ) );
 foreach ( $iterator as $file ) if ( $file->isFile() ) $all .= "\n" . $read( $file->getPathname() );
 $must = array(
-	"Version: 1.1.0-rc5", "define( 'RSV_SCHEMA_VERSION', '1.2.0' )", "define( 'RSV_CONTRACT_VERSION', 4 )",
+	"Version: 1.1.0-rc6", "define( 'RSV_SCHEMA_VERSION', '1.2.0' )", "define( 'RSV_CONTRACT_VERSION', 5 )",
 	"smc_membership_assertions", "rsv_identity_contract_compatible", "eligible_for_reel", "view_sessions", "actor_scope_window",
 	"status IN ('pending','retry')", "migrate_history", "CHECKPOINT_OPTION", "rollback_legacy_cutover", "post_parent",
 	"prefers-reduced-motion", "data-rsv-load-more", "bindVideos", "rsv_privacy_retain_report_evidence",
@@ -14,10 +14,11 @@ $must = array(
 	"Why this Reel?", "data-rsv-topic", "body.data.trace_id", "--sabri-color-primary",
 	"stories-status", "attributed-responses", "mandatory_youth_mode", "history_cursor", "patient_reuse_consent",
 	"rsv_response_finalize_failed", "rsv_story_publish_evidence_failed", "rsv_highlight_evidence_failed", "rsv_privacy_erasure_evidence_failed",
+	"value_signal_receipts", "StoryExpired", "JSON_HEX_TAG", "rsv_repair_evidence_failed",
 );
 foreach ( $must as $needle ) if ( false === strpos( $all, $needle ) ) { fwrite( STDERR, "Missing required contract: $needle\n" ); exit( 1 ); }
 $forbidden = array(
-	"define( 'RSV_VERSION', '1.0.0-rc3' )", "Version: 1.0.0-rc2", "Version: 1.0.0-rc1",
+	"Version: 1.1.0-rc5", "define( 'RSV_VERSION', '1.0.0-rc3' )", "Version: 1.0.0-rc2", "Version: 1.0.0-rc1",
 	"if ( ! items )", "get_current_user_id() . '|' . gmdate( 'Y-m' )", ":root{--rsv-green",
 );
 foreach ( $forbidden as $needle ) if ( false !== strpos( $all, $needle ) ) { fwrite( STDERR, "Forbidden stale pattern: $needle\n" ); exit( 1 ); }
@@ -43,4 +44,4 @@ $db = $read( $plugin . '/includes/class-rsv-db.php' );
 if ( false === strpos( $db, 'appellant_id bigint unsigned' ) || false === strpos( $db, 'KEY appellant_created' ) ) exit( 1 );
 $css = $read( $plugin . '/assets/css/rsv.css' ) . $read( $plugin . '/assets/css/rsv-top20.css' );
 if ( false !== strpos( $css, ':root{' ) || false === strpos( $css, '--sabri-color-primary' ) ) exit( 1 );
-echo "forensic contracts RC5 PASS\n";
+echo "forensic contracts RC6 PASS\n";
