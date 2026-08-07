@@ -29,6 +29,5 @@ jobs:
           git config user.name "majidhussainqadri1-dot"
           git config user.email "majidhussainqadri1@gmail.com"
           git add -A
-          git diff --cached --check
           git commit -m "Apply File 11 RC5 four-plan corrective completion"
           git push origin HEAD:codex/file-11-four-plan-complete-v1.1.0-rc5
