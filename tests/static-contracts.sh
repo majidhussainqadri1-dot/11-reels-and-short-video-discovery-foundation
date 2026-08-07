@@ -2,14 +2,15 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 P="$ROOT/11-reels-foundation"
-grep -F "Version: 1.1.0-rc5" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_VERSION', '1.1.0-rc5' )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "Version: 1.1.0-rc6" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_VERSION', '1.1.0-rc6' )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "define( 'RSV_SCHEMA_VERSION', '1.2.0' )" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_CONTRACT_VERSION', 4 )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_CONTRACT_VERSION', 5 )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "class-rsv-top20.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "new RSV_Top20" "$P/includes/class-rsv-plugin.php" >/dev/null
 grep -F "RSV_Top20::install" "$P/includes/class-rsv-plugin.php" >/dev/null
 grep -F "class RSV_Top20" "$P/includes/class-rsv-top20.php" >/dev/null
+grep -F "const SCHEMA_VERSION = '1.1.0'" "$P/includes/class-rsv-top20.php" >/dev/null
 grep -RF "MAX_STORY_HOURS = 24" "$P/includes" --include='class-rsv-top20.php' --include='trait-rsv-top20-*.php' >/dev/null
 grep -RF "reel_context" "$P/includes" --include='class-rsv-top20.php' --include='trait-rsv-top20-*.php' >/dev/null
 grep -RF "highlight_items" "$P/includes" --include='class-rsv-top20.php' --include='trait-rsv-top20-*.php' >/dev/null
@@ -55,7 +56,7 @@ grep -RF "public static function required_tables" "$P/includes" --include='class
 grep -F "public static function contract_compatible" "$P/includes/class-rsv-file10.php" >/dev/null
 grep -F 'null !== $user_id' "$P/includes/class-rsv-security.php" >/dev/null
 grep -F "published_without_context" "$P/includes/class-rsv-diagnostics.php" >/dev/null
-# RC5 hardening contracts.
+# Inherited RC5 hardening contracts.
 grep -F "Do not run object-dependent publication validation before authorization" "$P/includes/trait-rsv-top20-experience.php" >/dev/null
 grep -F "rsv_response_finalize_failed" "$P/includes/trait-rsv-top20-responses.php" >/dev/null
 grep -F "rsv_story_publish_evidence_failed" "$P/includes/trait-rsv-top20-stories.php" >/dev/null
@@ -65,4 +66,13 @@ grep -F "LIMIT %d OFFSET %d" "$P/includes/trait-rsv-top20-privacy-integration.ph
 grep -F "render_story_form" "$P/includes/trait-rsv-top20-experience.php" >/dev/null
 grep -F "render_highlight_form" "$P/includes/trait-rsv-top20-experience.php" >/dev/null
 grep -F "rel=\"noopener noreferrer nofollow\"" "$P/includes/trait-rsv-top20-experience.php" >/dev/null
-echo "static contracts RC5 PASS"
+# RC6 forty-review release identity and corrective contracts.
+grep -F "'guardian_ok'          => ! \$guardian_required || \$guardian_verified" "$P/includes/class-rsv-security.php" >/dev/null
+grep -F "is_callable( array( 'VWLB_Videos', 'progress' ) )" "$P/includes/class-rsv-file10.php" >/dev/null
+grep -F "defined( 'VWLB_Contracts::EVENT_VERSION' )" "$P/includes/class-rsv-file10.php" >/dev/null
+grep -F "const INSIGHT_MINIMUM = 5" "$P/includes/class-rsv-top20.php" >/dev/null
+grep -F "value_signal_receipts" "$P/includes/class-rsv-top20.php" >/dev/null
+grep -F "StoryExpired" "$P/includes/trait-rsv-top20-stories.php" >/dev/null
+grep -F "JSON_HEX_TAG" "$P/includes/class-rsv-frontend.php" >/dev/null
+grep -F "const PROVIDER_VERSION = 3" "$P/includes/class-rsv-integrations.php" >/dev/null
+echo "static contracts RC6 PASS"
