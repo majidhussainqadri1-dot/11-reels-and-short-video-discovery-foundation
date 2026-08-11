@@ -36,6 +36,9 @@ $must = array(
  ['js','let autoplay = false'],
  ['frontend','data-rsv-clear-history'],
  ['admin','RSV_Current_Plan::report_risk_profile'],
+ ['admin','ORDER BY CASE reason_code'],
+ ['admin',"WHEN 'child-safety' THEN 0"],
+ ['admin',"WHEN 'harm' THEN 0"],
 );
 foreach ($must as [$key,$needle]) {
   if (false === strpos($f[$key], $needle)) { fwrite(STDERR, "Missing current-plan marker [$key]: $needle\n"); exit(1); }
