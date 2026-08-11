@@ -21,8 +21,10 @@ final class RSV_Integrations {
 			'canonical_owner' => 'File 11',
 			'entity_types' => array( 'reel', 'story', 'highlight', 'reel-response' ),
 			'public_routes' => array( 'reels', 'reel', 'stories', 'story', 'highlights' ),
-			'capabilities' => array( 'timeline','home-cards','search-documents','recommendation-explanation','stories-status','highlights','attributed-responses','source-safety','wellbeing','youth-safe','value-insights' ),
+			'capabilities' => array( 'timeline','home-cards','search-documents','recommendation-explanation','stories-status','highlights','attributed-responses','source-safety','wellbeing','youth-safe','value-insights','medical-safety-charter','report-risk-routing','governing-requirements' ),
 			'write_policy' => 'owner-only-versioned-commands', 'privacy_policy' => 'public-eligible-fields-only',
+			'commercial_ranking' => 'none', 'donor_advantage' => false,
+			'governing_plan_revision' => '2026-08-11',
 			'maturity' => 'repository-release-candidate-staging-pending',
 		);
 		if ( is_array( $manifest ) && isset( $manifest['provider_id'] ) ) return $file11;
@@ -54,7 +56,7 @@ final class RSV_Integrations {
 				'provider_id'=>'file11-reels','provider_version'=>self::PROVIDER_VERSION,'native_id'=>$dto['id'],'entity_type'=>'reel',
 				'title'=>$dto['title'],'excerpt'=>wp_trim_words(wp_strip_all_tags($dto['caption']),32),'canonical_url'=>$dto['url'],
 				'topic'=>$dto['topic'],'language'=>$dto['language'],'published_at'=>$dto['published_at'],'visibility'=>'public',
-				'source_safety'=>$dto['source_safety']??array(),'safety'=>array('file10-verified','rights-checked','consent-checked','youth-filterable'),
+				'source_safety'=>$dto['source_safety']??array(),'safety'=>array('file10-verified','rights-checked','consent-checked','youth-filterable','education-only'),
 			);
 		}
 		return $documents;
@@ -75,7 +77,7 @@ final class RSV_Integrations {
 		if ( 'latest' === $sort ) $reasons[] = __( 'It is a recently published, approved educational Reel.', RSV_TEXT_DOMAIN );
 		else {
 			$reasons[] = __( 'It passed educational relevance, source, rights, consent and safety gates.', RSV_TEXT_DOMAIN );
-			$reasons[] = __( 'Recommended ordering uses bounded quality, completion, freshness and diversity signals—not payment or follower count alone.', RSV_TEXT_DOMAIN );
+			$reasons[] = __( 'Recommended ordering uses bounded quality, completion, freshness and diversity signals—not payment, donation status, or follower count alone.', RSV_TEXT_DOMAIN );
 		}
 		if ( class_exists( 'RSV_Top20' ) && RSV_Top20::youth_mode() ) $reasons[] = __( 'Youth-safe mode removed age-inappropriate topics, labels and social actions before ranking.', RSV_TEXT_DOMAIN );
 		if ( ! empty( $reel['topic'] ) ) $reasons[] = sprintf( __( 'Its approved topic is %s.', RSV_TEXT_DOMAIN ), RSV_Helpers::label( (string) $reel['topic'] ) );

@@ -10,6 +10,7 @@ php "$ROOT/tests/forensic-contracts.php"
 php "$ROOT/tests/top20-contracts.php"
 php "$ROOT/tests/rc5-hardening-contracts.php"
 php "$ROOT/tests/rc6-forty-review-contracts.php"
+php "$ROOT/tests/current-plan-contracts.php"
 bash "$ROOT/tests/static-contracts.sh"
 A="$(mktemp -d)"; B="$(mktemp -d)"; trap 'rm -rf "$A" "$B"' EXIT
 bash "$ROOT/tools/build-package.sh" "$A/file11.zip" >/dev/null
@@ -19,4 +20,4 @@ unzip -t "$A/file11.zip" >/dev/null
 test "$(unzip -Z1 "$A/file11.zip" | cut -d/ -f1 | sort -u)" = "reels-foundation-11"
 rm -rf "$A/extract"; mkdir -p "$A/extract"; unzip -q "$A/file11.zip" -d "$A/extract"
 diff -ru "$ROOT/11-reels-foundation" "$A/extract/reels-foundation-11"
-echo "all File 11 RC6 forty-review automated checks PASS"
+echo "all File 11 RC7 rewritten-plan automated checks PASS"

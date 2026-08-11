@@ -80,7 +80,13 @@ final class RSV_REST {
 	public function publish( $request ) { $r=$this->reel_from_request($request); return $r ? RSV_Reels::publish($r['id'],absint($request->get_param('version'))) : RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404); }
 	public function view_session( $request ) { $r=$this->reel_from_request($request); return $r ? RSV_Reels::start_view_session($r['id']) : RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404); }
 	public function progress( $request ) { $r=$this->reel_from_request($request); return $r ? RSV_Reels::progress($r['id'],$request->get_param('session_id'),$request->get_param('seconds')) : RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404); }
-	public function report( $request ) { $r=$this->reel_from_request($request); return $r ? RSV_Reels::report($r['id'],$request->get_param('reason'),$request->get_param('details'),$request->get_header('Idempotency-Key')) : RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404); }
+	public function report( $request ) {
+		$r = $this->reel_from_request( $request );
+		if ( ! $r ) return RSV_Helpers::error( 'rsv_not_found', __( 'Reel not found.', RSV_TEXT_DOMAIN ), 404 );
+		$reason = RSV_Contracts::normalize_report_reason( $request->get_param( 'reason' ) );
+		if ( ! $reason ) return RSV_Helpers::error( 'rsv_report_reason_invalid', __( 'Choose a valid report reason.', RSV_TEXT_DOMAIN ), 422 );
+		return RSV_Reels::report( $r['id'], $reason, $request->get_param( 'details' ), $request->get_header( 'Idempotency-Key' ) );
+	}
 	public function interact( $request ) { $r=$this->reel_from_request($request); return $r ? RSV_Reels::interact($r['id'],$request->get_param('type')) : RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404); }
 	public function appeal( $request ) { return RSV_Reels::appeal($request['id'],$request->get_param('text'),absint($request->get_param('version'))); }
 

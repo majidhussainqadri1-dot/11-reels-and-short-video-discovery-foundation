@@ -30,6 +30,7 @@ final class RSV_Plugin {
 		RSV_Jobs::schedule();
 		update_option( 'rsv_version', RSV_VERSION, false );
 		update_option( 'rsv_contract_version', RSV_CONTRACT_VERSION, false );
+		update_option( 'rsv_governing_plan_revision', RSV_Current_Plan::REVISION, false );
 		set_transient( 'rsv_activation_notice', 1, 120 );
 		flush_rewrite_rules();
 	}
@@ -88,11 +89,16 @@ final class RSV_Plugin {
 	public function register() {
 		if ( (string) get_option( 'rsv_schema_version' ) !== RSV_SCHEMA_VERSION ) RSV_DB::install();
 		if ( (string) get_option( 'rsv_top20_schema_version' ) !== RSV_Top20::SCHEMA_VERSION ) RSV_Top20::install();
-		if ( (string) get_option( 'rsv_version' ) !== RSV_VERSION ) {
+		if ( (string) get_option( 'rsv_version' ) !== RSV_VERSION || (string) get_option( 'rsv_governing_plan_revision' ) !== RSV_Current_Plan::REVISION ) {
 			self::roles();
 			$pages = self::pages();
-			if ( ! is_wp_error( $pages ) ) { update_option( 'rsv_version', RSV_VERSION, false ); update_option( 'rsv_contract_version', RSV_CONTRACT_VERSION, false ); }
-			else { set_transient( 'rsv_page_repair_error', $pages->get_error_message(), 300 ); }
+			if ( ! is_wp_error( $pages ) ) {
+				update_option( 'rsv_version', RSV_VERSION, false );
+				update_option( 'rsv_contract_version', RSV_CONTRACT_VERSION, false );
+				update_option( 'rsv_governing_plan_revision', RSV_Current_Plan::REVISION, false );
+			} else {
+				set_transient( 'rsv_page_repair_error', $pages->get_error_message(), 300 );
+			}
 		}
 		add_filter( 'cron_schedules', array( 'RSV_Jobs', 'intervals' ) );
 		add_action( 'rest_api_init', array( new RSV_REST(), 'register' ) );
@@ -102,6 +108,7 @@ final class RSV_Plugin {
 		( new RSV_Jobs() )->register();
 		( new RSV_Integrations() )->register();
 		( new RSV_Top20() )->register();
+		( new RSV_Current_Plan() )->register();
 		add_action( 'admin_notices', array( $this, 'notices' ) );
 	}
 

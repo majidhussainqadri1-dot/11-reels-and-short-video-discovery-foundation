@@ -15,7 +15,12 @@ final class RSV_Contracts {
 	const REPORT_STATES = array( 'submitted', 'triaged', 'action', 'no_action', 'appealed', 'closed' );
 	const VISIBILITIES  = array( 'public', 'unlisted', 'member', 'entitled' );
 	const INTERACTIONS  = array( 'like', 'dislike', 'save' );
-	const REPORT_REASONS = array( 'medical-claim', 'patient-privacy', 'harassment', 'copyright', 'spam', 'other' );
+
+	/** Founder-approved canonical report routing taxonomy (CV-254). */
+	const REPORT_REASONS = array( 'harm', 'false-claim', 'impersonation', 'privacy', 'abuse', 'copyright', 'scam', 'child-safety', 'other' );
+	/** Historical values remain readable for migrated RC6 records, but new writes use REPORT_REASONS. */
+	const LEGACY_REPORT_REASONS = array( 'medical-claim', 'patient-privacy', 'harassment', 'spam' );
+	const RISK_TIERS = array( 'low', 'medium', 'high', 'critical' );
 	const MODERATION_DECISIONS = array( 'no_action', 'restrict', 'remove', 'close', 'restore' );
 
 	const STORY_TYPES = array( 'announcement', 'event-reminder', 'clinic-update', 'course-prompt', 'status' );
@@ -49,6 +54,37 @@ final class RSV_Contracts {
 		'CV-119','CV-120','CV-121','CV-122','CV-123','CV-124',
 		'CV-125','CV-126','CV-127','CV-128','CV-129',
 	);
+
+	/**
+	 * Cross-cutting catalogue transferred into the rewritten File 11 plan.
+	 * Presence here establishes consumer/assurance traceability; it does not
+	 * duplicate the canonical owner of global shell, security, operations, etc.
+	 */
+	const CROSS_CUTTING_REQUIREMENTS = array(
+		'CV-239','CV-240','CV-241','CV-242','CV-243','CV-244','CV-245','CV-246','CV-247','CV-248','CV-249',
+		'CV-250','CV-251','CV-252','CV-253','CV-254','CV-255','CV-256','CV-257','CV-258','CV-259','CV-260','CV-261',
+		'CV-262','CV-263','CV-264','CV-265','CV-266','CV-267','CV-268','CV-269','CV-270','CV-271','CV-272','CV-273',
+		'CV-274','CV-275','CV-276','CV-277','CV-278','CV-279','CV-280','CV-281','CV-282','CV-283','CV-284','CV-285',
+	);
+
+	const FILE_CENTRAL_REQUIREMENTS = array( 'F11-CEN-01' );
+	const ACCEPTANCE_JOURNEYS = array( 'AJ-17','AJ-24','AJ-25','AJ-31','AJ-32','AJ-33','AJ-34','AJ-35','AJ-36','AJ-37','AJ-38','AJ-39','AJ-40' );
+
+	public static function all_requirements() {
+		return array_values( array_unique( array_merge( self::REQUIREMENTS, self::TOP20_REQUIREMENTS, self::CROSS_CUTTING_REQUIREMENTS, self::FILE_CENTRAL_REQUIREMENTS ) ) );
+	}
+
+	public static function normalize_report_reason( $value ) {
+		$value = sanitize_key( (string) $value );
+		$legacy = array(
+			'medical-claim'   => 'false-claim',
+			'patient-privacy' => 'privacy',
+			'harassment'      => 'abuse',
+			'spam'            => 'scam',
+		);
+		$value = $legacy[ $value ] ?? $value;
+		return in_array( $value, self::REPORT_REASONS, true ) ? $value : '';
+	}
 
 	public static function event( $name ) {
 		return sanitize_key( $name ) . '.v' . self::EVENT_VERSION;

@@ -25,9 +25,8 @@ $f = array(
  'uninstall'=>$read($root.'/uninstall.php'),
 );
 $must = array(
- ['bootstrap', 'Version: 1.1.0-rc6'],
- ['bootstrap', "define( 'RSV_VERSION', '1.1.0-rc6' )"],
- ['bootstrap', "define( 'RSV_CONTRACT_VERSION', 5 )"],
+ ['bootstrap', 'Version: 1.1.0-rc7'],
+ ['bootstrap', "define( 'RSV_CONTRACT_VERSION', 6 )"],
  ['security', "'guardian_ok'          => ! \$guardian_required || \$guardian_verified"],
  ['file10', "is_callable( array( 'VWLB_Repository', 'find' ) )"],
  ['file10', "is_callable( array( 'VWLB_Videos', 'playback' ) )"],
@@ -39,47 +38,25 @@ $must = array(
  ['db', "false === \$wpdb->query( 'START TRANSACTION' )"],
  ['db', "false === \$wpdb->query( 'COMMIT' )"],
  ['db', "false === \$wpdb->query( 'ROLLBACK' )"],
- ['reels', '$age_days'],
- ['reels', '$creator_count'],
- ['repo', '$extra_eligible'],
+ ['reels', '$age_days'], ['reels', '$creator_count'], ['repo', '$extra_eligible'],
  ['repo', 'private static function safe_destination_url'],
- ['top20', "const SCHEMA_VERSION = '1.1.0'"],
- ['top20', 'value_signal_receipts'],
- ['top20', 'const INSIGHT_MINIMUM = 5'],
+ ['top20', "const SCHEMA_VERSION = '1.1.0'"], ['top20', 'value_signal_receipts'], ['top20', 'const INSIGHT_MINIMUM = 5'],
  ['responses', "if ( ! is_user_logged_in() ) return RSV_Helpers::error( 'rsv_signal_login_required'"],
- ['responses', 'INSERT IGNORE INTO $receipts'],
- ['stories', "RSV_Helpers::outbox( 'StoryExpired'"],
- ['js20', 'let activeSeconds = 0'],
- ['js20', "document.querySelector('[data-rsv-reel]')"],
+ ['responses', 'INSERT IGNORE INTO $receipts'], ['stories', "RSV_Helpers::outbox( 'StoryExpired'"],
+ ['js20', 'let activeSeconds = 0'], ['js20', "document.querySelector('[data-rsv-reel]')"],
  ['frontend', 'JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT'],
  ['helpers', 'public static function label( $value )'],
- ['privacy', 'rp.reporter_id=%d OR rp.appellant_id=%d'],
- ['privacy', "array( 'impressions', 'value_signal_receipts' )"],
- ['privacy', 'RSV_DB::transaction'],
- ['jobs', "RSV_Helpers::outbox( 'ReelMediaReadyForReview'"],
- ['jobs', 'rsv_dependency_evidence_failed'],
- ['migration', 'rsv_reconcile_evidence_failed'],
- ['migration', 'rsv_rollback_evidence_failed'],
- ['plugin', 'rsv_feed_page_failed'],
- ['plugin', 'rsv_create_page_failed'],
- ['diagnostics', 'rsv_repair_evidence_failed'],
- ['integrations', 'const PROVIDER_VERSION = 3'],
- ['privacy20', "'provider_version'] = 3"],
- ['uninstall', 'value_signal_receipts'],
+ ['privacy', 'rp.reporter_id=%d OR rp.appellant_id=%d'], ['privacy', "array( 'impressions', 'value_signal_receipts' )"], ['privacy', 'RSV_DB::transaction'],
+ ['jobs', "RSV_Helpers::outbox( 'ReelMediaReadyForReview'"], ['jobs', 'rsv_dependency_evidence_failed'],
+ ['migration', 'rsv_reconcile_evidence_failed'], ['migration', 'rsv_rollback_evidence_failed'],
+ ['plugin', 'rsv_feed_page_failed'], ['plugin', 'rsv_create_page_failed'], ['diagnostics', 'rsv_repair_evidence_failed'],
+ ['integrations', 'const PROVIDER_VERSION = 3'], ['privacy20', "'provider_version'] = 3"], ['uninstall', 'value_signal_receipts'],
 );
-foreach ($must as [$key,$needle]) {
-  if (false === strpos($f[$key], $needle)) { fwrite(STDERR, "Missing RC6 marker [$key]: $needle\n"); exit(1); }
-}
+foreach ($must as [$key,$needle]) { if (false === strpos($f[$key], $needle)) { fwrite(STDERR, "Missing inherited RC6 invariant [$key]: $needle\n"); exit(1); } }
 $forbidden = array(
- ['bootstrap', "Version: 1.1.0-rc5"],
- ['bootstrap', "define( 'RSV_CONTRACT_VERSION', 4 )"],
  ['security', "'guardian_ok'          => ! \$guardian_required || ! \$guardian_verified"],
  ['reels', "in_array( \$reel['status'] ?? '', array( 'review', 'restricted'"],
- ['top20', "const INSIGHT_MINIMUM = 3"],
- ['integrations', 'const PROVIDER_VERSION = 2'],
- ['privacy', 'rr.owner_id'],
+ ['top20', "const INSIGHT_MINIMUM = 3"], ['privacy', 'rr.owner_id'],
 );
-foreach ($forbidden as [$key,$needle]) {
-  if (false !== strpos($f[$key], $needle)) { fwrite(STDERR, "Forbidden pre-RC6 pattern [$key]: $needle\n"); exit(1); }
-}
-echo "RC6 forty-review corrective contracts PASS\n";
+foreach ($forbidden as [$key,$needle]) { if (false !== strpos($f[$key], $needle)) { fwrite(STDERR, "Forbidden inherited pattern [$key]: $needle\n"); exit(1); } }
+echo "Inherited RC6 corrective invariants PASS under RC7\n";

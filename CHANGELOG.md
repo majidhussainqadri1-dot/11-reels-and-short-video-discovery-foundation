@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.1.0-rc7 — 2026-08-11
+
+### Rewritten governing-plan reconciliation
+- Re-read the current consolidated central plan and rewritten File 11 plan as the governing baseline rather than assuming RC6 plan parity.
+- Registered the current File 11 requirement manifest: F11-FR/NFR, CV-119–129, F11-CEN-01, CV-239–285 consumer obligations and current acceptance journeys.
+- Preserved canonical ownership: File 10 remains raw-media/player/rights/caption-object owner; Files 00/19/20/24/25/26 retain their respective shared-domain authority.
+
+### Safety, moderation and business-integrity corrections
+- Replaced the legacy four-value report intake with the current harm / false-claim / impersonation / privacy / abuse / copyright / scam / child-safety taxonomy, with backward-compatible legacy mapping.
+- Added low/medium/high/critical risk routing, SLA and specialist-route metadata to the moderation experience.
+- Added a visible education-only medical safety charter: no autonomous diagnosis, prescription, dose selection or emergency replacement.
+- Added a governed provider bridge for verified local emergency/qualified-care guidance; File 11 does not invent country emergency data.
+- Made non-commercial recommendation behavior explicit: payment or donation status cannot purchase Reel ranking priority.
+
+### Release identity
+- Plugin `1.1.0-rc7`; main schema `1.2.0`; Top-20 schema `1.1.0`; File 11 contract `6`; event contract `4`; provider contract `3`.
+- Added current-plan contract tests and RC7 exact-head packaging workflow while retaining all inherited RC5/RC6 corrective invariants.
+
 ## 1.1.0-rc6 — 2026-08-07
 
 ### Forty consecutive review/fix rounds
@@ -36,27 +54,10 @@
 - Added `tests/rc6-forty-review-contracts.php`, RC6 exact-head packaging workflow and forty-round defect register.
 
 ## 1.1.0-rc5 — 2026-08-07
-
-### Four fresh adversarial review/fix rounds
-- Re-audited the repository against Definitive Master Plan v3.0, Recovered Directives v2.1, Continuous Value / Top-20 Superset v1.0 and File 11 Master Plan v1.0.
-- Corrected authorization-order, atomicity, idempotency, privacy completeness, partial-update, localization and no-JavaScript experience defects that remained after RC4.
-
-### Security, integrity and privacy
-- Publication pre-dispatch now validates object readiness only after canonical authorization.
-- Private REST responses receive no-store/noindex headers.
-- Story, Highlight and Response writes now require idempotency keys, enforce bounded rates and complete atomically with audit/outbox evidence.
-- Story and Response publication is restricted to the review state and rolls back if evidence cannot be written.
-- Reel-create compensation now checks every rollback operation and surfaces compensation failure.
-- Preference PATCH semantics preserve omitted fields and record the versioned audit atomically.
-- Privacy export is paginated and covers preferences, Stories, Highlights, Responses and Reel source/safety context; erasure is batched and reports removed/retained data accurately.
-
-### Experience and evidence
-- Added no-JavaScript Story creation, Highlight addition and attributed Response submission forms.
-- Completed client localization labels and external-link safety attributes.
-- Added RC5 hardening contracts, four review records, a defect register and exact-head RC5 release workflow.
+- Re-audited the repository against the then-current governing plans and corrected authorization, atomicity, idempotency, privacy, localization and no-JavaScript defects.
 
 ## 1.1.0-rc4 — 2026-08-06
 - Implemented CV-119–CV-129, including Stories/Status, Highlights, attributed responses, source/safety context, youth-safe discovery, well-being controls and value insights.
 
 ## 1.0.0-rc3 — historical
-RC3 established the canonical Reel foundation. RC6 supersedes RC5, RC4 and RC3.
+RC3 established the canonical Reel foundation. RC7 supersedes RC6, RC5, RC4 and RC3 as repository candidate.

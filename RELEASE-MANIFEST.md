@@ -1,18 +1,21 @@
-# Release Manifest — File 11 v1.1.0-rc6
+# Release Manifest — File 11 v1.1.0-rc7
 
 - Source directory: `11-reels-foundation`
 - Installable root: `reels-foundation-11`
-- Package: `reels-foundation-11-1.1.0-rc6.zip`
-- Plugin version: `1.1.0-rc6`
+- Package: `reels-foundation-11-1.1.0-rc7.zip`
+- Plugin version: `1.1.0-rc7`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
-- File 11 contract version: `5`
+- File 11 contract version: `6`
 - File 11 event version: `4`
+- Integration provider contract: `3`
+- Governing-plan revision: `2026-08-11`
 - Required File 10: `>=1.0.0-rc1` plus compatible classes/methods and declared event/provider contract
 - Package checksum: generated and verified by the exact-head deterministic workflow
 - Automated matrix: PHP 8.1, 8.3 and 8.4 complete suites must be Green on the final exact head
 - Package gates: deterministic double build, SHA-256, ZIP integrity and exact plugin source/package parity
-- Artifact: `file11-reels-1.1.0-rc6`, produced by the exact-head workflow
-- Review evidence: forty RC6 review/fix rounds; 25 rounds found defects, 15 found no new defect
-- Corrected RC6 defects: `F11-D-601` through `F11-D-625`
+- Artifact: `file11-reels-1.1.0-rc7`, produced by the exact-head workflow
+- Current-plan tests: F11-FR/NFR + F11-CEN-01 + CV-119–129 + CV-239–285 consumer obligations + acceptance-journey markers
+- Business integrity: no payment/donation ranking advantage
+- Medical safety: education only; verified-provider bridge for emergency/qualified-care guidance
 - Status: repository release candidate; Hostinger staging, Founder acceptance, live deployment and operational acceptance remain separate gates

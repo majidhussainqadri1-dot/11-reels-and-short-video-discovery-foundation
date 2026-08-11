@@ -2,12 +2,14 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 P="$ROOT/11-reels-foundation"
-grep -F "Version: 1.1.0-rc6" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_VERSION', '1.1.0-rc6' )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "Version: 1.1.0-rc7" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_VERSION', '1.1.0-rc7' )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "define( 'RSV_SCHEMA_VERSION', '1.2.0' )" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_CONTRACT_VERSION', 5 )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_CONTRACT_VERSION', 6 )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "class-rsv-top20.php" "$P/11-reels-foundation.php" >/dev/null
+grep -F "class-rsv-current-plan.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "new RSV_Top20" "$P/includes/class-rsv-plugin.php" >/dev/null
+grep -F "new RSV_Current_Plan" "$P/includes/class-rsv-plugin.php" >/dev/null
 grep -F "RSV_Top20::install" "$P/includes/class-rsv-plugin.php" >/dev/null
 grep -F "class RSV_Top20" "$P/includes/class-rsv-top20.php" >/dev/null
 grep -F "const SCHEMA_VERSION = '1.1.0'" "$P/includes/class-rsv-top20.php" >/dev/null
@@ -66,7 +68,7 @@ grep -F "LIMIT %d OFFSET %d" "$P/includes/trait-rsv-top20-privacy-integration.ph
 grep -F "render_story_form" "$P/includes/trait-rsv-top20-experience.php" >/dev/null
 grep -F "render_highlight_form" "$P/includes/trait-rsv-top20-experience.php" >/dev/null
 grep -F "rel=\"noopener noreferrer nofollow\"" "$P/includes/trait-rsv-top20-experience.php" >/dev/null
-# RC6 forty-review release identity and corrective contracts.
+# Inherited RC6 forty-review corrective contracts.
 grep -F "'guardian_ok'          => ! \$guardian_required || \$guardian_verified" "$P/includes/class-rsv-security.php" >/dev/null
 grep -F "is_callable( array( 'VWLB_Videos', 'progress' ) )" "$P/includes/class-rsv-file10.php" >/dev/null
 grep -F "defined( 'VWLB_Contracts::EVENT_VERSION' )" "$P/includes/class-rsv-file10.php" >/dev/null
@@ -75,4 +77,12 @@ grep -F "value_signal_receipts" "$P/includes/class-rsv-top20.php" >/dev/null
 grep -F "StoryExpired" "$P/includes/trait-rsv-top20-stories.php" >/dev/null
 grep -F "JSON_HEX_TAG" "$P/includes/class-rsv-frontend.php" >/dev/null
 grep -F "const PROVIDER_VERSION = 3" "$P/includes/class-rsv-integrations.php" >/dev/null
-echo "static contracts RC6 PASS"
+# RC7 rewritten-plan alignment.
+grep -F "const REVISION = '2026-08-11'" "$P/includes/class-rsv-current-plan.php" >/dev/null
+grep -F "F11-CEN-01" "$P/includes/class-rsv-contracts.php" >/dev/null
+grep -F "CV-285" "$P/includes/class-rsv-contracts.php" >/dev/null
+grep -F "child-safety" "$P/includes/class-rsv-contracts.php" >/dev/null
+grep -F "Educational content only." "$P/includes/class-rsv-current-plan.php" >/dev/null
+grep -F "normalize_report_reason" "$P/includes/class-rsv-rest.php" >/dev/null
+grep -F "donation status" "$P/includes/class-rsv-integrations.php" >/dev/null
+echo "static contracts RC7 PASS"
