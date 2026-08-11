@@ -9,7 +9,7 @@ $context    = $read( $p . '/trait-rsv-top20-context.php' );
 $privacy    = $read( $p . '/trait-rsv-top20-privacy-integration.php' );
 $bootstrap  = $read( dirname( $p ) . '/11-reels-foundation.php' );
 $must = array(
-	array( $bootstrap, "define( 'RSV_CONTRACT_VERSION', 5 )" ),
+	array( $bootstrap, "define( 'RSV_CONTRACT_VERSION', 6 )" ),
 	array( $experience, 'Do not run object-dependent publication validation before authorization' ),
 	array( $experience, "RSV_Security::can( RSV_Contracts::CAP_PUBLISH, \$reel, 'publish_reel' )" ),
 	array( $experience, "private, no-store, max-age=0" ),
@@ -33,4 +33,4 @@ $forbidden = array(
 	array( $context, "'history_paused' => ! empty( \$data['history_paused'] ) ? 1 : 0" ),
 );
 foreach ( $forbidden as $pair ) if ( false !== strpos( $pair[0], $pair[1] ) ) { fwrite( STDERR, "Forbidden pre-RC5 pattern remains: {$pair[1]}\n" ); exit( 1 ); }
-echo "inherited RC5 hardening contracts PASS\n";
+echo "inherited RC5 hardening contracts PASS under RC7\n";

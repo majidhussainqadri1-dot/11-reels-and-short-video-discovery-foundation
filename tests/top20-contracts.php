@@ -10,7 +10,7 @@ $repo = $read( $p . '/includes/class-rsv-repository.php' );
 $js = $read( $p . '/assets/js/rsv-top20.js' );
 $diagnostics = $read( $p . '/includes/class-rsv-diagnostics.php' );
 $file10 = $read( $p . '/includes/class-rsv-file10.php' );
-if ( 11 !== preg_match_all( "/'CV-[0-9]{3}'/", $contracts ) ) { fwrite( STDERR, "Top-20 requirement count mismatch\n" ); exit( 1 ); }
+foreach ( array( 'CV-119','CV-120','CV-121','CV-122','CV-123','CV-124','CV-125','CV-126','CV-127','CV-128','CV-129' ) as $cv ) if ( false === strpos( $contracts, "'$cv'" ) ) { fwrite( STDERR, "Missing Top-20 requirement $cv\n" ); exit( 1 ); }
 foreach ( array( 'stories','highlights','highlight_items','responses','preferences','value_signals','reel_context' ) as $table ) if ( false === strpos( $top, "table( '$table' )" ) ) { fwrite( STDERR, "Missing table $table\n" ); exit( 1 ); }
 foreach ( array(
 	'MAX_STORY_HOURS = 24','consent_snapshot','story_viewable','patient_reuse_consent','rsv_patient_reuse_consent_valid','rsv_patient_reuse_consent_still_valid',
@@ -23,4 +23,4 @@ if ( false === strpos( $repo, "'youth_safe' => \$youth" ) || false === strpos( $
 if ( false === strpos( $repo, '$requested_youth' ) || false === strpos( $repo, 'RSV_Top20::youth_mode()' ) ) exit( 1 );
 if ( false === strpos( $top, 'public static function required_tables' ) || false === strpos( $file10, 'public static function contract_compatible' ) || false === strpos( $diagnostics, 'published_without_context' ) ) exit( 1 );
 foreach ( array( 'MutationObserver','naturalStopShown','sessionStopShown','lateNightShown','recordSignal','source-open' ) as $needle ) if ( false === strpos( $js, $needle ) ) exit( 1 );
-echo "top20 contracts RC5 PASS\n";
+echo "top20 contracts RC7 PASS\n";
