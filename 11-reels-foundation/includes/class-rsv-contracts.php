@@ -67,11 +67,20 @@ final class RSV_Contracts {
 		'CV-274','CV-275','CV-276','CV-277','CV-278','CV-279','CV-280','CV-281','CV-282','CV-283','CV-284','CV-285',
 	);
 
+	const FUTURE30_REQUIREMENTS = array(
+		'F11-FUT-001','F11-FUT-002','F11-FUT-003','F11-FUT-004','F11-FUT-005',
+		'F11-FUT-006','F11-FUT-007','F11-FUT-008','F11-FUT-009','F11-FUT-010',
+		'F11-FUT-011','F11-FUT-012','F11-FUT-013','F11-FUT-014','F11-FUT-015',
+		'F11-FUT-016','F11-FUT-017','F11-FUT-018','F11-FUT-019','F11-FUT-020',
+		'F11-FUT-021','F11-FUT-022','F11-FUT-023','F11-FUT-024','F11-FUT-025',
+		'F11-FUT-026','F11-FUT-027','F11-FUT-028','F11-FUT-029','F11-FUT-030',
+	);
+
 	const FILE_CENTRAL_REQUIREMENTS = array( 'F11-CEN-01' );
 	const ACCEPTANCE_JOURNEYS = array( 'AJ-17','AJ-24','AJ-25','AJ-31','AJ-32','AJ-33','AJ-34','AJ-35','AJ-36','AJ-37','AJ-38','AJ-39','AJ-40' );
 
 	public static function all_requirements() {
-		return array_values( array_unique( array_merge( self::REQUIREMENTS, self::TOP20_REQUIREMENTS, self::CROSS_CUTTING_REQUIREMENTS, self::FILE_CENTRAL_REQUIREMENTS ) ) );
+		return array_values( array_unique( array_merge( self::REQUIREMENTS, self::TOP20_REQUIREMENTS, self::CROSS_CUTTING_REQUIREMENTS, self::FILE_CENTRAL_REQUIREMENTS, self::FUTURE30_REQUIREMENTS ) ) );
 	}
 
 	public static function normalize_report_reason( $value ) {

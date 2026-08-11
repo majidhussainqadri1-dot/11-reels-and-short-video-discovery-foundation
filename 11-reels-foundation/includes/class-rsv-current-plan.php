@@ -6,7 +6,7 @@ defined( 'ABSPATH' ) || exit;
  * Native File 11 duties are implemented here; cross-platform owners remain authoritative.
  */
 final class RSV_Current_Plan {
-	const REVISION = '2026-08-11';
+	const REVISION = '2026-08-12';
 
 	public function register() {
 		add_filter( 'do_shortcode_tag', array( __CLASS__, 'enhance_shortcode' ), 40, 4 );
@@ -21,7 +21,7 @@ final class RSV_Current_Plan {
 		$manifest = is_array( $manifest ) ? $manifest : array();
 		$manifest['file11'] = array(
 			'plan_revision' => self::REVISION,
-			'native'        => array_merge( RSV_Contracts::REQUIREMENTS, RSV_Contracts::TOP20_REQUIREMENTS, RSV_Contracts::FILE_CENTRAL_REQUIREMENTS ),
+			'native'        => array_merge( RSV_Contracts::REQUIREMENTS, RSV_Contracts::TOP20_REQUIREMENTS, RSV_Contracts::FILE_CENTRAL_REQUIREMENTS, RSV_Contracts::FUTURE30_REQUIREMENTS ),
 			'cross_cutting' => RSV_Contracts::CROSS_CUTTING_REQUIREMENTS,
 			'acceptance'    => RSV_Contracts::ACCEPTANCE_JOURNEYS,
 			'owners'        => array(

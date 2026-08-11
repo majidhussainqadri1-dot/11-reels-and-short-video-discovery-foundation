@@ -1,52 +1,78 @@
 # File 11 — Reels and Short Video Discovery
 
-**Release candidate:** `1.1.0-rc7`  
-**Working branch:** `codex/file-11-40-review-v1.1.0-rc6` (historical branch name retained for PR continuity)  
+**Current repository candidate:** `1.2.0-rc1`  
+**Future30 amendment:** `SSH-F11-FUTURE-REEL-KNOWLEDGE-INTELLIGENCE-30-2026`  
 **Canonical package root:** `reels-foundation-11`
 
-File 11 is the canonical owner of vertical educational Reel entities, the 60–600-second rule, swipe discovery, ranking guardrails, moderation, private progress/history, maximum-24-hour Stories/Status, durable consent-current Highlights, attributed Reel-to-Reel Response/Remix relationships, source/safety context, user-controlled well-being settings, youth-safe discovery and privacy-minimized creator value insights.
+File 11 owns the vertical educational Reel entity, the authoritative 60–600-second Reel eligibility rule through File 10, Reel-native discovery, moderation, private history/progress and the approved Reel-domain Future30 orchestration layer. It does not duplicate File 10 raw media, File 05 learning truth, File 06 canonical knowledge, File 16 AI execution, File 00 identity, File 19 delivery, File 20 shell, File 24 assurance, File 25 visual system or File 26 cross-platform discovery/graph ownership.
 
-File 10 remains the sole owner of raw upload, transcoding, storage, playback, caption objects, media rights, patient-media consent and secure delivery. File 11 does not duplicate that backend.
+## Future30 v1.2.0-rc1
 
-## Current governing baseline
+The 2026-08-12 Founder-approved additive amendment introduces `F11-FUT-001` through `F11-FUT-030`:
 
-RC7 re-harmonizes the repository against the Founder-supplied rewritten governing documents current on 2026-08-11:
+1. Educational Reel Series / Playlists
+2. Structured Learning Paths
+3. Related Knowledge Button
+4. Source-at-Time Citation Cards
+5. Evidence Layer / Scientific Classification
+6. Correction & Supersession System
+7. Versioned Reel
+8. Advanced Remix Studio
+9. Remix Permission Matrix
+10. Reel Templates Library
+11. Question → Reel Answer
+12. Collaborative Reel / Co-authoring
+13. Expert Review Badge
+14. 10-Language Reel System
+15. AI Translation + Optional Dubbing
+16. Searchable Transcript
+17. Smart Chapters / Key Moments
+18. Reel Knowledge Card
+19. Micro-Quiz after Reel
+20. Save to Study Collection
+21. Reel → Personal Notes
+22. Ask AI About This Reel
+23. Creator Search Opportunity Intelligence
+24. Expanded “Why am I seeing this Reel?”
+25. Feed Control Center
+26. Serendipity / Knowledge Diversity Slider
+27. Creator Research Dashboard
+28. Pre-Publish Clinical Safety Scanner
+29. Accessibility Plus Mode
+30. Reel Knowledge Graph
 
-1. the consolidated central governing master plan;
-2. the rewritten File 11 complete master plan.
+## Safety and ownership invariants
 
-Historical RC4–RC6 review evidence remains useful regression evidence, but the rewritten documents are the current specification baseline for this release candidate.
-
-## RC7 rewritten-plan completion
-
-RC7 preserves all RC6 corrective invariants and closes the additional plan-to-code gaps identified when the rewritten plans were re-read requirement-by-requirement:
-
-- registers the rewritten File 11 requirement/acceptance manifest, including `F11-CEN-01`, `CV-239–CV-285` consumer obligations and current acceptance journeys;
-- adopts the current report taxonomy: harm, false claim, impersonation, privacy, abuse, copyright, scam and child safety, while safely mapping legacy RC6 report values;
-- exposes content-risk tier, SLA and expert-route metadata for moderation without creating a second moderation owner;
-- adds a visible education-only medical safety charter and a verified-provider bridge for local emergency/qualified-care diversion;
-- makes ranking/provider metadata explicit that payment, donation status and follower count alone do not buy recommendation priority;
-- records the exact current governing-plan revision in runtime/provider contracts.
+- External canonical references are provider-validated and fail closed if missing, stale or private.
+- Patient-case remix defaults to deny and requires current canonical remix/rights/consent approval plus a verified File 10 derivative.
+- Co-author acceptance, expert-review attribution and AI-dubbing voice consent require provider-verifiable assertions; client booleans are insufficient.
+- The original Reel language remains canonical and at most nine linked language versions may be attached.
+- AI execution remains File 16; File 11 exposes grounded context with `execute_ai=false`.
+- Searchable transcript and generated audio tracks remain File 10 objects; File 11 stores references/projections only.
+- Payment or donation status never purchases ranking priority.
+- Private collections, notes and preferences are user-scoped, no-store/noindex, exportable and erasable.
 
 ## Release identity
 
-- Plugin: `1.1.0-rc7`
+- Plugin: `1.2.0-rc1`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
-- File 11 contract: `6`
-- File 11 event contract: `4`
+- Future30 schema: `1.0.0`
+- File 11 contract: `7`
+- Event contract: `4`
 - Provider contract: `3`
-- Governing-plan revision: `2026-08-11`
+- Future30 sub-contract: `1`
+- Governing-plan revision: `2026-08-12`
 
 ## Verification
 
 ```bash
 bash tests/run-all.sh
-bash tools/build-package.sh packages/reels-foundation-11-1.1.0-rc7.zip
+bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc1.zip
 ```
 
-The complete suite covers PHP 8.1/8.3/8.4, PHP/JavaScript syntax, state/helper tests, forensic/static/Top-20/inherited-RC5/inherited-RC6/current-plan contracts, deterministic double build, SHA-256, ZIP integrity and exact source/package parity.
+The release workflow must pass PHP 8.1/8.3/8.4 suites, JavaScript syntax, legacy corrective regressions, Future30 contracts, deterministic double build, checksum, ZIP integrity and exact source/package parity.
 
 ## Claim boundary
 
-RC7 is a **repository release candidate**, not production completion. Hostinger staging, real companion contracts, real roles/media, browsers/devices/RTL/accessibility, migration/restore/rollback rehearsal, Founder acceptance, controlled deployment and operational monitoring remain separate mandatory gates.
+This repository may become a **Coded + Packaged + Automated-QA Green candidate** after the final exact-head workflow passes. Hostinger staging, real companion providers, real roles/media, browser/accessibility/load evidence, restore/rollback, Founder acceptance, live deployment and Operational status are later independent gates.

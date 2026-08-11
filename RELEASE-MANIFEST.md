@@ -1,21 +1,17 @@
-# Release Manifest — File 11 v1.1.0-rc7
+# Release Manifest — File 11 v1.2.0-rc1
 
 - Source directory: `11-reels-foundation`
 - Installable root: `reels-foundation-11`
-- Package: `reels-foundation-11-1.1.0-rc7.zip`
-- Plugin version: `1.1.0-rc7`
+- Package: `reels-foundation-11-1.2.0-rc1.zip`
+- Plugin version: `1.2.0-rc1`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
-- File 11 contract version: `6`
-- File 11 event version: `4`
+- Future30 schema: `1.0.0`
+- File 11 contract: `7`
+- File 11 event contract: `4`
 - Integration provider contract: `3`
-- Governing-plan revision: `2026-08-11`
-- Required File 10: `>=1.0.0-rc1` plus compatible classes/methods and declared event/provider contract
-- Package checksum: generated and verified by the exact-head deterministic workflow
-- Automated matrix: PHP 8.1, 8.3 and 8.4 complete suites must be Green on the final exact head
-- Package gates: deterministic double build, SHA-256, ZIP integrity and exact plugin source/package parity
-- Artifact: `file11-reels-1.1.0-rc7`, produced by the exact-head workflow
-- Current-plan tests: F11-FR/NFR + F11-CEN-01 + CV-119–129 + CV-239–285 consumer obligations + acceptance-journey markers
-- Business integrity: no payment/donation ranking advantage
-- Medical safety: education only; verified-provider bridge for emergency/qualified-care guidance
-- Status: repository release candidate; Hostinger staging, Founder acceptance, live deployment and operational acceptance remain separate gates
+- Future30 contract: `1`
+- Governing-plan revision: `2026-08-12`
+- Required File 10: compatible canonical provider with authoritative duration/media/playback contracts
+- Exact source SHA / package SHA-256 / artifact digest: supplied only by the final exact-head workflow
+- Status: repository candidate; staging/live/operational remain separate gates

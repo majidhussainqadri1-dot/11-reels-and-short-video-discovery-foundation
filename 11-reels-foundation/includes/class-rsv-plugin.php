@@ -20,6 +20,7 @@ final class RSV_Plugin {
 		}
 		RSV_DB::install();
 		RSV_Top20::install();
+		RSV_Future30::install();
 		self::roles();
 		$pages = self::pages();
 		if ( is_wp_error( $pages ) ) {
@@ -89,6 +90,7 @@ final class RSV_Plugin {
 	public function register() {
 		if ( (string) get_option( 'rsv_schema_version' ) !== RSV_SCHEMA_VERSION ) RSV_DB::install();
 		if ( (string) get_option( 'rsv_top20_schema_version' ) !== RSV_Top20::SCHEMA_VERSION ) RSV_Top20::install();
+		if ( (string) get_option( 'rsv_future30_schema_version' ) !== RSV_Future30::SCHEMA_VERSION ) RSV_Future30::install();
 		if ( (string) get_option( 'rsv_version' ) !== RSV_VERSION || (string) get_option( 'rsv_governing_plan_revision' ) !== RSV_Current_Plan::REVISION ) {
 			self::roles();
 			$pages = self::pages();
@@ -109,6 +111,7 @@ final class RSV_Plugin {
 		( new RSV_Integrations() )->register();
 		( new RSV_Top20() )->register();
 		( new RSV_Current_Plan() )->register();
+		( new RSV_Future30() )->register();
 		add_action( 'admin_notices', array( $this, 'notices' ) );
 	}
 

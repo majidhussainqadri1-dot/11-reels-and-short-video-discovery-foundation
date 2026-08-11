@@ -143,6 +143,9 @@ final class RSV_Repository {
 			if ( ! RSV_Security::can_view_reel( $row, 0 ) ) {
 				continue;
 			}
+			if ( class_exists( 'RSV_Future30' ) && ! RSV_Future30::feed_allows_row( $row ) ) {
+				continue;
+			}
 			if ( count( $items ) >= $limit ) {
 				$extra_eligible = true;
 				break;
