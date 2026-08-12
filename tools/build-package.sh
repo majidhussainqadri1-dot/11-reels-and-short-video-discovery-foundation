@@ -3,7 +3,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SOURCE="$ROOT/11-reels-foundation"
 PACKAGE_ROOT="reels-foundation-11"
-OUT="${1:-$ROOT/packages/reels-foundation-11-1.2.0-rc2.zip}"
+OUT="${1:-$ROOT/packages/reels-foundation-11-1.2.0-rc3.zip}"
 case "$OUT" in /*) ;; *) OUT="$ROOT/$OUT";; esac
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/$PACKAGE_ROOT" "$(dirname "$OUT")"
