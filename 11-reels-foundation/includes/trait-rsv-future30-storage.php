@@ -154,11 +154,30 @@ trait RSV_Future30_Storage_Trait {
 	}
 
 
-	private static function idempotent_finish_result( $scope, $key, $result ) {
+	private static function idempotent_finish_result( $scope, $key, $operation, $evidence = array() ) {
+		$result = RSV_DB::transaction(
+			static function () use ( $scope, $key, $operation, $evidence ) {
+				$value = is_callable( $operation ) ? call_user_func( $operation ) : RSV_Helpers::error( 'rsv_future_operation_invalid', __( 'The protected operation could not be executed.', RSV_TEXT_DOMAIN ), 500 );
+				if ( is_wp_error( $value ) ) return $value;
+				$response = array( 'ok' => true, 'result' => $value );
+				if ( ! RSV_Security::idempotency_finish( $scope, $key, $response ) ) return RSV_Helpers::error( 'rsv_idempotency_finish_failed', __( 'The operation could not be committed with complete replay evidence.', RSV_TEXT_DOMAIN ), 500 );
+				if ( $evidence ) {
+					$entity_type = sanitize_key( $evidence['entity_type'] ?? 'future30' );
+					$entity_id   = absint( $evidence['entity_id'] ?? 0 );
+					$action      = sanitize_key( $evidence['action'] ?? 'update' );
+					$reason      = RSV_Helpers::text( $evidence['reason'] ?? '', 500 );
+					$meta        = is_array( $evidence['meta'] ?? null ) ? $evidence['meta'] : array();
+					$event       = RSV_Helpers::text( $evidence['event'] ?? '', 120 );
+					$event_data  = is_array( $evidence['event_data'] ?? null ) ? $evidence['event_data'] : array();
+					if ( ! RSV_Helpers::audit( $entity_type, $entity_id, $action, '', '', $reason, $meta ) || ( $event && ! RSV_Helpers::outbox( $event, $entity_type, $entity_id, $event_data ) ) ) {
+						return RSV_Helpers::error( 'rsv_future_evidence_failed', __( 'The operation could not be committed with complete audit and event evidence.', RSV_TEXT_DOMAIN ), 500 );
+					}
+				}
+				return $response;
+			}
+		);
 		if ( is_wp_error( $result ) ) { RSV_Security::idempotency_fail( $scope, $key ); return $result; }
-		$response = array( 'ok'=>true, 'result'=>$result );
-		RSV_Security::idempotency_finish( $scope, $key, $response );
-		return rest_ensure_response( $response );
+		return rest_ensure_response( $result );
 	}
 
 }
