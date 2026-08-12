@@ -1,0 +1,46 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Reels and Short Video Discovery 1.1.0-rc4\n"
+"POT-Creation-Date: 2026-08-06 22:55+0500\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: reels-short-video-discovery\n"
+
+msgid "Stories / Status"
+msgstr ""
+
+msgid "Well-being"
+msgstr ""
+
+msgid "Value insights"
+msgstr ""
+
+msgid "Source, transcript and safety"
+msgstr ""
+
+msgid "Source"
+msgstr ""
+
+msgid "Safety"
+msgstr ""
+
+msgid "Transcript"
+msgstr ""
+
+msgid "Create an attributed response/remix"
+msgstr ""
+
+msgid "Natural pause: take a moment before continuing."
+msgstr ""
+
+msgid "Your chosen Reel session limit has been reached."
+msgstr ""
+
+msgid "Late-night reminder: consider resting and returning later."
+msgstr ""
+
+msgid "Continue by choice"
+msgstr ""
+
+msgid "Additional Reel context is temporarily unavailable."
+msgstr ""
