@@ -4,7 +4,7 @@ Tags: reels, educational-video, learning, citations, accessibility, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0-rc3
+Stable tag: 1.2.0-rc4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,7 +14,7 @@ Canonical educational Reels plus the Founder-approved Future Reel Knowledge & Le
 
 File 11 owns the vertical educational Reel entity, 60–600 second eligibility, Reel-native discovery, moderation, private progress/history and Reel-domain Future30 orchestration. File 10 remains the sole raw-media/player/track/transcript owner; File 05 learning truth, File 06 knowledge/evidence, File 16 AI execution, File 00 identity and File 26 cross-platform discovery/graph remain authoritative.
 
-RC3 preserves all 30 Future30 capabilities and adds the second fresh 20-round hardening cycle: CAS-safe idempotency renewal, canonical 10-language handling, reviewed AI translation exposure, transactional transcript-index evidence, strict quiz public/private schema, privacy erase reconciliation, current membership-state authorization for private endpoints, stale translation-link reconciliation, current File 10 duration checks for AI grounding, and minimized public Learning Path DTOs.
+RC4 preserves all 30 Future30 capabilities and adds the third fresh 20-round hardening cycle: canonical public projections now revalidate current external references at read time; creator-research metrics require provider-carried minimum-sample proof before exposure; Future30 privacy erasure evidence uses opaque subject references rather than recreating the erased WordPress user ID. RC4 also advances the immutable File 11 contract identity to 10 while retaining the same database schemas.
 
 Public content remains browseable without login where eligible. Protected actions require current File 00 capability/state. External provider refs fail closed. Patient-case remix defaults to deny. AI execution is never performed by File 11, and no automated diagnosis/prescription/dose/emergency replacement is introduced.
 
@@ -43,8 +43,16 @@ No. Payment/donation status is not an allowed recommendation-priority reason.
 
 == Changelog ==
 
+= 1.2.0-rc4 =
+* Third fresh 20-round corrective review candidate over the amended 2026-08-12 File 11 plan.
+* Revalidated generic public Future30 projections against current authoritative external references at read time.
+* Required privacy-threshold proof for every exposed Creator Research aggregate.
+* Removed direct erased user IDs from Future30 erasure audit/outbox evidence, retaining opaque subject references only.
+* Added a dedicated third fresh20 regression-contract suite.
+* Advanced File 11 contract to 10 and created a distinct rc4 package/release identity.
+
 = 1.2.0-rc3 =
-* Completed a second fresh 20-round corrective review cycle over the amended 2026-08-12 File 11 plan.
+* Completed the second fresh 20-round corrective review cycle over the amended 2026-08-12 File 11 plan.
 * Added CAS-safe idempotency renewal and transactional transcript discovery evidence.
 * Hardened canonical language tags, stale linked-language reconciliation and reviewed AI translation/dubbing exposure.
 * Added strict quiz DTO schema, private-state membership revalidation and privacy erase cache/index reconciliation evidence.
