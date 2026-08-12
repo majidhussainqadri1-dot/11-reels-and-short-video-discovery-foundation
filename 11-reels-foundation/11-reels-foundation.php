@@ -50,6 +50,7 @@ $files = array(
 	'class-rsv-future30-analytics-safety.php',
 	'class-rsv-future30-accessibility-runtime.php',
 	'class-rsv-future30-privacy-integrity.php',
+	'class-rsv-future30-private-route-guard.php',
 	'class-rsv-fresh20-hardening.php',
 	'class-rsv-fresh-review-hardening.php',
 	'class-rsv-fresh-review-public-minimization.php',
