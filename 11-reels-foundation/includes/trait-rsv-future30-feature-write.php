@@ -14,8 +14,38 @@ trait RSV_Future30_Feature_Write_Trait {
 	}
 
 	public function reel_feature_write( $request ) {
-		list($fid,$def)=self::feature($request['feature']);if(!$fid)return RSV_Helpers::error('rsv_future_unknown',__('Unknown future feature.',RSV_TEXT_DOMAIN),404);if(!self::generic_write_allowed($fid))return RSV_Helpers::error('rsv_future_dedicated_endpoint',__('Use the dedicated protected endpoint for this capability.',RSV_TEXT_DOMAIN),400);$reel=self::reel($request['id'],true);if(is_wp_error($reel))return $reel;$rate=RSV_Security::rate_limit('future30_mutation',120,HOUR_IN_SECONDS);if(is_wp_error($rate))return $rate;$p=(array)$request->get_json_params();$idem=$request->get_header('Idempotency-Key');$begin=RSV_Security::idempotency_begin('future30_'.strtolower(str_replace('-','_',$fid)),$idem,$p);if(is_wp_error($begin))return $begin;if(!empty($begin['replay']))return rest_ensure_response($begin['response']);
-		$result=self::feature_write($fid,$reel,$p); if(is_wp_error($result)){RSV_Security::idempotency_fail('future30_'.strtolower(str_replace('-','_',$fid)),$idem);return $result;} $response=array('ok'=>true,'feature_id'=>$fid,'result'=>$result);RSV_Security::idempotency_finish('future30_'.strtolower(str_replace('-','_',$fid)),$idem,$response);RSV_Helpers::audit('reel',$reel['id'],'future30_write','','',$fid,array('feature'=>$def['slug']));RSV_Helpers::outbox('ReelFutureCapabilityUpdated','reel',$reel['id'],array('reel_public_id'=>$reel['public_id'],'feature_id'=>$fid));return rest_ensure_response($response);
+		list( $fid, $def ) = self::feature( $request['feature'] );
+		if ( ! $fid ) return RSV_Helpers::error( 'rsv_future_unknown', __( 'Unknown future feature.', RSV_TEXT_DOMAIN ), 404 );
+		if ( ! self::generic_write_allowed( $fid ) ) return RSV_Helpers::error( 'rsv_future_dedicated_endpoint', __( 'Use the dedicated protected endpoint for this capability.', RSV_TEXT_DOMAIN ), 400 );
+		$reel = self::reel( $request['id'], true );
+		if ( is_wp_error( $reel ) ) return $reel;
+		$rate = RSV_Security::rate_limit( 'future30_mutation', 120, HOUR_IN_SECONDS );
+		if ( is_wp_error( $rate ) ) return $rate;
+		$p     = (array) $request->get_json_params();
+		$idem  = $request->get_header( 'Idempotency-Key' );
+		$scope = 'future30_' . strtolower( str_replace( '-', '_', $fid ) );
+		$begin = RSV_Security::idempotency_begin( $scope, $idem, $p );
+		if ( is_wp_error( $begin ) ) return $begin;
+		if ( ! empty( $begin['replay'] ) ) return rest_ensure_response( $begin['response'] );
+
+		$response = RSV_DB::transaction(
+			static function () use ( $fid, $def, $reel, $p, $scope, $idem ) {
+				$result = self::feature_write( $fid, $reel, $p );
+				if ( is_wp_error( $result ) ) return $result;
+				$payload = array( 'ok' => true, 'feature_id' => $fid, 'result' => $result );
+				if ( ! RSV_Security::idempotency_finish( $scope, $idem, $payload )
+					|| ! RSV_Helpers::audit( 'reel', $reel['id'], 'future30_write', '', '', $fid, array( 'feature' => $def['slug'] ) )
+					|| ! RSV_Helpers::outbox( 'ReelFutureCapabilityUpdated', 'reel', $reel['id'], array( 'reel_public_id' => $reel['public_id'], 'feature_id' => $fid ) ) ) {
+					return RSV_Helpers::error( 'rsv_future30_evidence_failed', __( 'The Future30 change could not be committed with complete replay, audit and event evidence.', RSV_TEXT_DOMAIN ), 500 );
+				}
+				return $payload;
+			}
+		);
+		if ( is_wp_error( $response ) ) {
+			RSV_Security::idempotency_fail( $scope, $idem );
+			return $response;
+		}
+		return rest_ensure_response( $response );
 	}
 
 	private static function feature_write( $fid, $reel, $p ) {
