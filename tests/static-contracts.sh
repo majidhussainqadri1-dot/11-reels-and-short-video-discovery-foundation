@@ -3,10 +3,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 P="$ROOT/11-reels-foundation"
 
-grep -F "Version: 1.2.0-rc4" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_VERSION', '1.2.0-rc4' )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "Version: 1.2.0-rc5" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_VERSION', '1.2.0-rc5' )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "define( 'RSV_SCHEMA_VERSION', '1.2.0' )" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_CONTRACT_VERSION', 10 )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_CONTRACT_VERSION', 11 )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "class-rsv-current-plan.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "trait-rsv-future30-storage.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "trait-rsv-future30-feature-write.php" "$P/11-reels-foundation.php" >/dev/null
@@ -68,6 +68,10 @@ grep -RF "rsv-a11y-reduced-motion" "$P/includes" --include='class-rsv-future30.p
 grep -F "wp_add_inline_script" "$P/includes/class-rsv-future30.php" >/dev/null
 grep -F "future_user_state" "$P/uninstall.php" >/dev/null
 
+grep -F "'language-version','File 11'" "$P/includes/trait-rsv-future30-feature-write.php" >/dev/null
+grep -F "validation_owner = 'F11-FUT-014'" "$P/includes/trait-rsv-future30-storage.php" >/dev/null
+! grep -F "'language-version','translation-provider'" "$P/includes/trait-rsv-future30-feature-write.php"
+
 H="$P/includes/class-rsv-fresh20-hardening.php"
 grep -F "class RSV_Fresh20_Hardening" "$H" >/dev/null
 grep -F "rsv_series_invalid" "$H" >/dev/null
@@ -109,4 +113,4 @@ grep -F "subject_ref" "$P/includes/class-rsv-future30-privacy-integrity.php" >/d
 ! grep -F ":root{" "$P/assets/css/rsv.css"
 ! grep -F ":root" "$P/assets/css/rsv-top20.css"
 
-echo "static contracts Future30 rc4 PASS"
+echo "static contracts Future30 rc5 PASS"
