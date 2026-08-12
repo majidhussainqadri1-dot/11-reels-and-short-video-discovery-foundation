@@ -40,4 +40,144 @@ trait RSV_Future30_Storage_Trait {
 	}
 
 	private static function generic_write_allowed( $feature_id ) {
-		return in_array( $feature_id, array( 'F11-FUT-003','F11-FUT-004','F11-FUT-005','F11-FUT-006','F11-FUT-007','F11-FUT-008','F11-FUT-009','F11-FUT-010','F11-FUT-011','F11-FUT-012','F11-FUT-013','F11-FUT-014','F11-FUT-015','F11-FUT-016','F11-FUT-017','F11-FUT-018','F11-FUT-019','F11-FUT-024','F11-FUUBÓ#‚rÂtcÔeUBÓ3r’ÂG'VR“° —Ð  —&—fFR7FF–2gVæ7F–öâ6æöæ–6Å÷&Ve÷V&Æ–5÷fÆ–B‚F÷væW"ÂG&VbÂGW'÷6R’° ’F÷væW"Ò%5eô†VÇW'3£§FW‡B‚F÷væW"Â3“° ’G&VbÒ%5eô†VÇW'3£§FW‡B‚G&VbÂ#SR“° ––b‚F÷væW"ÇÂG&Vb’&WGW&âfÇ6S° ––b‚tf–ÆRrÓÓÒF÷væW"’° ’GF&vWBÒ%5eõ&W÷6—F÷'“£¦f–æB‚G&VbÂG'VR“° —&WGW&â†&ööÂ’‚GF&vWBbb%5eõ6V7W&—G“£¦6å÷f–Wu÷&VVÂ‚GF&vWBÂ’“° —Ð —&WGW&âG'VRÓÓÒÇ•öf–ÇFW'2‚w'7eögWGW&S3÷V&Æ–5÷&Ve÷fÆ–BrÂfÇ6RÂF÷væW"ÂG&VbÂ6æ—F—¦Uö¶W’‚GW'÷6R’“° —Ð  —&—fFR7FF–2gVæ7F–öâV&Æ–5÷&ö¦V7F–öâ‚FfVGW&Uö–BÂG&VVÂ’° ’Fö&¦V7G2Ò6VÆc£¦ö&¦V7E÷&÷w2‚FfVGW&Uö–BÂG&VVÅ²v–BuÒÂÂ“° ’FVFvW2Ò6VÆc£¦VFvU÷&÷w2‚FfVGW&Uö–BÂG&VVÅ²v–BuÒÂ#“° –f÷&V6‚‚Fö&¦V7G22bFö&¦V7B’Vç6WB‚Fö&¦V7E²v÷væW%ö–BuÒÂFö&¦V7E²w&VVÅö–BuÒ“° ––b‚tcÔeUBÓbrÓÓÒFfVGW&Uö–B’f÷&V6‚‚FVFvW22bG&÷r’G&÷u²w–ÆöBuÒÒ'&’‚vVffV7F—fUöBsÓâG&÷u²w–ÆöBuÕ²vVffV7F—fUöBuÒóòrr“° ––b‚tcÔeUBÓrrÓÓÒFfVGW&Uö–B’f÷&V6‚‚Fö&¦V7G22bG&÷r’G&÷u²w–ÆöBuÒÒ'&’‚w&VVÅ÷fW'6–öâsÓæ'6–çB‚G&÷u²w–ÆöBuÕ²w&VVÅ÷fW'6–öâuÒóò’Âw6æ6†÷Eö†6‚sÓå%5eô†VÇW'3£§FW‡B‚G&÷u²w–ÆöBuÕ²w6æ6†÷Eö†6‚uÒóòrrÃcB’“° ––b‚tcÔeUBÓ"rÓÓÒFfVGW&Uö–B’° ’FVFvW2Ò'&•÷fÇVW2‚'&•öf–ÇFW"‚FVFvW2Â7FF–2gVæ7F–öâ‚G&÷r’²&WGW&âV×G’‚G&÷u²w–ÆöBuÕ²v66WFVBuÒ“²Ò’“° —Ð ––b‚tcÔeUBÓ2rÓÓÒFfVGW&Uö–B’° ’FVFvW2Ò'&•÷fÇVW2‚'&•öf–ÇFW"‚FVFvW2Â7FF–2gVæ7F–öâ‚G&÷r’²&WGW&âv&÷fVBrÓÓÒ‚G&÷u²w–ÆöBuÕ²vFV6—6–öâuÒóòrr“²Ò’“° –f÷&V6‚‚FVFvW22bG&÷r’° ’G&÷u²w–ÆöBuÒÒ'&’‚vFV6—6–öâsÓâv&÷fVBrÂw&Wf–WvVEöBsÓâG&÷u²w–ÆöBuÕ²w&Wf–WvVEöBuÒóòrrÂv6öæfÆ–7EöFV6Æ&VBsÓâV×G’‚G&÷u²w–ÆöBuÕ²v6öæfÆ–7EöFV6Æ&VBuÒ’“° —Ð —Ð ––b‚tcÔeUBÓbrÓÓÒFfVGW&Uö–B’° ’Fö&¦V7G2Ò'&•÷fÇVW2‚'&•öf–ÇFW"‚Fö&¦V7G2Â7FF–2gVæ7F–öâ‚G&÷r’²&WGW&âV×G’‚G&÷u²w–ÆöBuÕ²w&Wf–WvVBuÒ“²Ò’“° —Ð ––b‚tcÔeUBÓ’rÓÓÒFfVGW&Uö–B’° –f÷&V6‚‚Fö&¦V7G22bG&÷r’° ’GVW7F–öç2Ò'&’‚“° –f÷&V6‚‚†'&’’‚G&÷u²w–ÆöBuÕ²wVW7F–öç2uÒóò'&’‚’’2GVW7F–öâ’° ––b‚—5ö'&’‚GVW7F–öâ’’6öçF–çVS° —Vç6WB‚GVW7F–öå²v6÷'&V7BuÒÂGVW7F–öå²vç7vW"uÒÂGVW7F–öå²vW‡ÆæF–öå÷&—fFRuÒ“° ’GVW7F–öç5µÒÒGVW7F–öã° —Ð ’G&÷u²w–ÆöBuÕ²wVW7F–öç2uÒÒGVW7F–öç3° —Ð —Ð —&WGW&â'&’‚vö&¦V7G2sÓâFö&¦V7G2ÂvVFvW2sÓâFVFvW2“° —Ð  —&—fFR7FF–2gVæ7F–öâ6æ—F—¦U÷–ÆöB‚G–ÆöB’° ’G–ÆöBÒ—5ö'&’‚G–ÆöB’òG–ÆöB¢'&’‚“° ’F÷WBÒ'&’‚“° –f÷&V6‚‚G–ÆöB2F¶W’ÓâGfÇVR’° ’F¶W’Ò6æ—F—¦Uö¶W’‚‡7G&–ær’F¶W’“° ––b‚—5ö'&’‚GfÇVR’’F÷WE²F¶W’ÒÒ6VÆc£§6æ—F—¦U÷–ÆöB‚GfÇVR“° –VÇ6V–b‚—5ö&ööÂ‚GfÇVR’’F÷WE²F¶W’ÒÒGfÇVS° –VÇ6V–b‚—5öçVÖW&–2‚GfÇVR’’F÷WE²F¶W’ÒÒ²GfÇVS° –VÇ6RF÷WE²F¶W’ÒÒ%5eô†VÇW'3£§FW‡B‚‡7G&–ær’GfÇVRÂC“° —Ð —&WGW&âF÷WC° —Ð  —&—fFR7FF–2gVæ7F–öâWEöö&¦V7B‚FfVGW&Uö–BÂFö&¦V7E÷G—RÂG&VVÅö–BÂGF—FÆRÂG–ÆöBÂGV&Æ–5ö–BÒrr’° –vÆö&ÂGwF#° ’GF&ÆRÒ%5eô†VÇW'3£§F&ÆR‚vgWGW&Uöö&¦V7G2r“° ’FfVGW&Uö–BÒ7G'F÷WW"‚6æ—F—¦U÷FW‡Eöf–VÆB‚FfVGW&Uö–B’“° ’Fö&¦V7E÷G—RÒ6æ—F—¦Uö¶W’‚Fö&¦V7E÷G—R“° ’GV&Æ–5ö–BÒGV&Æ–5ö–Bò%5eô†VÇW'3£§FW‡B‚GV&Æ–5ö–BÂƒ’¢%5eô†VÇW'3£§V&Æ–5ö–B‚vc3r“° ’Fæ÷rÒ%5eô†VÇW'3£¦æ÷r‚“° ’FW†—7F–ærÒGwF"ÓævWE÷&÷r‚GwF"Óç&W&R‚%4TÄT5B¢e$ôÒGF&ÆRt„U$RV&Æ–5ö–CÒW2"ÂGV&Æ–5ö–B’Â%$•ô“° ’FFFÒ'&’‚vfVGW&Uö–BsÓâFfVGW&Uö–BÂvö&¦V7E÷G—RsÓâFö&¦V7E÷G—RÂw&VVÅö–BsÓæ'6–çB‚G&VVÅö–B’Âv÷væW%ö–BsÓævWEö7W'&VçE÷W6W%ö–B‚’Âw7FGW2sÓâv7F—fRrÂwF—FÆRsÓå%5eô†VÇW'3£§FW‡B‚GF—FÆRÃ#SR’Âw–ÆöEö§6öâsÓå%5eô†VÇW'3£¦§6öåöVæ6öFR‡6VÆc£§6æ—F—¦U÷–ÆöB‚G–ÆöB’’ÂwWFFVEöBsÓâFæ÷r“° ––b‚FW†—7F–ær’° ––b‚'6–çB‚FW†—7F–æu²v÷væW%ö–BuÒ’ÓÒvWEö7W'&VçE÷W6W%ö–B‚’bb%5eõ6V7W&—G“£¦6â‚%5eô6öçG&7G3£¤4ôÔätR’’&WGW&â%5eô†VÇW'3£¦W'&÷"‚w'7eögWGW&Uöf÷&&–FFVârÂõò‚u–÷R6ææ÷BWFFRF†—2—FVÒârÂ%5eõDU…EôDôÔ”â’ÂC2“° ’FFF²wfW'6–öâuÒÒ'6–çB‚FW†—7F–æu²wfW'6–öâuÒ’²° ’Fö²ÒGwF"ÓçWFFR‚GF&ÆRÂFFFÂ'&’‚v–BsÓæ'6–çB‚FW†—7F–æu²v–BuÒ’ÂwfW'6–öâsÓæ'6–çB‚FW†—7F–æu²wfW'6–öâuÒ’’Â'&’‚rW2rÂrW2rÂrVBrÂrVBrÂrW2rÂrW2rÂrW2rÂrW2rÂrVBr’Â'&’‚rVBrÂrVBr’“° ––b‚ÓÒFö²’&WGW&â%5eô†VÇW'3£¦W'&÷"‚w'7eögWGW&Uö6öæfÆ–7BrÂõò‚uF†R—FVÒ6†ævVBâ&Vg&W6‚æB&WG'’ârÂ%5eõDU…EôDôÔ”â’ÂC’“° —&WGW&â'&’‚wV&Æ–5ö–BsÓâGV&Æ–5ö–BÂwfW'6–öâsÓâFFF²wfW'6–öâuÒ“° —Ð ’FFF²wV&Æ–5ö–BuÓÒGV&Æ–5ö–C²FFF²wfW'6–öâuÓÓ²FFF²v7&VFVEöBuÓÒFæ÷s° ’Fö²ÒGwF"Óæ–ç6W'B‚GF&ÆRÂFFFÂ'&’‚rW2rÂrW2rÂrW2rÂrVBrÂrVBrÂrW2rÂrW2rÂrW2rÂrW2rÂrVBrÂrW2r’“° ––b‚ÓÒFö²’&WGW&â%5eô†VÇW'3£¦W'&÷"‚w'7eögWGW&U÷w&—FUöf–ÆVBrÂõò‚uF†R—FVÒ6÷VÆBæ÷B&R6fVBârÂ%5eõDU…EôDôÔ”â’ÂS“° —&WGW&â'&’‚wV&Æ–5ö–BsÓâGV&Æ–5ö–BÂwfW'6–öâsÓã“° —Ð  —&—fFR7FF–2gVæ7F–öâWEöVFvR‚FfVGW&Uö–BÂG&VVÅö–BÂFVFvU÷G—RÂGF&vWEö÷væW"ÂGF&vWE÷&VbÂG–ÆöBÂG7F'BÒÂFVæBÒ’° –vÆö&ÂGwF#° ’GF&ÆSÕ%5eô†VÇW'3£§F&ÆR‚vgWGW&UöVFvW2r“²Fæ÷sÕ%5eô†VÇW'3£¦æ÷r‚“° ’GF&vWEö÷væW#Õ%5eô†VÇW'3£§FW‡B‚GF&vWEö÷væW"Ã3“²GF&vWE÷&VcÕ%5eô†VÇW'3£§FW‡B‚GF&vWE÷&VbÃ#SR“° ––b‚GF&vWE÷&Vb’&WGW&â%5eô†VÇW'3£¦W'&÷"‚w'7eögWGW&U÷F&vWE÷&WV—&VBrÅõò‚t6æöæ–6ÂF&vWB&VfW&Væ6R—2&WV—&VBârÅ%5eõDU…EôDôÔ”â’ÃC#"“° ’G7F'CÖÖ‚ƒÆ'6–çB‚G7F'B’“²FVæCÖÖ‚‚G7F'BÆ'6–çB‚FVæB’“° ’GV&Æ–5ö–CÕ%5eô†VÇW'3£§V&Æ–5ö–B‚vVFvRr“° ’Fö³ÒGwF"Óæ–ç6W'B‚GF&ÆRÆ'&’‚wV&Æ–5ö–BsÓâGV&Æ–5ö–BÂvfVGW&Uö–BsÓâFfVGW&Uö–BÂw6÷W&6U÷&VVÅö–BsÓæ'6–çB‚G&VVÅö–B’ÂvVFvU÷G—RsÓç6æ—F—¦Uö¶W’‚FVFvU÷G—R’ÂwF&vWEö÷væW"sÓâGF&vWEö÷væW"ÂwF&vWE÷&VbsÓâGF&vWE÷&VbÂw7F'E÷6V6öæBsÓâG7F'BÂvVæE÷6V6öæBsÓâFVæBÂw–ÆöEö§6öâsÓå%5eô†VÇW'3£¦§6öåöVæ6öFR‡6VÆc£§6æ—F—¦U÷–ÆöB‚G–ÆöB’’Âw7FGW2sÓâv7F—fRrÂwfW'6–öâsÓãÂv7&VFVEöBsÓâFæ÷rÂwWFFVEöBsÓâFæ÷r’Æ'&’‚rW2rÂrW2rÂrVBrÂrW2rÂrW2rÂrW2rÂrVBrÂrVBrÂrW2rÂrW2rÂrVBrÂrW2rÂrW2r’“° ––bƒÓÒFö²—&WGW&â%5eô†VÇW'3£¦W'&÷"‚w'7eögWGW&UöVFvUöf–ÆVBrÅõò‚uF†R&VÆF–öç6†—6÷VÆBæ÷B&R6fVBârÅ%5eõDU…EôDôÔ”â’ÃS“° —&WGW&â'&’‚wV&Æ–5ö–BsÓâGV&Æ–5ö–BÂwfW'6–öâsÓã“° —Ð  —&—fFR7FF–2gVæ7F–öâö&¦V7E÷&÷w2‚FfVGW&Uö–BÂG&VVÅö–BÒÂF÷væW%ö–BÒÂFÆ–Ö—BÒS’° –vÆö&ÂGwF#²GF&ÆSÕ%5eô†VÇW'3£§F&ÆR‚vgWGW&Uöö&¦V7G2r“²Gv†W&SÖ'&’‚vfVGW&Uö–CÒW2rÂw7FGW3ÒW2r“²F&w3Ö'&’‚FfVGW&Uö–BÂv7F—fRr“° ––b‚G&VVÅö–B—²Gv†W&UµÓÒw&VVÅö–CÒVBs²F&w5µÓÖ'6–çB‚G&VVÅö–B“·Ò–b‚F÷væW%ö–B—²Gv†W&UµÓÒv÷væW%ö–CÒVBs²F&w5µÓÖ'6–çB‚F÷væW%ö–B“·ÒF&w5µÓÖÖ–âƒÆÖ‚ƒÆ'6–çB‚FÆ–Ö—B’’“° ’G7ÃÒ%4TÄT5BV&Æ–5ö–BÆfVGW&Uö–BÆö&¦V7E÷G—RÇ&VVÅö–BÆ÷væW%ö–BÇF—FÆRÇ–ÆöEö§6öâÇfW'6–öâÆ7&VFVEöBÇWFFVEöBe$ôÒGF&ÆRt„U$R"æ–×ÆöFR‚räBrÂGv†W&R’ârõ$DU"%’WFFVEöBDU42Æ–BDU42Ä”Ô•BVBs° ’G&÷w3ÒGwF"ÓævWE÷&W7VÇG2‚GwF"Óç&W&R‚G7ÂÂF&w2’Ä%$•ô“²f÷&V6‚‚G&÷w22bG&÷r—²G&÷u²w–ÆöBuÓÕ%5eô†VÇW'3£¦§6öåöFV6öFR‚G&÷u²w–ÆöEö§6öâuÒ“·Vç6WB‚G&÷u²w–ÆöEö§6öâuÒ“·Ò&WGW&âG&÷w3° —Ð  —&—fFR7FF–2gVæ7F–öâVFvU÷&÷w2‚FfVGW&Uö–BÂG&VVÅö–BÂFÆ–Ö—BÒ’° –vÆö&ÂGwF#²GF&ÆSÕ%5eô†VÇW'3£§F&ÆR‚vgWGW&UöVFvW2r“²G&÷w3ÒGwF"ÓævWE÷&W7VÇG2‚GwF"Óç&W&R‚%4TÄT5BV&Æ–5ö–BÆfVGW&Uö–BÆVFvU÷G—RÇF&vWEö÷væW"ÇF&vWE÷&VbÇ7F'E÷6V6öæBÆVæE÷6V6öæBÇ–ÆöEö§6öâÇfW'6–öâÆ7&VFVEöBÇWFFVEöBe$ôÒGF&ÆRt„U$RfVGW&Uö–CÒW2äB6÷W&6U÷&VVÅö–CÒVBäB7FGW3Òv7F—fRrõ$DU"%’7F'E÷6V6öæB42Æ–B42Ä”Ô•BVB"ÂFfVGW&Uö–BÆ'6–çB‚G&VVÅö–B’ÆÖ–âƒ#ÆÖ‚ƒÆ'6–çB‚FÆ–Ö—B’’’’Ä%$•ô“¶f÷&V6‚‚G&÷w22bG&÷r—²G&÷u²w–ÆöBuÓÕ%5eô†VÇW'3£¦§6öåöFV6öFR‚G&÷u²w–ÆöEö§6öâuÒ“·Vç6WB‚G&÷u²w–ÆöEö§6öâuÒ“·×&WGW&âG&÷w3° —Ð  —&—fFR7FF–2gVæ7F–öâ7FFUövWB‚FfVGW&Uö–BÂFö&¦V7E÷&VbÂG7FFUö¶W’ÂFFVfVÇBÒ'&’‚’’° –vÆö&ÂGwF#²GF&ÆSÕ%5eô†VÇW'3£§F&ÆR‚vgWGW&U÷W6W%÷7FFRr“²G&÷sÒGwF"ÓævWE÷&÷r‚GwF"Óç&W&R‚%4TÄT5B–ÆöEö§6öâÇfW'6–öâÇWFFVEöBe$ôÒGF&ÆRt„U$RW6W%ö–CÒVBäBfVGW&Uö–CÒW2äBö&¦V7E÷&VcÒW2äB7FFUö¶W“ÒW2"ÆvWEö7W'&VçE÷W6W%ö–B‚’ÂFfVGW&Uö–BÅ%5eô†VÇW'3£§FW‡B‚Fö&¦V7E÷&VbÃ’Ç6æ—F—¦Uö¶W’‚G7FFUö¶W’’’Ä%$•ô“¶–b‚G&÷r—&WGW&âFFVfVÇC²G–ÆöEöFVfVÇCÒ†—5ö'&’‚FFVfVÇB’bf'&•ö¶W•öW†—7G2‚w–ÆöBrÂFFVfVÇB’“ò†'&’’FFVfVÇE²w–ÆöBuÓ¢†'&’’FFVfVÇC·&WGW&â'&’‚w–ÆöBsÓå%5eô†VÇW'3£¦§6öåöFV6öFR‚G&÷u²w–ÆöEö§6öâuÒÂG–ÆöEöFVfVÇB’ÂwfW'6–öâsÓæ'6–çB‚G&÷u²wfW'6–öâuÒ’ÂwWFFVEöBsÓâG&÷u²wWFFVEöBuÒ“° —Ð  —&—fFR7FF–2gVæ7F–öâ7FFU÷WB‚FfVGW&Uö–BÂFö&¦V7E÷&VbÂG7FFUö¶W’ÂG–ÆöB’° –vÆö&ÂGwF#²GF&ÆSÕ%5eô†VÇW'3£§F&ÆR‚vgWGW&U÷W6W%÷7FFRr“²Fæ÷sÕ%5eô†VÇW'3£¦æ÷r‚“²Fö&¦V7E÷&VcÕ%5eô†VÇW'3£§FW‡B‚Fö&¦V7E÷&VbÃ“²G7FFUö¶W“×6æ—F—¦Uö¶W’‚G7FFUö¶W’“²G–ÆöCÕ%5eô†VÇW'3£¦§6öåöVæ6öFR‡6VÆc£§6æ—F—¦U÷–ÆöB‚G–ÆöB’“° ’G7ÃÒGwF"Óç&W&R‚$”å4U%B”åDòGF&ÆR‡W6W%ö–BÆfVGW&Uö–BÆö&¦V7E÷&VbÇ7FFUö¶W’Ç–ÆöEö§6öâÇfW'6–öâÆ7&VFVEöBÇWFFVEöB’dÅTU2‚VBÂW2ÂW2ÂW2ÂW2ÃÂW2ÂW2’ôâEUÄ”DR´U’UDDR–ÆöEö§6öãÕdÅTU2‡–ÆöEö§6öâ’ÇfW'6–öã×fW'6–öâ³ÇWFFVEöCÕdÅTU2‡WFFVEöB’"ÆvWEö7W'&VçE÷W6W%ö–B‚’ÂFfVGW&Uö–BÂFö&¦V7E÷&VbÂG7FFUö¶W’ÂG–ÆöBÂFæ÷rÂFæ÷r“¶–b†fÇ6SÓÓÒGwF"ÓçVW'’‚G7Â’—&WGW&â%5eô†VÇW'3£¦W'&÷"‚w'7eögWGW&U÷7FFUöf–ÆVBrÅõò‚uF†R&—fFR6WGF–ær6÷VÆBæ÷B&R6fVBârÅ%5eõDU…EôDôÔ”â’ÃS“·&WGW&â6VÆc£§7FFUövWB‚FfVGW&Uö–BÂFö&¦V7E÷&VbÂG7FFUö¶W’Æ'&’‚’“° —Ð   —&—fFR7FF–2gVæ7F–öâ–FV×÷FVçEöf–æ—6…÷&W7VÇB‚G66÷RÂF¶W’ÂF÷W&F–öâÂFWf–FVæ6RÒ'&’‚’’° ’G&W7VÇBÒ%5eôD#£§G&ç67F–öâ€ —7FF–2gVæ7F–öâ‚’W6R‚G66÷RÂF¶W’ÂF÷W&F–öâÂFWf–FVæ6R’° ’GfÇVRÒ—5ö6ÆÆ&ÆR‚F÷W&F–öâ’ò6ÆÅ÷W6W%ögVæ2‚F÷W&F–öâ’¢%5eô†VÇW'3£¦W'&÷"‚w'7eögWGW&Uö÷W&F–öåö–çfÆ–BrÂõò‚uF†R&÷FV7FVB÷W&F–öâ6÷VÆBæ÷B&RW†V7WFVBârÂ%5eõDU…EôDôÔ”â’ÂS“° ––b‚—5÷wöW'&÷"‚GfÇVR’’&WGW&âGfÇVS° ’G&W7öç6RÒ'&’‚vö²rÓâG'VRÂw&W7VÇBrÓâGfÇVR“° ––b‚%5eõ6V7W&—G“£¦–FV×÷FVæ7•öf–æ—6‚‚G66÷RÂF¶W’ÂG&W7öç6R’’&WGW&â%5eô†VÇW'3£¦W'&÷"‚w'7eö–FV×÷FVæ7•öf–æ—6…öf–ÆVBrÂõò‚uF†R÷W&F–öâ6÷VÆBæ÷B&R6öÖÖ—GFVBv—F‚6ö×ÆWFR&WÆ’Wf–FVæ6RârÂ%5eõDU…EôDôÔ”â’ÂS“° ––b‚FWf–FVæ6R’° ’FVçF—G•÷G—RÒ6æ—F—¦Uö¶W’‚FWf–FVæ6U²vVçF—G•÷G—RuÒóòvgWGW&S3r“° ’FVçF—G•ö–BÒ'6–çB‚FWf–FVæ6U²vVçF—G•ö–BuÒóò“° ’F7F–öâÒ6æ—F—¦Uö¶W’‚FWf–FVæ6U²v7F–öâuÒóòwWFFRr“° ’G&V6öâÒ%5eô†VÇW'3£§FW‡B‚FWf–FVæ6U²w&V6öâuÒóòrrÂS“° ’FÖWFÒ—5ö'&’‚FWf–FVæ6U²vÖWFuÒóòçVÆÂ’òFWf–FVæ6U²vÖWFuÒ¢'&’‚“° ’FWfVçBÒ%5eô†VÇW'3£§FW‡B‚FWf–FVæ6U²vWfVçBuÒóòrrÂ#“° ’FWfVçEöFFÒ—5ö'&’‚FWf–FVæ6U²vWfVçEöFFuÒóòçVÆÂ’òFWf–FVæ6U²vWfVçEöFFuÒ¢'&’‚“° ––b‚%5eô†VÇW'3£¦VF—B‚FVçF—G•÷G—RÂFVçF—G•ö–BÂF7F–öâÂrrÂrrÂG&V6öâÂFÖWF’ÇÂ‚FWfVçBbb%5eô†VÇW'3£¦÷WF&÷‚‚FWfVçBÂFVçF—G•÷G—RÂFVçF—G•ö–BÂFWfVçEöFF’’’° —&WGW&â%5eô†VÇW'3£¦W'&÷"‚w'7eögWGW&UöWf–FVæ6Uöf–ÆVBrÂõò‚uF†R÷W&F–öâ6÷VÆBæ÷B&R6öÖÖ—GFVBv—F‚6ö×ÆWFRVF—BæBWfVçBWf–FVæ6RârÂ%5eõDU…EôDôÔ”â’ÂS“° —Ð —Ð —&WGW&âG&W7öç6S° —Ð ’“° ––b‚—5÷wöW'&÷"‚G&W7VÇB’’²%5eõ6V7W&—G“£¦–FV×÷FVæ7•öf–Â‚G66÷RÂF¶W’“²&WGW&âG&W7VÇC²Ð —&WGW&â&W7EöVç7W&U÷&W7öç6R‚G&W7VÇB“° —Ð §Ð
+		return in_array( $feature_id, array( 'F11-FUT-003','F11-FUT-004','F11-FUT-005','F11-FUT-006','F11-FUT-007','F11-FUT-008','F11-FUT-009','F11-FUT-010','F11-FUT-011','F11-FUT-012','F11-FUT-013','F11-FUT-014','F11-FUT-015','F11-FUT-016','F11-FUT-017','F11-FUT-018','F11-FUT-019','F11-FUT-024','F11-FUT-028','F11-FUT-030' ), true );
+	}
+
+	private static function canonical_ref_public_valid( $owner, $ref, $purpose ) {
+		$owner = RSV_Helpers::text( $owner, 30 );
+		$ref = RSV_Helpers::text( $ref, 255 );
+		if ( ! $owner || ! $ref ) return false;
+		if ( 'File 11' === $owner ) {
+			$target = RSV_Repository::find( $ref, true );
+			return (bool) ( $target && RSV_Security::can_view_reel( $target, 0 ) );
+		}
+		return true === apply_filters( 'rsv_future30_public_ref_valid', false, $owner, $ref, sanitize_key( $purpose ) );
+	}
+
+	private static function public_projection( $feature_id, $reel ) {
+		$objects = self::object_rows( $feature_id, $reel['id'], 0, 100 );
+		$edges = self::edge_rows( $feature_id, $reel['id'], 200 );
+		foreach ( $objects as &$object ) unset( $object['owner_id'] );
+		if ( 'F11-FUT-006' === $feature_id ) foreach ( $edges as &$row ) $row['payload'] = array( 'effective_at'=>$row['payload']['effective_at'] ?? '' );
+		if ( 'F11-FUT-007' === $feature_id ) foreach ( $objects as &$row ) $row['payload'] = array( 'reel_version'=>absint($row['payload']['reel_version'] ?? 0), 'snapshot_hash'=>RSV_Helpers::text($row['payload']['snapshot_hash'] ?? '',64) );
+		if ( 'F11-FUT-012' === $feature_id ) {
+			$edges = array_values( array_filter( $edges, static function( $row ) { return ! empty( $row['payload']['accepted'] ); } ) );
+		}
+		if ( 'F11-FUT-013' === $feature_id ) {
+			$edges = array_values( array_filter( $edges, static function( $row ) { return 'approved' === ( $row['payload']['decision'] ?? '' ); } ) );
+			foreach ( $edges as &$row ) {
+				$row['payload'] = array( 'decision'=>'approved', 'reviewed_at'=>$row['payload']['reviewed_at'] ?? '', 'conflict_declared'=>! empty( $row['payload']['conflict_declared'] ) );
+			}
+		}
+		if ( 'F11-FUT-016' === $feature_id ) {
+			$objects = array_values( array_filter( $objects, static function( $row ) { return ! empty( $row['payload']['reviewed'] ); } ) );
+		}
+		if ( 'F11-FUT-019' === $feature_id ) {
+			foreach ( $objects as &$row ) {
+				$questions = array();
+				foreach ( (array) ( $row['payload']['questions'] ?? array() ) as $question ) {
+					if ( ! is_array( $question ) ) continue;
+					unset( $question['correct'], $question['answer'], $question['explanation_private'] );
+					$questions[] = $question;
+				}
+				$row['payload']['questions'] = $questions;
+			}
+		}
+		return array( 'objects'=>$objects, 'edges'=>$edges );
+	}
+
+	private static function sanitize_payload( $payload ) {
+		$payload = is_array( $payload ) ? $payload : array();
+		$out = array();
+		foreach ( $payload as $key => $value ) {
+			$key = sanitize_key( (string) $key );
+			if ( is_array( $value ) ) $out[ $key ] = self::sanitize_payload( $value );
+			elseif ( is_bool( $value ) ) $out[ $key ] = $value;
+			elseif ( is_numeric( $value ) ) $out[ $key ] = 0 + $value;
+			else $out[ $key ] = RSV_Helpers::text( (string) $value, 4000 );
+		}
+		return $out;
+	}
+
+	private static function put_object( $feature_id, $object_type, $reel_id, $title, $payload, $public_id = '' ) {
+		global $wpdb;
+		$table = RSV_Helpers::table( 'future_objects' );
+		$feature_id = strtoupper( sanitize_text_field( $feature_id ) );
+		$object_type = sanitize_key( $object_type );
+		$public_id = $public_id ? RSV_Helpers::text( $public_id, 80 ) : RSV_Helpers::public_id( 'f30' );
+		$now = RSV_Helpers::now();
+		$existing = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE public_id=%s", $public_id ), ARRAY_A );
+		$data = array( 'feature_id'=>$feature_id,'object_type'=>$object_type,'reel_id'=>absint($reel_id),'owner_id'=>get_current_user_id(),'status'=>'active','title'=>RSV_Helpers::text($title,255),'payload_json'=>RSV_Helpers::json_encode(self::sanitize_payload($payload)),'updated_at'=>$now );
+		if ( $existing ) {
+			if ( absint( $existing['owner_id'] ) !== get_current_user_id() && ! RSV_Security::can( RSV_Contracts::CAP_MANAGE ) ) return RSV_Helpers::error( 'rsv_future_forbidden', __( 'You cannot update this item.', RSV_TEXT_DOMAIN ), 403 );
+			$data['version'] = absint( $existing['version'] ) + 1;
+			$ok = $wpdb->update( $table, $data, array('id'=>absint($existing['id']),'version'=>absint($existing['version'])), array('%s','%s','%d','%d','%s','%s','%s','%s','%d'), array('%d','%d') );
+			if ( 1 !== $ok ) return RSV_Helpers::error( 'rsv_future_conflict', __( 'The item changed. Refresh and retry.', RSV_TEXT_DOMAIN ), 409 );
+			return array( 'public_id'=>$public_id, 'version'=>$data['version'] );
+		}
+		$data['public_id']=$public_id; $data['version']=1; $data['created_at']=$now;
+		$ok = $wpdb->insert( $table, $data, array('%s','%s','%s','%d','%d','%s','%s','%s','%s','%d','%s') );
+		if ( 1 !== $ok ) return RSV_Helpers::error( 'rsv_future_write_failed', __( 'The item could not be saved.', RSV_TEXT_DOMAIN ), 500 );
+		return array( 'public_id'=>$public_id, 'version'=>1 );
+	}
+
+	private static function put_edge( $feature_id, $reel_id, $edge_type, $target_owner, $target_ref, $payload, $start = 0, $end = 0 ) {
+		global $wpdb;
+		$table=RSV_Helpers::table('future_edges'); $now=RSV_Helpers::now();
+		$target_owner=RSV_Helpers::text($target_owner,30); $target_ref=RSV_Helpers::text($target_ref,255);
+		if ( ! $target_ref ) return RSV_Helpers::error('rsv_future_target_required',__('A canonical target reference is required.',RSV_TEXT_DOMAIN),422);
+		$start=max(0,absint($start)); $end=max($start,absint($end));
+		$public_id=RSV_Helpers::public_id('edge');
+		$ok=$wpdb->insert($table,array('public_id'=>$public_id,'feature_id'=>$feature_id,'source_reel_id'=>absint($reel_id),'edge_type'=>sanitize_key($edge_type),'target_owner'=>$target_owner,'target_ref'=>$target_ref,'start_second'=>$start,'end_second'=>$end,'payload_json'=>RSV_Helpers::json_encode(self::sanitize_payload($payload)),'status'=>'active','version'=>1,'created_at'=>$now,'updated_at'=>$now),array('%s','%s','%d','%s','%s','%s','%d','%d','%s','%s','%d','%s','%s'));
+		if(1!==$ok)return RSV_Helpers::error('rsv_future_edge_failed',__('The relationship could not be saved.',RSV_TEXT_DOMAIN),500);
+		return array('public_id'=>$public_id,'version'=>1);
+	}
+
+	private static function object_rows( $feature_id, $reel_id = 0, $owner_id = 0, $limit = 50 ) {
+		global $wpdb; $table=RSV_Helpers::table('future_objects'); $where=array('feature_id=%s','status=%s'); $args=array($feature_id,'active');
+		if($reel_id){$where[]='reel_id=%d';$args[]=absint($reel_id);} if($owner_id){$where[]='owner_id=%d';$args[]=absint($owner_id);} $args[]=min(100,max(1,absint($limit)));
+		$sql="SELECT public_id,feature_id,object_type,reel_id,owner_id,title,payload_json,version,created_at,updated_at FROM $table WHERE ".implode(' AND ',$where).' ORDER BY updated_at DESC,id DESC LIMIT %d';
+		$rows=$wpdb->get_results($wpdb->prepare($sql,$args),ARRAY_A); foreach($rows as &$row){$row['payload']=RSV_Helpers::json_decode($row['payload_json']);unset($row['payload_json']);} return $rows;
+	}
+
+	private static function edge_rows( $feature_id, $reel_id, $limit = 100 ) {
+		global $wpdb;$table=RSV_Helpers::table('future_edges');$rows=$wpdb->get_results($wpdb->prepare("SELECT public_id,feature_id,edge_type,target_owner,target_ref,start_second,end_second,payload_json,version,created_at,updated_at FROM $table WHERE feature_id=%s AND source_reel_id=%d AND status='active' ORDER BY start_second ASC,id ASC LIMIT %d",$feature_id,absint($reel_id),min(200,max(1,absint($limit)))),ARRAY_A);foreach($rows as &$row){$row['payload']=RSV_Helpers::json_decode($row['payload_json']);unset($row['payload_json']);}return $rows;
+	}
+
+	private static function state_get( $feature_id, $object_ref, $state_key, $default = array() ) {
+		global $wpdb;$table=RSV_Helpers::table('future_user_state');$row=$wpdb->get_row($wpdb->prepare("SELECT payload_json,version,updated_at FROM $table WHERE user_id=%d AND feature_id=%s AND object_ref=%s AND state_key=%s",get_current_user_id(),$feature_id,RSV_Helpers::text($object_ref,100),sanitize_key($state_key)),ARRAY_A);if(!$row)return $default;$payload_default=(is_array($default)&&array_key_exists('payload',$default))?(array)$default['payload']:(array)$default;return array('payload'=>RSV_Helpers::json_decode($row['payload_json'],$payload_default),'version'=>absint($row['version']),'updated_at'=>$row['updated_at']);
+	}
+
+	private static function state_put( $feature_id, $object_ref, $state_key, $payload ) {
+		global $wpdb;$table=RSV_Helpers::table('future_user_state');$now=RSV_Helpers::now();$object_ref=RSV_Helpers::text($object_ref,100);$state_key=sanitize_key($state_key);$payload=RSV_Helpers::json_encode(self::sanitize_payload($payload));
+		$sql=$wpdb->prepare("INSERT INTO $table (user_id,feature_id,object_ref,state_key,payload_json,version,created_at,updated_at) VALUES (%d,%s,%s,%s,%s,1,%s,%s) ON DUPLICATE KEY UPDATE payload_json=VALUES(payload_json),version=version+1,updated_at=VALUES(updated_at)",get_current_user_id(),$feature_id,$object_ref,$state_key,$payload,$now,$now);if(false===$wpdb->query($sql))return RSV_Helpers::error('rsv_future_state_failed',__('The private setting could not be saved.',RSV_TEXT_DOMAIN),500);return self::state_get($feature_id,$object_ref,$state_key,array());
+	}
+
+
+	private static function idempotent_finish_result( $scope, $key, $operation, $evidence = array() ) {
+		$result = RSV_DB::transaction(
+			static function () use ( $scope, $key, $operation, $evidence ) {
+				$value = is_callable( $operation ) ? call_user_func( $operation ) : RSV_Helpers::error( 'rsv_future_operation_invalid', __( 'The protected operation could not be executed.', RSV_TEXT_DOMAIN ), 500 );
+				if ( is_wp_error( $value ) ) return $value;
+				$response = array( 'ok' => true, 'result' => $value );
+				if ( ! RSV_Security::idempotency_finish( $scope, $key, $response ) ) return RSV_Helpers::error( 'rsv_idempotency_finish_failed', __( 'The operation could not be committed with complete replay evidence.', RSV_TEXT_DOMAIN ), 500 );
+				if ( $evidence ) {
+					$entity_type = sanitize_key( $evidence['entity_type'] ?? 'future30' );
+					$entity_id   = absint( $evidence['entity_id'] ?? 0 );
+					$action      = sanitize_key( $evidence['action'] ?? 'update' );
+					$reason      = RSV_Helpers::text( $evidence['reason'] ?? '', 500 );
+					$meta        = is_array( $evidence['meta'] ?? null ) ? $evidence['meta'] : array();
+					$event       = RSV_Helpers::text( $evidence['event'] ?? '', 120 );
+					$event_data  = is_array( $evidence['event_data'] ?? null ) ? $evidence['event_data'] : array();
+					if ( ! RSV_Helpers::audit( $entity_type, $entity_id, $action, '', '', $reason, $meta ) || ( $event && ! RSV_Helpers::outbox( $event, $entity_type, $entity_id, $event_data ) ) ) {
+						return RSV_Helpers::error( 'rsv_future_evidence_failed', __( 'The operation could not be committed with complete audit and event evidence.', RSV_TEXT_DOMAIN ), 500 );
+					}
+				}
+				return $response;
+			}
+		);
+		if ( is_wp_error( $result ) ) { RSV_Security::idempotency_fail( $scope, $key ); return $result; }
+		return rest_ensure_response( $result );
+	}
+
+}
