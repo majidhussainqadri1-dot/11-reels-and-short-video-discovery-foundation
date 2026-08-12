@@ -25,14 +25,14 @@ Baseline exact repository HEAD before this cycle: `26fb6594032129d40d4ab6fd470eb
 | 17 | CLEAN | Pre-publish Clinical Safety Scanner provider-outage, review-required, no-auto-publish and no-autonomous-clinical-authority behavior rechecked. |
 | 18 | DEFECT | **F11-D-913** — Accessibility Plus writes could reset unspecified preferences on partial updates and lacked complete idempotency/audit/outbox evidence. Added merge-preserving partial writes with row locking and atomic replay/audit/event evidence. |
 | 19 | DEFECT | **F11-D-914** — Knowledge Graph local/federated read output lacked a final current target/evidence revalidation layer. Added current canonical target and File 06 evidence checks with bounded safe projection. |
-| 20 | DEFECT | **F11-D-915** — the new Fresh-20 corrections lacked their own dedicated regression suite. Added `tests/fresh20-hardening-contracts.php` to complete QA. **F11-D-916** — keeping the prior `1.2.0-rc1` identity after substantive behavior/contract fixes would create mutable release identity. Advanced candidate to `1.2.0-rc2`, File 11 contract `8`, and a distinct rc2 package/workflow identity. |
+| 20 | DEFECT → FIX → RETEST | **F11-D-915** — the new Fresh-20 corrections lacked their own dedicated regression suite. **F11-D-916** — retaining `1.2.0-rc1` after substantive fixes would create mutable release identity, so the candidate advanced to `1.2.0-rc2` / File 11 contract `8`. The first rc2 exact-head run then exposed **F11-D-917**: the inherited RC5 regression fixture still hard-coded File 11 contract `7`. The fixture was corrected to contract `8`; Round 20 remains open until the corrected exact HEAD completes Green. |
 
 ## Accounting
 
-- Requested rounds: **20/20 completed**.
+- Requested rounds: **20/20 substantive rounds completed**; Round 20 exact-head retest is the final closure gate.
 - Defect rounds: **03, 04, 06, 07, 08, 10, 11, 12, 13, 14, 15, 18, 19, 20**.
 - Clean rounds: **01, 02, 05, 09, 16, 17**.
-- New findings: **F11-D-896 through F11-D-916** (21 findings).
+- New findings: **F11-D-896 through F11-D-917** (22 findings).
 - Candidate after corrections: **1.2.0-rc2**, File 11 contract **8**; main schema `1.2.0`, Top-20 schema `1.1.0`, Future30 schema `1.0.0` unchanged.
 
 ## Claim boundary
