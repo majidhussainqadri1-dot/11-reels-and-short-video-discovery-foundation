@@ -3,10 +3,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 P="$ROOT/11-reels-foundation"
 
-grep -F "Version: 1.2.0-rc3" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_VERSION', '1.2.0-rc3' )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "Version: 1.2.0-rc4" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_VERSION', '1.2.0-rc4' )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "define( 'RSV_SCHEMA_VERSION', '1.2.0' )" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_CONTRACT_VERSION', 9 )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_CONTRACT_VERSION', 10 )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "class-rsv-current-plan.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "trait-rsv-future30-storage.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "trait-rsv-future30-feature-write.php" "$P/11-reels-foundation.php" >/dev/null
@@ -16,6 +16,7 @@ grep -F "class-rsv-future30.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "class-rsv-fresh20-hardening.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "class-rsv-fresh-review-hardening.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "class-rsv-fresh-review-public-minimization.php" "$P/11-reels-foundation.php" >/dev/null
+grep -F "class-rsv-third-review-hardening.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "new RSV_Future30" "$P/includes/class-rsv-plugin.php" >/dev/null
 grep -F "RSV_Future30::install" "$P/includes/class-rsv-plugin.php" >/dev/null
 
@@ -95,6 +96,12 @@ grep -F "rsv_quiz_unknown_field" "$R" >/dev/null
 grep -F "authoritative_duration_seconds" "$R" >/dev/null
 grep -F "class RSV_Fresh_Review_Public_Minimization" "$P/includes/class-rsv-fresh-review-public-minimization.php" >/dev/null
 
+T="$P/includes/class-rsv-third-review-hardening.php"
+grep -F "class RSV_Third_Review_Hardening" "$T" >/dev/null
+grep -F "MIN_CREATOR_RESEARCH_SAMPLE = 5" "$T" >/dev/null
+grep -F "rsv_future30_creator_research_aggregates" "$T" >/dev/null
+grep -F "subject_ref" "$P/includes/class-rsv-future30-privacy-integrity.php" >/dev/null
+
 ! grep -RIE "(api[_-]?key|secret|token)[[:space:]]*=[[:space:]]*['\"][A-Za-z0-9_\-]{16,}" "$P" --include='*.php' --include='*.js'
 ! grep -R "postMessage" "$P/assets/js/rsv.js" | grep -F ", '*')"
 ! grep -R "if ( ! items )" "$P"
@@ -102,4 +109,4 @@ grep -F "class RSV_Fresh_Review_Public_Minimization" "$P/includes/class-rsv-fres
 ! grep -F ":root{" "$P/assets/css/rsv.css"
 ! grep -F ":root" "$P/assets/css/rsv-top20.css"
 
-echo "static contracts Future30 rc3 PASS"
+echo "static contracts Future30 rc4 PASS"
