@@ -13,6 +13,7 @@ php "$ROOT/tests/rc5-hardening-contracts.php"
 php "$ROOT/tests/rc6-forty-review-contracts.php"
 php "$ROOT/tests/current-plan-contracts.php"
 php "$ROOT/tests/future30-contracts.php"
+php "$ROOT/tests/fresh40-hardening-contracts.php"
 bash "$ROOT/tests/static-contracts.sh"
 A="$(mktemp -d)"; B="$(mktemp -d)"; trap 'rm -rf "$A" "$B"' EXIT
 bash "$ROOT/tools/build-package.sh" "$A/file11.zip" >/dev/null
