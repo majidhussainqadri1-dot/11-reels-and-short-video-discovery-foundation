@@ -26,7 +26,8 @@ $markers = array(
 	array('lock','pre_delete_option_'), array('lock','acquire_lock'), array('lock','release_lock'),
 	array('feature_write','rsv_future30_evidence_failed'), array('feature_write','RSV_DB::transaction'), array('storage','idempotent_finish_result'), array('storage','rsv_future_evidence_failed'),
 );
-foreach ( $markers as array($key,$needle) ) {
+foreach ( $markers as $pair ) {
+	list( $key, $needle ) = $pair;
 	if ( false === strpos( $files[$key], $needle ) ) { fwrite( STDERR, "Missing fresh40 hardening marker [$key]: $needle\n" ); exit( 1 ); }
 }
 if ( false !== strpos( $files['public'], "'translation_status'=>'candidate'" ) ) { fwrite( STDERR, "Unsafe candidate translation marker found in public guard\n" ); exit( 1 ); }
