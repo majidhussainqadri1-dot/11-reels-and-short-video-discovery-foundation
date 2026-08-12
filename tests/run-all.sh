@@ -26,4 +26,4 @@ unzip -t "$A/file11.zip" >/dev/null
 test "$(unzip -Z1 "$A/file11.zip" | cut -d/ -f1 | sort -u)" = "reels-foundation-11"
 rm -rf "$A/extract"; mkdir -p "$A/extract"; unzip -q "$A/file11.zip" -d "$A/extract"
 diff -ru "$P" "$A/extract/reels-foundation-11"
-echo "all File 11 Future30 1.2.0-rc3 automated checks PASS"
+echo "all File 11 Future30 1.2.0-rc4 automated checks PASS"
