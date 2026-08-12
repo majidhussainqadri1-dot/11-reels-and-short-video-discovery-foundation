@@ -52,6 +52,7 @@ $files = array(
 	'class-rsv-future30-privacy-integrity.php',
 	'class-rsv-fresh20-hardening.php',
 	'class-rsv-fresh-review-hardening.php',
+	'class-rsv-fresh-review-public-minimization.php',
 	'trait-rsv-top20-context.php',
 	'trait-rsv-top20-stories.php',
 	'trait-rsv-top20-responses.php',
