@@ -7,8 +7,8 @@ $f = array(
     'future'    => $read( $root . '/includes/class-rsv-future30.php' ),
 );
 $must = array(
-    array( 'bootstrap', 'Version: 1.2.0-rc4' ),
-    array( 'bootstrap', "define( 'RSV_CONTRACT_VERSION', 10 )" ),
+    array( 'bootstrap', 'Version: 1.2.0-rc5' ),
+    array( 'bootstrap', "define( 'RSV_CONTRACT_VERSION', 11 )" ),
     array( 'bootstrap', 'class-rsv-fresh20-hardening.php' ),
     array( 'hardening', 'rsv_series_invalid' ), array( 'hardening', 'rsv_learning_step_invalid' ),
     array( 'hardening', 'rsv_evidence_grade_invalid' ), array( 'hardening', 'rsv_remix_self_invalid' ),
@@ -25,5 +25,5 @@ $must = array(
 );
 foreach ( $must as $pair ) { list( $key, $needle ) = $pair; if ( false === strpos( $f[$key], $needle ) ) { fwrite( STDERR, "Missing fresh20 marker [$key]: $needle\n" ); exit( 1 ); } }
 if ( 30 !== preg_match_all( "/'F11-FUT-[0-9]{3}'/", substr( $f['future'], strpos( $f['future'], 'const FEATURE_IDS' ), strpos( $f['future'], 'public static function definitions' ) - strpos( $f['future'], 'const FEATURE_IDS' ) ) ) ) { fwrite( STDERR, "Future30 manifest no longer contains exactly 30 stable IDs\n" ); exit( 1 ); }
-foreach ( array( 'Version: 1.2.0-rc1', 'Version: 1.2.0-rc2', 'Version: 1.2.0-rc3', "define( 'RSV_CONTRACT_VERSION', 7 )", "define( 'RSV_CONTRACT_VERSION', 8 )", "define( 'RSV_CONTRACT_VERSION', 9 )" ) as $needle ) if ( false !== strpos( $f['bootstrap'], $needle ) ) { fwrite( STDERR, "Stale release identity remains: $needle\n" ); exit( 1 ); }
-echo "fresh 20-round hardening contracts PASS under rc4\n";
+foreach ( array( 'Version: 1.2.0-rc1', 'Version: 1.2.0-rc2', 'Version: 1.2.0-rc3', 'Version: 1.2.0-rc4', "define( 'RSV_CONTRACT_VERSION', 7 )", "define( 'RSV_CONTRACT_VERSION', 8 )", "define( 'RSV_CONTRACT_VERSION', 9 )", "define( 'RSV_CONTRACT_VERSION', 10 )" ) as $needle ) if ( false !== strpos( $f['bootstrap'], $needle ) ) { fwrite( STDERR, "Stale release identity remains: $needle\n" ); exit( 1 ); }
+echo "fresh 20-round hardening contracts PASS under rc5\n";
