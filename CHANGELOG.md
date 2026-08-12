@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.0-rc2 — 2026-08-12
+
+### Fresh 20-round corrective hardening
+- Completed 20 sequential review → fix → next-review rounds over all Future30 capabilities and release integrity.
+- Corrected `F11-D-896` through `F11-D-917`; see `docs/FRESH-20-REVIEW-REGISTER-1.2.0-rc2.md`.
+- Added final read-time current-reference validation for Series, Learning Paths, related/citation/knowledge/transcript tools, AI context and Knowledge Graph.
+- Added bounded evidence grades, template types/sections, recommendation reasons and strict linked-language Reel truth.
+- Denied self-remix and conflicted peer-review approval; preserved current external owner attestations.
+- Added type-aware quiz scoring and atomic rate/idempotency/audit/outbox evidence for quiz attempts, collections, notes, feed preferences and Accessibility Plus writes.
+- Bridged Future30 history pause to the canonical Top-20 preference and applied persisted autoplay through the existing guarded runtime control.
+- Advanced immutable release identity to plugin `1.2.0-rc2`, File 11 contract `8`; main/Top-20/Future30 schemas remain unchanged.
+
 ## 1.2.0-rc1 — 2026-08-12
 
 ### Future Reel Knowledge & Learning Intelligence — 30 Enhancements
@@ -8,15 +20,6 @@
 - Added original-language + nine linked-language enforcement, governed AI translation/dubbing requests, reviewed transcript projection, chapters, knowledge cards and micro-quizzes.
 - Added private study collections, timestamp notes, File 16 grounded AI context, File 26 search opportunity consumer, expanded recommendation explanations, feed controls/diversity preferences and privacy-thresholded creator research metrics.
 - Added pre-publish clinical safety scanning, Accessibility Plus preferences and Reel knowledge-graph edges.
-
-### Security/privacy hardening during implementation
-- Public generic Future30 APIs explicitly deny private/dedicated capabilities.
-- Public projections strip internal owner IDs, pending co-author invites, reviewer notes, rejected reviews, unsafe historical captions and quiz correct answers.
-- External canonical refs fail closed through owner/provider validation.
-- Timestamps are bounded by the authoritative File 10 duration.
-- Patient-case/remix permission, co-author consent, peer-review attestation, dubbing voice consent, File 10 derivatives/tracks and reviewed transcript refs require provider-verifiable evidence.
-- Series, learning-path, note and safety-scan mutations use rate limits/idempotency where duplicate effects matter.
-- Search-opportunity and creator-research outputs are privacy-minimized; provider graph output is reduced to public-safe allowlisted fields.
 
 ### Release identity
 - Plugin `1.2.0-rc1`; main schema `1.2.0`; Top-20 schema `1.1.0`; Future30 schema `1.0.0`; File 11 contract `7`; event `4`; provider `3`; Future30 contract `1`.
