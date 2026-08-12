@@ -33,6 +33,17 @@ final class RSV_Future30_Privacy_Integrity {
 				$removed = $wpdb->query( $sql );
 				if ( false === $removed || absint( $removed ) !== count( $ids ) ) return RSV_Helpers::error( 'rsv_future30_erase_incomplete', __( 'Private Reel data could not be erased atomically.', RSV_TEXT_DOMAIN ), 500 );
 				if ( ! RSV_Helpers::audit( 'privacy', $user_id, 'future30_erase', '', '', 'Private Future30 state erased', array( 'count'=>absint($removed) ), $user_id ) ) return RSV_Helpers::error( 'rsv_future30_erase_evidence_failed', __( 'Private Reel data erasure could not be committed with complete evidence.', RSV_TEXT_DOMAIN ), 500 );
+				if ( ! RSV_Helpers::outbox(
+					'ReelFuturePrivateStateErased',
+					'privacy',
+					$user_id,
+					array(
+						'user_ref' => RSV_Helpers::opaque_user_ref( $user_id, 'future30-erasure' ),
+						'features' => array( 'F11-FUT-019','F11-FUT-020','F11-FUT-021','F11-FUT-025','F11-FUT-026','F11-FUT-029' ),
+						'reconcile' => array( 'cache', 'index', 'feed-preferences', 'accessibility-preferences' ),
+						'count' => absint( $removed ),
+					)
+				) ) return RSV_Helpers::error( 'rsv_future30_erase_reconciliation_failed', __( 'Private Reel data erasure could not be committed with downstream reconciliation evidence.', RSV_TEXT_DOMAIN ), 500 );
 				$remaining = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $table WHERE user_id=%d", $user_id ) );
 				return array( 'removed'=>absint($removed), 'done'=>0 === $remaining );
 			}
