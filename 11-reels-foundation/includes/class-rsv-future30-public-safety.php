@@ -2,13 +2,35 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Final public-response guard for Future30 generic feature projections.
- * Write-time validation is not sufficient: external references, reviewer
- * attestations, translations and transcripts can become stale after storage.
+ * Final public/read and pre-mutation guard for Future30 projections.
+ * Stored external assertions are revalidated at read time and graph-changing
+ * mutations are rejected before they can create ambiguous/cyclic lineage.
  */
 final class RSV_Future30_Public_Safety {
 	public static function register() {
+		add_filter( 'rest_pre_dispatch', array( __CLASS__, 'pre_dispatch' ), 20, 3 );
 		add_filter( 'rest_post_dispatch', array( __CLASS__, 'filter_response' ), 90, 3 );
+	}
+
+	public static function pre_dispatch( $result, $server, $request ) {
+		unset( $server );
+		if ( null !== $result || 'POST' !== $request->get_method() ) return $result;
+		$route = $request->get_route();
+		if ( ! preg_match( '#^/rsv/v1/reels/(reel_[a-f0-9-]{36})/future30/(F11-FUT-[0-9]{3})$#', $route, $m ) ) return $result;
+		if ( 'F11-FUT-006' !== $m[2] ) return $result;
+		$source = RSV_Repository::find( $m[1], true );
+		if ( ! $source || ! RSV_Security::can( RSV_Contracts::CAP_PUBLISH, $source, 'future30_supersession' ) ) return $result;
+		$params = (array) $request->get_json_params();
+		$replacement_ref = RSV_Helpers::text( $params['replacement_reel_ref'] ?? '', 255 );
+		if ( ! $replacement_ref ) return $result;
+		if ( hash_equals( (string) $source['public_id'], $replacement_ref ) || self::supersession_would_cycle( $source['public_id'], $replacement_ref ) ) {
+			return RSV_Helpers::error( 'rsv_supersession_cycle', __( 'A Reel correction cannot supersede itself or create a supersession cycle.', RSV_TEXT_DOMAIN ), 409 );
+		}
+		$existing = self::active_supersession_targets( absint( $source['id'] ) );
+		if ( $existing && ! in_array( $replacement_ref, $existing, true ) ) {
+			return RSV_Helpers::error( 'rsv_supersession_ambiguous', __( 'This Reel already has an active replacement. Resolve the existing lineage before assigning another.', RSV_TEXT_DOMAIN ), 409 );
+		}
+		return $result;
 	}
 
 	public static function filter_response( $response, $server, $request ) {
@@ -24,6 +46,27 @@ final class RSV_Future30_Public_Safety {
 		$data['edges']   = self::safe_edges( $m[2], (array) ( $data['edges'] ?? array() ), $reel );
 		$response->set_data( $data );
 		return $response;
+	}
+
+	private static function active_supersession_targets( $source_id ) {
+		global $wpdb;
+		$table = RSV_Helpers::table( 'future_edges' );
+		return array_values( array_unique( array_filter( array_map( 'strval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT target_ref FROM $table WHERE feature_id=%s AND source_reel_id=%d AND edge_type=%s AND status=%s ORDER BY id ASC LIMIT 5", 'F11-FUT-006', absint( $source_id ), 'supersedes', 'active' ) ) ) ) ) );
+	}
+
+	private static function supersession_would_cycle( $source_ref, $replacement_ref ) {
+		$source_ref = RSV_Helpers::text( $source_ref, 80 );
+		$next_ref   = RSV_Helpers::text( $replacement_ref, 80 );
+		$seen = array( $source_ref => true );
+		for ( $depth = 0; $depth < 100 && $next_ref; $depth++ ) {
+			if ( isset( $seen[ $next_ref ] ) ) return true;
+			$seen[ $next_ref ] = true;
+			$target = RSV_Repository::find( $next_ref, true );
+			if ( ! $target ) return false;
+			$targets = self::active_supersession_targets( absint( $target['id'] ) );
+			$next_ref = $targets ? (string) $targets[0] : '';
+		}
+		return (bool) $next_ref;
 	}
 
 	private static function safe_objects( $feature, $objects, $reel ) {
