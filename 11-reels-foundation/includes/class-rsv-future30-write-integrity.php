@@ -13,14 +13,21 @@ final class RSV_Future30_Write_Integrity {
 		$route = $request->get_route();
 		$feature = '';
 		$reel_id = 0;
+		$reel = null;
 		if ( preg_match( '#^/rsv/v1/reels/(reel_[a-f0-9-]{36})/future30/(F11-FUT-[0-9]{3})$#', $route, $m ) ) {
 			$feature = $m[2];
 			$reel = RSV_Repository::find( $m[1], true );
-			$reel_id = $reel ? absint( $reel['id'] ) : 0;
+			if ( ! $reel ) return $result;
+			$reel_id = absint( $reel['id'] );
+			$owns = absint( $reel['owner_id'] ?? 0 ) === get_current_user_id();
+			$manage = RSV_Security::can( RSV_Contracts::CAP_MANAGE, $reel, 'future30_integrity' );
+			if ( ! RSV_Security::can( RSV_Contracts::CAP_PUBLISH, $reel, 'future30_integrity' ) || ( ! $owns && ! $manage ) ) return $result;
 		} elseif ( '/rsv/v1/future30/series' === $route ) {
 			$feature = 'F11-FUT-001';
+			if ( ! RSV_Security::can( RSV_Contracts::CAP_PUBLISH, null, 'future30_integrity' ) && ! RSV_Security::can( RSV_Contracts::CAP_MANAGE, null, 'future30_integrity' ) ) return $result;
 		} elseif ( '/rsv/v1/future30/learning-paths' === $route ) {
 			$feature = 'F11-FUT-002';
+			if ( ! RSV_Security::can( RSV_Contracts::CAP_PUBLISH, null, 'future30_integrity' ) && ! RSV_Security::can( RSV_Contracts::CAP_MANAGE, null, 'future30_integrity' ) ) return $result;
 		} else {
 			return $result;
 		}
