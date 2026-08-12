@@ -3,10 +3,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 P="$ROOT/11-reels-foundation"
 
-grep -F "Version: 1.2.0-rc2" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_VERSION', '1.2.0-rc2' )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "Version: 1.2.0-rc3" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_VERSION', '1.2.0-rc3' )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "define( 'RSV_SCHEMA_VERSION', '1.2.0' )" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_CONTRACT_VERSION', 8 )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_CONTRACT_VERSION', 9 )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "class-rsv-current-plan.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "trait-rsv-future30-storage.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "trait-rsv-future30-feature-write.php" "$P/11-reels-foundation.php" >/dev/null
@@ -14,10 +14,11 @@ grep -F "trait-rsv-future30-user-features.php" "$P/11-reels-foundation.php" >/de
 grep -F "trait-rsv-future30-experience.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "class-rsv-future30.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "class-rsv-fresh20-hardening.php" "$P/11-reels-foundation.php" >/dev/null
+grep -F "class-rsv-fresh-review-hardening.php" "$P/11-reels-foundation.php" >/dev/null
+grep -F "class-rsv-fresh-review-public-minimization.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "new RSV_Future30" "$P/includes/class-rsv-plugin.php" >/dev/null
 grep -F "RSV_Future30::install" "$P/includes/class-rsv-plugin.php" >/dev/null
 
-# Inherited canonical/safety contracts.
 grep -F "smc_membership_assertions" "$P/includes/class-rsv-security.php" >/dev/null
 grep -F "rsv_identity_contract_compatible" "$P/includes/class-rsv-security.php" >/dev/null
 grep -F "duration >= 60" "$P/includes/class-rsv-file10.php" >/dev/null
@@ -35,7 +36,6 @@ grep -F "Cache-Control: private, no-store" "$P/includes/class-rsv-helpers.php" >
 grep -F "RSV_ALLOW_DESTRUCTIVE_PURGE" "$P/uninstall.php" >/dev/null
 grep -RF "prefers-reduced-motion" "$P/assets" >/dev/null
 
-# Future30 identity/data/contracts.
 grep -F "const SCHEMA_VERSION = '1.0.0'" "$P/includes/class-rsv-future30.php" >/dev/null
 grep -F "const CONTRACT_VERSION = 1" "$P/includes/class-rsv-future30.php" >/dev/null
 grep -F "const PLAN_REVISION = '2026-08-12'" "$P/includes/class-rsv-future30.php" >/dev/null
@@ -67,7 +67,6 @@ grep -RF "rsv-a11y-reduced-motion" "$P/includes" --include='class-rsv-future30.p
 grep -F "wp_add_inline_script" "$P/includes/class-rsv-future30.php" >/dev/null
 grep -F "future_user_state" "$P/uninstall.php" >/dev/null
 
-# Fresh20 corrective contracts.
 H="$P/includes/class-rsv-fresh20-hardening.php"
 grep -F "class RSV_Fresh20_Hardening" "$H" >/dev/null
 grep -F "rsv_series_invalid" "$H" >/dev/null
@@ -87,7 +86,15 @@ grep -F "ReelAccessibilityPreferencesUpdated" "$H" >/dev/null
 grep -F "render_safe_tools" "$H" >/dev/null
 grep -F "FOR UPDATE" "$H" >/dev/null
 
-# Privacy/security negative assertions.
+R="$P/includes/class-rsv-fresh-review-hardening.php"
+grep -F "delete_idempotency_snapshot" "$P/includes/class-rsv-security.php" >/dev/null
+grep -F "ReelTranscriptProjectionReady" "$P/includes/trait-rsv-future30-feature-write.php" >/dev/null
+grep -F "ReelFuturePrivateStateErased" "$P/includes/class-rsv-future30-privacy-integrity.php" >/dev/null
+grep -F "ReelLanguageLinksReconciled" "$R" >/dev/null
+grep -F "rsv_quiz_unknown_field" "$R" >/dev/null
+grep -F "authoritative_duration_seconds" "$R" >/dev/null
+grep -F "class RSV_Fresh_Review_Public_Minimization" "$P/includes/class-rsv-fresh-review-public-minimization.php" >/dev/null
+
 ! grep -RIE "(api[_-]?key|secret|token)[[:space:]]*=[[:space:]]*['\"][A-Za-z0-9_\-]{16,}" "$P" --include='*.php' --include='*.js'
 ! grep -R "postMessage" "$P/assets/js/rsv.js" | grep -F ", '*')"
 ! grep -R "if ( ! items )" "$P"
@@ -95,4 +102,4 @@ grep -F "FOR UPDATE" "$H" >/dev/null
 ! grep -F ":root{" "$P/assets/css/rsv.css"
 ! grep -F ":root" "$P/assets/css/rsv-top20.css"
 
-echo "static contracts Future30 rc2 PASS"
+echo "static contracts Future30 rc3 PASS"
