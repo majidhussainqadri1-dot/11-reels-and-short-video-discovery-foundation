@@ -30,7 +30,7 @@ $must = array(
  ['future','rsv_future30_coauthor_consent_valid'], ['future','rsv_future30_peer_review_attestation_valid'], ['future','rsv_future30_voice_consent_valid'],
  ['future','rsv_future30_transcript_ref_public_valid'], ['future','at most nine linked language versions'],
  ['future','feed_allows_row'], ['future','body_classes'], ['future','rsv-a11y-'],
- ['future',"unset( $question['correct']"], ['future','Authoritative Reel duration'],
+ ['future','unset( $question[\'correct\']'], ['future','Authoritative Reel duration'],
  ['plugin','RSV_Future30::install'], ['plugin','new RSV_Future30'], ['future','single_reel_tools'], ['future','wp_add_inline_style'], ['future','wp_add_inline_script'],
  ['uninstall','future_user_state'], ['contracts','F11-FUT-030'],
 );
