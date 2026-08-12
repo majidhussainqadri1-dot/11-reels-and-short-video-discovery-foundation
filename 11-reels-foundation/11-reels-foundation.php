@@ -45,6 +45,7 @@ $files = array(
 	'class-rsv-future30-public-safety.php',
 	'class-rsv-future30-write-integrity.php',
 	'class-rsv-future30-private-state-integrity.php',
+	'class-rsv-future30-ai-context-safety.php',
 	'trait-rsv-top20-context.php',
 	'trait-rsv-top20-stories.php',
 	'trait-rsv-top20-responses.php',
