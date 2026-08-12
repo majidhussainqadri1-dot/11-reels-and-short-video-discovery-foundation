@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0-rc4 — 2026-08-12
+
+### Third fresh 20-round corrective hardening
+- Began from exact rc3 HEAD `ec600e97a007f1c06038ff6b42465bab8f5a98a5` and performed a new sequential review → fix → next-review cycle against the amended File 11 plan.
+- Revalidated generic public Future30 projections at read time against current authoritative external/public references, current File 10 duration and current File 11 linked-Reel state where required.
+- Required every exposed Creator Research metric to carry provider-verifiable aggregate sample-size proof meeting the minimum privacy threshold; unproved/low-sample metrics fail closed.
+- Removed raw erased WordPress user IDs from new Future30 erasure audit/outbox evidence; opaque subject references now carry downstream cache/index/preference reconciliation.
+- Added a dedicated third fresh20 regression-contract suite and kept all prior corrective suites in the complete runner.
+- Advanced immutable release identity to plugin `1.2.0-rc4`, File 11 contract `10`; main/Top-20/Future30 schemas, event/provider contracts and Future30 sub-contract remain unchanged.
+
 ## 1.2.0-rc3 — 2026-08-12
 
 ### Second fresh 20-round corrective hardening
