@@ -26,6 +26,8 @@ final class RSV_Fresh_Review_Hardening {
 		if ( ! $reel ) return $response;
 		$params = (array) $request->get_json_params();
 		if ( 'F11-FUT-014' === $m[2] ) {
+			$reconciled = self::reconcile_stale_language_edges( $reel );
+			if ( is_wp_error( $reconciled ) ) return $reconciled;
 			$validation = self::validate_linked_language( $reel, $params );
 			return is_wp_error( $validation ) ? $validation : $response;
 		}
@@ -76,6 +78,50 @@ final class RSV_Fresh_Review_Hardening {
 		return $response;
 	}
 
+	private static function reconcile_stale_language_edges( $reel ) {
+		$authorized = RSV_Security::can( RSV_Contracts::CAP_PUBLISH, $reel, 'future30_language_reconcile' ) || RSV_Security::can( RSV_Contracts::CAP_MANAGE, $reel, 'future30_language_reconcile' );
+		if ( ! $authorized ) return RSV_Helpers::error( 'rsv_forbidden', __( 'You cannot manage Reel language links.', RSV_TEXT_DOMAIN ), 403 );
+		return RSV_DB::transaction(
+			static function () use ( $reel ) {
+				global $wpdb;
+				$table = RSV_Helpers::table( 'future_edges' );
+				$rows = $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT id,target_ref,payload_json,version FROM $table WHERE feature_id=%s AND source_reel_id=%d AND status=%s ORDER BY id ASC LIMIT 20 FOR UPDATE",
+						'F11-FUT-014',
+						absint( $reel['id'] ),
+						'active'
+					),
+					ARRAY_A
+				);
+				$staled = 0;
+				foreach ( (array) $rows as $row ) {
+					$ref = RSV_Helpers::text( $row['target_ref'] ?? '', 255 );
+					$payload = RSV_Helpers::json_decode( $row['payload_json'] ?? '{}', array() );
+					$edge_lang = self::canonical_language_tag( $payload['language'] ?? '' );
+					$target = preg_match( '/^reel_[a-f0-9-]{36}$/', $ref ) ? RSV_Repository::find( $ref, true ) : null;
+					$actual_lang = $target ? self::canonical_language_tag( $target['language'] ?? '' ) : '';
+					$current = $target && RSV_Security::can_view_reel( $target, 0 ) && $edge_lang && $actual_lang && hash_equals( strtolower( $edge_lang ), strtolower( $actual_lang ) );
+					if ( $current ) continue;
+					$changed = $wpdb->update(
+						$table,
+						array( 'status'=>'stale', 'version'=>absint( $row['version'] ) + 1, 'updated_at'=>RSV_Helpers::now() ),
+						array( 'id'=>absint( $row['id'] ), 'version'=>absint( $row['version'] ), 'status'=>'active' ),
+						array( '%s','%d','%s' ),
+						array( '%d','%d','%s' )
+					);
+					if ( 1 !== $changed ) return RSV_Helpers::error( 'rsv_language_reconcile_conflict', __( 'Reel language links changed concurrently. Refresh and retry.', RSV_TEXT_DOMAIN ), 409 );
+					$staled++;
+				}
+				if ( $staled ) {
+					if ( ! RSV_Helpers::audit( 'reel', absint( $reel['id'] ), 'language_links_reconciled', '', '', 'Stale language links removed from active capacity', array( 'count'=>$staled ) ) ) return RSV_Helpers::error( 'rsv_language_reconcile_evidence_failed', __( 'Stale language links could not be reconciled with complete audit evidence.', RSV_TEXT_DOMAIN ), 500 );
+					if ( ! RSV_Helpers::outbox( 'ReelLanguageLinksReconciled', 'reel', absint( $reel['id'] ), array( 'reel_public_id'=>RSV_Helpers::text( $reel['public_id'] ?? '', 80 ), 'stale_links'=>$staled ) ) ) return RSV_Helpers::error( 'rsv_language_reconcile_event_failed', __( 'Stale language links could not be reconciled with durable event evidence.', RSV_TEXT_DOMAIN ), 500 );
+				}
+				return true;
+			}
+		);
+	}
+
 	private static function validate_linked_language( $reel, $params ) {
 		$raw  = RSV_Helpers::text( $params['language'] ?? '', 20 );
 		$lang = self::canonical_language_tag( $raw );
@@ -87,7 +133,6 @@ final class RSV_Fresh_Review_Hardening {
 		if ( $source && hash_equals( strtolower( $source ), strtolower( $lang ) ) ) {
 			return RSV_Helpers::error( 'rsv_language_duplicate_source', __( 'The original source language must not be duplicated as a linked translation.', RSV_TEXT_DOMAIN ), 409 );
 		}
-
 		global $wpdb;
 		$table = RSV_Helpers::table( 'future_edges' );
 		$rows = $wpdb->get_results(
