@@ -45,8 +45,14 @@ final class RSV_Fresh_Review_Hardening {
 	public static function after_dispatch( $response, $server, $request ) {
 		unset( $server );
 		if ( ! ( $response instanceof WP_REST_Response ) || 'GET' !== strtoupper( $request->get_method() ) ) return $response;
-		if ( ! preg_match( '#^/rsv/v1/reels/(reel_[a-f0-9-]{36})/future30/F11-FUT-015$#', $request->get_route(), $m ) ) return $response;
-		$reel = RSV_Repository::find( $m[1], true );
+		$route = $request->get_route();
+		if ( preg_match( '#^/rsv/v1/reels/(reel_[a-f0-9-]{36})/future30/F11-FUT-015$#', $route, $m ) ) return self::filter_ai_translation_public_response( $response, $m[1] );
+		if ( preg_match( '#^/rsv/v1/reels/(reel_[a-f0-9-]{36})/ai-context$#', $route, $m ) ) return self::filter_ai_context_timestamps( $response, $m[1] );
+		return $response;
+	}
+
+	private static function filter_ai_translation_public_response( $response, $reel_ref ) {
+		$reel = RSV_Repository::find( $reel_ref, true );
 		if ( ! $reel || ! RSV_Security::can_view_reel( $reel, 0 ) ) return $response;
 		$data = $response->get_data();
 		if ( ! is_array( $data ) ) return $response;
@@ -75,6 +81,40 @@ final class RSV_Fresh_Review_Hardening {
 		}
 		$data['objects'] = $safe;
 		$response->set_data( $data );
+		return $response;
+	}
+
+	private static function filter_ai_context_timestamps( $response, $reel_ref ) {
+		$reel = RSV_Repository::find( $reel_ref, true );
+		if ( ! $reel || ! RSV_Security::can_view_reel( $reel ) ) return $response;
+		$dto = RSV_Repository::public_dto( $reel );
+		$duration = absint( $dto['duration_seconds'] ?? 0 );
+		if ( $duration < 60 || $duration > 600 ) {
+			$error = rest_ensure_response( array( 'code'=>'rsv_ai_context_duration_unavailable', 'message'=>__( 'Authoritative Reel duration is unavailable; AI grounding is temporarily disabled.', RSV_TEXT_DOMAIN ) ) );
+			$error->set_status( 503 );
+			$error->header( 'Cache-Control', 'private, no-store, max-age=0' );
+			$error->header( 'X-Robots-Tag', 'noindex, nofollow, noarchive' );
+			return $error;
+		}
+		$data = $response->get_data();
+		if ( ! is_array( $data ) || ! is_array( $data['context'] ?? null ) ) return $response;
+		foreach ( array( 'citations', 'chapters' ) as $bucket ) {
+			$safe = array();
+			foreach ( (array) ( $data['context'][ $bucket ] ?? array() ) as $row ) {
+				if ( ! is_array( $row ) ) continue;
+				$start = absint( $row['start_second'] ?? 0 );
+				$end   = absint( $row['end_second'] ?? 0 );
+				if ( $start > $duration || ( $end && ( $end < $start || $end > $duration ) ) ) continue;
+				$row['start_second'] = $start;
+				$row['end_second']   = $end;
+				$safe[] = $row;
+			}
+			$data['context'][ $bucket ] = $safe;
+		}
+		$data['context']['authoritative_duration_seconds'] = $duration;
+		$response->set_data( $data );
+		$response->header( 'Cache-Control', 'private, no-store, max-age=0' );
+		$response->header( 'X-Robots-Tag', 'noindex, nofollow, noarchive' );
 		return $response;
 	}
 
@@ -126,39 +166,25 @@ final class RSV_Fresh_Review_Hardening {
 		$raw  = RSV_Helpers::text( $params['language'] ?? '', 20 );
 		$lang = self::canonical_language_tag( $raw );
 		if ( ! $lang ) return RSV_Helpers::error( 'rsv_language_invalid', __( 'Use a valid language tag for the linked Reel version.', RSV_TEXT_DOMAIN ), 422 );
-		if ( ! hash_equals( $raw, $lang ) ) {
-			return RSV_Helpers::error( 'rsv_language_tag_not_canonical', __( 'Use the canonical language-tag form before linking this Reel.', RSV_TEXT_DOMAIN ), 422, array( 'canonical_language' => $lang ) );
-		}
+		if ( ! hash_equals( $raw, $lang ) ) return RSV_Helpers::error( 'rsv_language_tag_not_canonical', __( 'Use the canonical language-tag form before linking this Reel.', RSV_TEXT_DOMAIN ), 422, array( 'canonical_language'=>$lang ) );
 		$source = self::canonical_language_tag( $reel['language'] ?? '' );
-		if ( $source && hash_equals( strtolower( $source ), strtolower( $lang ) ) ) {
-			return RSV_Helpers::error( 'rsv_language_duplicate_source', __( 'The original source language must not be duplicated as a linked translation.', RSV_TEXT_DOMAIN ), 409 );
-		}
+		if ( $source && hash_equals( strtolower( $source ), strtolower( $lang ) ) ) return RSV_Helpers::error( 'rsv_language_duplicate_source', __( 'The original source language must not be duplicated as a linked translation.', RSV_TEXT_DOMAIN ), 409 );
 		global $wpdb;
 		$table = RSV_Helpers::table( 'future_edges' );
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT payload_json FROM $table WHERE feature_id=%s AND source_reel_id=%d AND status=%s ORDER BY id ASC LIMIT 20",
-				'F11-FUT-014',
-				absint( $reel['id'] ),
-				'active'
-			),
-			ARRAY_A
-		);
+		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT payload_json FROM $table WHERE feature_id=%s AND source_reel_id=%d AND status=%s ORDER BY id ASC LIMIT 20", 'F11-FUT-014', absint( $reel['id'] ), 'active' ), ARRAY_A );
 		foreach ( (array) $rows as $row ) {
-			$payload   = RSV_Helpers::json_decode( $row['payload_json'] ?? '{}', array() );
+			$payload = RSV_Helpers::json_decode( $row['payload_json'] ?? '{}', array() );
 			$edge_lang = self::canonical_language_tag( $payload['language'] ?? '' );
-			if ( $edge_lang && hash_equals( strtolower( $edge_lang ), strtolower( $lang ) ) ) {
-				return RSV_Helpers::error( 'rsv_language_duplicate', __( 'This language version is already linked.', RSV_TEXT_DOMAIN ), 409 );
-			}
+			if ( $edge_lang && hash_equals( strtolower( $edge_lang ), strtolower( $lang ) ) ) return RSV_Helpers::error( 'rsv_language_duplicate', __( 'This language version is already linked.', RSV_TEXT_DOMAIN ), 409 );
 		}
 		return true;
 	}
 
 	private static function validate_ai_target_language( $reel, $params ) {
-		$raw  = RSV_Helpers::text( $params['language'] ?? '', 20 );
+		$raw = RSV_Helpers::text( $params['language'] ?? '', 20 );
 		$lang = self::canonical_language_tag( $raw );
 		if ( ! $lang ) return RSV_Helpers::error( 'rsv_translation_language_invalid', __( 'Use a valid target language tag for AI translation or dubbing.', RSV_TEXT_DOMAIN ), 422 );
-		if ( ! hash_equals( $raw, $lang ) ) return RSV_Helpers::error( 'rsv_translation_language_not_canonical', __( 'Use the canonical target language-tag form.', RSV_TEXT_DOMAIN ), 422, array( 'canonical_language' => $lang ) );
+		if ( ! hash_equals( $raw, $lang ) ) return RSV_Helpers::error( 'rsv_translation_language_not_canonical', __( 'Use the canonical target language-tag form.', RSV_TEXT_DOMAIN ), 422, array( 'canonical_language'=>$lang ) );
 		$source = self::canonical_language_tag( $reel['language'] ?? '' );
 		if ( $source && hash_equals( strtolower( $source ), strtolower( $lang ) ) ) return RSV_Helpers::error( 'rsv_translation_source_language_invalid', __( 'AI translation or dubbing must target an additional language, not duplicate the canonical source language.', RSV_TEXT_DOMAIN ), 409 );
 		return true;
@@ -176,9 +202,7 @@ final class RSV_Fresh_Review_Hardening {
 			$correct = $question['correct'] ?? null;
 			if ( is_array( $correct ) ) {
 				foreach ( $correct as $answer ) if ( ! is_scalar( $answer ) ) return RSV_Helpers::error( 'rsv_quiz_answer_schema_invalid', __( 'Private quiz answers must be scalar option values.', RSV_TEXT_DOMAIN ), 422 );
-			} elseif ( null !== $correct && ! is_scalar( $correct ) ) {
-				return RSV_Helpers::error( 'rsv_quiz_answer_schema_invalid', __( 'Private quiz answers must be scalar option values.', RSV_TEXT_DOMAIN ), 422 );
-			}
+			} elseif ( null !== $correct && ! is_scalar( $correct ) ) return RSV_Helpers::error( 'rsv_quiz_answer_schema_invalid', __( 'Private quiz answers must be scalar option values.', RSV_TEXT_DOMAIN ), 422 );
 		}
 		return true;
 	}
@@ -188,7 +212,7 @@ final class RSV_Fresh_Review_Hardening {
 		if ( ! preg_match( '/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/', $lang ) ) return '';
 		$parts = explode( '-', $lang );
 		$parts[0] = strtolower( $parts[0] );
-		for ( $i = 1, $count = count( $parts ); $i < $count; $i++ ) {
+		for ( $i=1, $count=count( $parts ); $i<$count; $i++ ) {
 			$part = $parts[$i];
 			if ( 4 === strlen( $part ) && ctype_alpha( $part ) ) $parts[$i] = ucfirst( strtolower( $part ) );
 			elseif ( ( 2 === strlen( $part ) && ctype_alpha( $part ) ) || ( 3 === strlen( $part ) && ctype_digit( $part ) ) ) $parts[$i] = strtoupper( $part );
