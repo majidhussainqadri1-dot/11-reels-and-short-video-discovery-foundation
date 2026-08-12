@@ -5,6 +5,7 @@ $f = array(
     'bootstrap' => $read( $root . '/11-reels-foundation.php' ),
     'storage' => $read( $root . '/includes/trait-rsv-future30-storage.php' ),
     'third' => $read( $root . '/includes/class-rsv-third-review-hardening.php' ),
+    'privacy' => $read( $root . '/includes/class-rsv-future30-privacy-integrity.php' ),
 );
 $markers = array(
     array( 'storage', 'public_projection' ),
@@ -32,6 +33,11 @@ $markers = array(
     array( 'third', "\$data['_sample_sizes']" ),
     array( 'third', "\$value['aggregate_count']" ),
     array( 'third', 'if ( $count < $required || ! is_numeric( $value ) ) continue;' ),
+    array( 'privacy', "RSV_Helpers::audit( 'privacy', 0, 'future30_erase'" ),
+    array( 'privacy', "'subject_ref'=>\$opaque_user_ref" ),
+    array( 'privacy', "'ReelFuturePrivateStateErased'" ),
+    array( 'privacy', "\t\t\t\t\t0," ),
+    array( 'privacy', "'user_ref' => \$opaque_user_ref" ),
 );
 foreach ( $markers as $pair ) {
     list( $key, $needle ) = $pair;
@@ -39,5 +45,9 @@ foreach ( $markers as $pair ) {
         fwrite( STDERR, "Missing third fresh20 invariant [$key]: $needle\n" );
         exit( 1 );
     }
+}
+if ( false !== strpos( $f['privacy'], "RSV_Helpers::audit( 'privacy', \$user_id" ) ) {
+    fwrite( STDERR, "Future30 privacy erasure must not re-identify the subject in audit object_id\n" );
+    exit( 1 );
 }
 echo "third fresh 20-round corrective invariants PASS\n";
