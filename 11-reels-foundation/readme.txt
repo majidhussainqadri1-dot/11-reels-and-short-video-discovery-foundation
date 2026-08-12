@@ -4,7 +4,7 @@ Tags: reels, educational-video, learning, citations, accessibility, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0-rc1
+Stable tag: 1.2.0-rc2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,7 +14,7 @@ Canonical educational Reels plus the Founder-approved Future Reel Knowledge & Le
 
 File 11 owns the vertical educational Reel entity, 60–600 second eligibility, Reel-native discovery, moderation, private progress/history and Reel-domain Future30 orchestration. File 10 remains the sole raw-media/player/track/transcript owner; File 05 learning truth, File 06 knowledge/evidence, File 16 AI execution, File 00 identity and File 26 cross-platform discovery/graph remain authoritative.
 
-Future30 adds Series, learning paths, related knowledge, timestamp citations, evidence projections, correction/version lineage, advanced remix relations/policy, templates, Q→Reel answers, verified collaboration/peer review, source+9 language links, governed AI dubbing requests, reviewed transcript projection, chapters, knowledge cards, micro-quizzes, study collections, private notes, grounded AI context, search opportunity intelligence, expanded ranking explanation, feed/diversity controls, creator research metrics, pre-publish clinical safety scanning, Accessibility Plus and Reel knowledge-graph edges.
+RC2 preserves all 30 Future30 capabilities and adds fresh-20 hardening for current public references, evidence grades, remix/template safety, peer-review conflicts, linked language truth, type-aware quiz scoring, idempotent/concurrent private user state, grounded AI context, non-commercial recommendation explanations, canonical history/autoplay preferences, Accessibility Plus partial updates and knowledge-graph evidence revalidation.
 
 Public content remains browseable without login where eligible. Protected actions require current File 00 capability/state. External provider refs fail closed. Patient-case remix defaults to deny. AI execution is never performed by File 11, and no automated diagnosis/prescription/dose/emergency replacement is introduced.
 
@@ -36,22 +36,22 @@ No. File 11 stores/uses verified references and orchestration contracts only. Ra
 No. Public coauthor acceptance, expert-review attribution and dubbing voice consent require canonical/provider-verifiable assertions.
 
 = How many languages can a Reel have? =
-The Reel has one canonical source language plus at most nine linked language versions. The source language cannot be duplicated as a translation.
+The Reel has one canonical source language plus at most nine linked language versions, each backed by a different current public Reel whose actual language matches the declared language.
 
 = Can payment or donation improve Reel ranking? =
 No. Payment/donation status is not an allowed recommendation-priority reason.
 
 == Changelog ==
 
+= 1.2.0-rc2 =
+* Completed a fresh 20-round review/fix cycle with findings F11-D-896 through F11-D-916.
+* Added current read-time validation for Series, Learning Paths, public knowledge tools, AI context and knowledge-graph edges.
+* Added bounded evidence/template/recommendation taxonomies and self-remix/peer-conflict/language-link protections.
+* Hardened quizzes, collections, notes, feed preferences and accessibility preferences with idempotency/concurrency/audit/outbox evidence.
+* Advanced File 11 contract to 8 and created a distinct rc2 release/package identity.
+
 = 1.2.0-rc1 =
-* Added F11-FUT-001 through F11-FUT-030 Future Reel Knowledge & Learning Intelligence capabilities.
-* Added additive Future30 schema 1.0.0 and File 11 contract 7.
-* Added provider-validated cross-file references, consent/attestation gates, public projection privacy hardening, idempotency/rate controls and authoritative timestamp validation.
-* Added native feed-control enforcement and Accessibility Plus runtime classes.
-* Added Future30 privacy export/erase and staging/release gates.
+* Added F11-FUT-001 through F11-FUT-030 Future Reel Knowledge & Learning Intelligence capabilities and Future30 schema 1.0.0.
 
 = 1.1.0-rc7 =
 * Re-harmonized File 11 with rewritten central/File 11 plans and current safety/report/ranking rules.
-
-= 1.1.0-rc6 =
-* Forty review/fix rounds over authorization, media contracts, privacy, moderation, reliability and release integrity.
