@@ -24,7 +24,7 @@ final class RSV_Integrations {
 			'capabilities' => array( 'timeline','home-cards','search-documents','recommendation-explanation','stories-status','highlights','attributed-responses','source-safety','wellbeing','youth-safe','value-insights','medical-safety-charter','report-risk-routing','governing-requirements' ),
 			'write_policy' => 'owner-only-versioned-commands', 'privacy_policy' => 'public-eligible-fields-only',
 			'commercial_ranking' => 'none', 'donor_advantage' => false,
-			'governing_plan_revision' => '2026-08-11',
+			'governing_plan_revision' => RSV_Current_Plan::REVISION,
 			'maturity' => 'repository-release-candidate-staging-pending',
 		);
 		if ( is_array( $manifest ) && isset( $manifest['provider_id'] ) ) return $file11;
