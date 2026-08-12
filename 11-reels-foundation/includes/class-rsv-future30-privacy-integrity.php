@@ -32,13 +32,14 @@ final class RSV_Future30_Privacy_Integrity {
 				$sql = $wpdb->prepare( "DELETE FROM $table WHERE user_id=%d AND id IN ($placeholders)", $args );
 				$removed = $wpdb->query( $sql );
 				if ( false === $removed || absint( $removed ) !== count( $ids ) ) return RSV_Helpers::error( 'rsv_future30_erase_incomplete', __( 'Private Reel data could not be erased atomically.', RSV_TEXT_DOMAIN ), 500 );
-				if ( ! RSV_Helpers::audit( 'privacy', $user_id, 'future30_erase', '', '', 'Private Future30 state erased', array( 'count'=>absint($removed) ), $user_id ) ) return RSV_Helpers::error( 'rsv_future30_erase_evidence_failed', __( 'Private Reel data erasure could not be committed with complete evidence.', RSV_TEXT_DOMAIN ), 500 );
+				$opaque_user_ref = RSV_Helpers::opaque_user_ref( $user_id, 'future30-erasure' );
+				if ( ! RSV_Helpers::audit( 'privacy', 0, 'future30_erase', '', '', 'Private Future30 state erased', array( 'count'=>absint($removed), 'subject_ref'=>$opaque_user_ref ), 0 ) ) return RSV_Helpers::error( 'rsv_future30_erase_evidence_failed', __( 'Private Reel data erasure could not be committed with complete evidence.', RSV_TEXT_DOMAIN ), 500 );
 				if ( ! RSV_Helpers::outbox(
 					'ReelFuturePrivateStateErased',
 					'privacy',
-					$user_id,
+					0,
 					array(
-						'user_ref' => RSV_Helpers::opaque_user_ref( $user_id, 'future30-erasure' ),
+						'user_ref' => $opaque_user_ref,
 						'features' => array( 'F11-FUT-019','F11-FUT-020','F11-FUT-021','F11-FUT-025','F11-FUT-026','F11-FUT-029' ),
 						'reconcile' => array( 'cache', 'index', 'feed-preferences', 'accessibility-preferences' ),
 						'count' => absint( $removed ),
