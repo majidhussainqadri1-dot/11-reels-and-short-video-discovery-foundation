@@ -34,6 +34,7 @@ $files = array(
 	'class-rsv-privacy.php',
 	'class-rsv-jobs.php',
 	'class-rsv-migration.php',
+	'class-rsv-migration-lock-guard.php',
 	'class-rsv-diagnostics.php',
 	'class-rsv-integrations.php',
 	'class-rsv-current-plan.php',
