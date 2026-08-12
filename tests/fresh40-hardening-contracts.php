@@ -17,7 +17,7 @@ $files = array(
 $markers = array(
 	array('bootstrap','class-rsv-future30-public-safety.php'), array('bootstrap','class-rsv-future30-write-integrity.php'), array('bootstrap','class-rsv-future30-private-state-integrity.php'),
 	array('bootstrap','class-rsv-future30-ai-context-safety.php'), array('bootstrap','class-rsv-future30-analytics-safety.php'), array('bootstrap','class-rsv-future30-accessibility-runtime.php'), array('bootstrap','class-rsv-future30-privacy-integrity.php'), array('bootstrap','class-rsv-migration-lock-guard.php'),
-	array('public','rest_post_dispatch'), array('public',"unset( $row['owner_id'], $row['reel_id']"), array('public','human_reviewed'), array('public','rsv_future30_peer_review_attestation_valid'), array('public','rsv_future30_transcript_ref_public_valid'), array('public','rsv_supersession_cycle'),
+	array('public','rest_post_dispatch'), array('public','unset( $row[\'owner_id\'], $row[\'reel_id\']'), array('public','human_reviewed'), array('public','rsv_future30_peer_review_attestation_valid'), array('public','rsv_future30_transcript_ref_public_valid'), array('public','rsv_supersession_cycle'),
 	array('write','rsv_version_snapshot_immutable'), array('write','rsv_future_public_id_conflict'), array('write','validate_quiz'), array('write','rsv_knowledge_source_invalid'), array('write','rsv_graph_source_invalid'),
 	array('private','rest_request_before_callbacks'), array('private','FOR UPDATE'), array('private','rsv_collection_key_conflict'), array('private','ReelStudyCollectionUpdated'),
 	array('ai','owner_id'), array('ai','private, no-store'), array('analytics','MIN_AGGREGATE = 5'), array('analytics','aggregate-only-minimum-5'),
