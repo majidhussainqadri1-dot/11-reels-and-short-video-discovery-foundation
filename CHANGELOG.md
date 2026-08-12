@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0-rc5 — 2026-08-12
+
+### Third fresh 20-round corrective closure
+- Corrected `F11-FUT-014` canonical ownership: linked translated Reel edges now target `File 11`, matching the amended plan's File 11 linked-version ownership.
+- Removed the invalid language-as-target fallback; every additional language link must point to a different current public File 11 Reel.
+- Preserved legacy rc1–rc4 language-edge compatibility by validating legacy target refs as current public File 11 Reels at read time even if their stored target owner used the older translation-provider label.
+- Retained third-cycle current-reference public projection hardening, Creator Research minimum-sample proof and identifier-minimized Future30 erasure evidence.
+- Advanced immutable release identity to plugin `1.2.0-rc5`, File 11 contract `11`, with a distinct rc5 workflow/package identity. Main/Top-20/Future30 schemas, event/provider contracts and Future30 sub-contract remain unchanged.
+
 ## 1.2.0-rc4 — 2026-08-12
 
 ### Third fresh 20-round corrective hardening
