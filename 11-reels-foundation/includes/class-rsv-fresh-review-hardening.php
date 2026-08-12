@@ -14,6 +14,7 @@ final class RSV_Fresh_Review_Hardening {
 
 	public static function register() {
 		add_filter( 'rest_request_before_callbacks', array( __CLASS__, 'before_callbacks' ), 6, 3 );
+		add_filter( 'rest_post_dispatch', array( __CLASS__, 'after_dispatch' ), 100, 3 );
 	}
 
 	public static function before_callbacks( $response, $handler, $request ) {
@@ -23,10 +24,51 @@ final class RSV_Fresh_Review_Hardening {
 		if ( ! preg_match( '#^/rsv/v1/reels/(reel_[a-f0-9-]{36})/future30/(F11-FUT-[0-9]{3})$#', $route, $m ) ) return $response;
 		$reel = RSV_Repository::find( $m[1], true );
 		if ( ! $reel ) return $response;
+		$params = (array) $request->get_json_params();
 		if ( 'F11-FUT-014' === $m[2] ) {
-			$validation = self::validate_linked_language( $reel, (array) $request->get_json_params() );
+			$validation = self::validate_linked_language( $reel, $params );
 			return is_wp_error( $validation ) ? $validation : $response;
 		}
+		if ( 'F11-FUT-015' === $m[2] ) {
+			$validation = self::validate_ai_target_language( $reel, $params );
+			return is_wp_error( $validation ) ? $validation : $response;
+		}
+		return $response;
+	}
+
+	public static function after_dispatch( $response, $server, $request ) {
+		unset( $server );
+		if ( ! ( $response instanceof WP_REST_Response ) || 'GET' !== strtoupper( $request->get_method() ) ) return $response;
+		if ( ! preg_match( '#^/rsv/v1/reels/(reel_[a-f0-9-]{36})/future30/F11-FUT-015$#', $request->get_route(), $m ) ) return $response;
+		$reel = RSV_Repository::find( $m[1], true );
+		if ( ! $reel || ! RSV_Security::can_view_reel( $reel, 0 ) ) return $response;
+		$data = $response->get_data();
+		if ( ! is_array( $data ) ) return $response;
+		$safe = array();
+		foreach ( (array) ( $data['objects'] ?? array() ) as $row ) {
+			if ( ! is_array( $row ) ) continue;
+			$payload = (array) ( $row['payload'] ?? array() );
+			$status  = sanitize_key( $payload['status'] ?? '' );
+			if ( ! in_array( $status, array( 'approved', 'published' ), true ) ) continue;
+			if ( true !== apply_filters( 'rsv_future30_translation_request_public_valid', false, $row, $reel ) ) continue;
+			$lang = self::canonical_language_tag( $payload['language'] ?? '' );
+			if ( ! $lang ) continue;
+			$safe[] = array(
+				'public_id' => RSV_Helpers::text( $row['public_id'] ?? '', 80 ),
+				'title' => RSV_Helpers::text( $row['title'] ?? 'AI translation/dubbing', 255 ),
+				'payload' => array(
+					'language' => $lang,
+					'dubbing' => ! empty( $payload['dubbing'] ),
+					'ai_label_required' => true,
+					'original_audio_option_required' => true,
+					'status' => $status,
+				),
+				'version' => absint( $row['version'] ?? 0 ),
+				'updated_at' => RSV_Helpers::text( $row['updated_at'] ?? '', 40 ),
+			);
+		}
+		$data['objects'] = $safe;
+		$response->set_data( $data );
 		return $response;
 	}
 
@@ -60,6 +102,16 @@ final class RSV_Fresh_Review_Hardening {
 				return RSV_Helpers::error( 'rsv_language_duplicate', __( 'This language version is already linked.', RSV_TEXT_DOMAIN ), 409 );
 			}
 		}
+		return true;
+	}
+
+	private static function validate_ai_target_language( $reel, $params ) {
+		$raw  = RSV_Helpers::text( $params['language'] ?? '', 20 );
+		$lang = self::canonical_language_tag( $raw );
+		if ( ! $lang ) return RSV_Helpers::error( 'rsv_translation_language_invalid', __( 'Use a valid target language tag for AI translation or dubbing.', RSV_TEXT_DOMAIN ), 422 );
+		if ( ! hash_equals( $raw, $lang ) ) return RSV_Helpers::error( 'rsv_translation_language_not_canonical', __( 'Use the canonical target language-tag form.', RSV_TEXT_DOMAIN ), 422, array( 'canonical_language' => $lang ) );
+		$source = self::canonical_language_tag( $reel['language'] ?? '' );
+		if ( $source && hash_equals( strtolower( $source ), strtolower( $lang ) ) ) return RSV_Helpers::error( 'rsv_translation_source_language_invalid', __( 'AI translation or dubbing must target an additional language, not duplicate the canonical source language.', RSV_TEXT_DOMAIN ), 409 );
 		return true;
 	}
 
