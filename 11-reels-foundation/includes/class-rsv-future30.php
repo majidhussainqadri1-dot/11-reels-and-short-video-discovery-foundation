@@ -52,7 +52,7 @@ final class RSV_Future30 {
 			'F11-FUT-021' => array( 'slug'=>'personal-notes', 'title'=>'Reel â†’ Personal Notes', 'owner'=>'File 11 private timestamp note / notes editor bridge', 'mode'=>'native-private' ),
 			'F11-FUT-022' => array( 'slug'=>'ask-ai', 'title'=>'Ask AI About This Reel', 'owner'=>'File 16 AI / File 11 grounded context', 'mode'=>'federated' ),
 			'F11-FUT-023' => array( 'slug'=>'search-opportunities', 'title'=>'Creator Search Opportunity Intelligence', 'owner'=>'File 26 search intelligence / File 11 consumer', 'mode'=>'federated' ),
-			'F11-FUT-024' => array( 'slug'=>'why-this-reel', 'title'=>'Expanded â€œWhy am I seeing this Reel?â€', 'owner'=>'File 11 native explanation / File 26 global reason', 'mode'=>'federated' ),
+			'F11-FUT-024' => array( 'slug'=>'why-this-reel', 'title'=>'Expanded â€œWhy am I seeing this Reel?â€', 'owner'=>'File 11 native explanation / File 26 global reasons', 'mode'=>'federated' ),
 			'F11-FUT-025' => array( 'slug'=>'feed-controls', 'title'=>'Feed Control Center', 'owner'=>'File 11 private preferences / File 26 cross-platform consumer', 'mode'=>'native-private' ),
 			'F11-FUT-026' => array( 'slug'=>'diversity-slider', 'title'=>'Serendipity / Knowledge Diversity Slider', 'owner'=>'File 11 preference / File 26 ranking consumer', 'mode'=>'native-private' ),
 			'F11-FUT-027' => array( 'slug'=>'creator-research', 'title'=>'Creator Research Dashboard', 'owner'=>'File 11 aggregate Reel metrics / shared analytics', 'mode'=>'derived' ),
@@ -85,155 +85,13 @@ final class RSV_Future30 {
 			KEY feature_reel (feature_id,reel_id,status,id),
 			KEY owner_feature (owner_id,feature_id,status,id),
 			KEY object_type (object_type,status,id)
-		) $c;";
+		)  $c;";
 		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'future_edges' ) . " (
 			id bigint unsigned NOT NULL AUTO_INCREMENT,
 			public_id varchar(80) NOT NULL,
 			feature_id varchar(20) NOT NULL,
 			source_reel_id bigint unsigned NOT NULL DEFAULT 0,
 			edge_type varchar(50) NOT NULL,
-			target_owner varchar(30) NOT NULL DEFAULT '',
+			target_owner varchar(30) NOT NULL,
 			target_ref varchar(255) NOT NULL DEFAULT '',
-			start_second int unsigned NOT NULL DEFAULT 0,
-			end_second int unsigned NOT NULL DEFAULT 0,
-			payload_json longtext NOT NULL,
-			status varchar(30) NOT NULL DEFAULT 'active',
-			version bigint unsigned NOT NULL DEFAULT 1,
-			created_at datetime NOT NULL,
-			updated_at datetime NOT NULL,
-			PRIMARY KEY (id),
-			UNIQUE KEY public_id (public_id),
-			KEY reel_feature (source_reel_id,feature_id,status,id),
-			KEY target_ref (target_owner,target_ref(120),status)
-		) $c;";
-		$sql[] = 'CREATE TABLE ' . RSV_Helpers::table( 'future_user_state' ) . " (
-			id bigint unsigned NOT NULL AUTO_INCREMENT,
-			user_id bigint unsigned NOT NULL,
-			feature_id varchar(20) NOT NULL,
-			object_ref varchar(100) NOT NULL DEFAULT '',
-			state_key varchar(60) NOT NULL,
-			payload_json longtext NOT NULL,
-			version bigint unsigned NOT NULL DEFAULT 1,
-			created_at datetime NOT NULL,
-			updated_at datetime NOT NULL,
-			PRIMARY KEY (id),
-			UNIQUE KEY user_feature_state (user_id,feature_id,object_ref,state_key),
-			KEY feature_updated (feature_id,updated_at,id),
-			KEY user_updated (user_id,updated_at,id)
-		) $c;";
-		foreach ( $sql as $statement ) dbDelta( $statement );
-		update_option( 'rsv_future30_schema_version', self::SCHEMA_VERSION, false );
-		update_option( 'rsv_future30_contract_version', self::CONTRACT_VERSION, false );
-		update_option( 'rsv_future30_plan_revision', self::PLAN_REVISION, false );
-	}
-
-	public function register() {
-		if ( (string) get_option( 'rsv_future30_schema_version' ) !== self::SCHEMA_VERSION ) self::install();
-		add_action( 'rest_api_init', array( $this, 'routes' ) );
-		add_filter( 'rsv_provider_manifest', array( __CLASS__, 'provider_manifest' ), 55 );
-		add_filter( 'rsv_current_plan_requirements', array( __CLASS__, 'requirements' ) );
-		add_filter( 'wp_privacy_personal_data_exporters', array( __CLASS__, 'privacy_exporters' ) );
-		add_filter( 'wp_privacy_personal_data_erasers', array( __CLASS__, 'privacy_erasers' ) );
-		add_filter( 'body_class', array( __CLASS__, 'body_classes' ) );
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'assets' ), 20 );
-		add_action( 'get_footer', array( __CLASS__, 'single_reel_tools' ), 3 );
-		add_shortcode( 'rsv_future30', array( __CLASS__, 'shortcode' ) );
-		add_action( 'init', array( __CLASS__, 'announce' ), 98 );
-	}
-
-	public static function requirements( $manifest ) {
-		$manifest = is_array( $manifest ) ? $manifest : array();
-		$manifest['future30'] = array(
-			'plan_revision' => self::PLAN_REVISION,
-			'schema_version' => self::SCHEMA_VERSION,
-			'contract_version' => self::CONTRACT_VERSION,
-			'requirements' => self::FEATURE_IDS,
-			'definitions' => self::definitions(),
-			'owner_law' => 'File 11 owns Reel-domain orchestration only; foreign canonical truth is referenced, never duplicated.',
-		);
-		return $manifest;
-	}
-
-	public static function provider_manifest( $manifest ) {
-		$payload = array(
-			'contract_version'=>self::CONTRACT_VERSION,
-			'plan_revision'=>self::PLAN_REVISION,
-			'features'=>self::definitions(),
-			'capabilities'=>array( 'series','learning-paths','citations','evidence-layer','corrections','version-history','remix-policy','templates','question-answers','collaborators','peer-review','language-links','chapters','knowledge-cards','micro-quizzes','study-collections','timestamp-notes','grounded-ai-context','search-opportunity-consumer','feed-controls','diversity-control','creator-research','clinical-safety-scan','accessibility-plus','knowledge-graph-edges' ),
-			'raw_media_owner'=>'File 10', 'ai_owner'=>'File 16', 'knowledge_owner'=>'File 06', 'global_discovery_owner'=>'File 26',
-		);
-		if ( is_array( $manifest ) && isset( $manifest['provider_id'] ) && 'file11-reels' === ( $manifest['provider_id'] ?? '' ) ) {
-			$manifest['future30'] = $payload;
-			return $manifest;
-		}
-		$manifest = is_array( $manifest ) ? $manifest : array();
-		$manifest['file11-future30'] = $payload;
-		return $manifest;
-	}
-
-	public static function announce() {
-		do_action( 'rsv_future30_registered', self::PLAN_REVISION, self::FEATURE_IDS, self::CONTRACT_VERSION );
-		do_action( 'sabri_platform_capability_registered', 'file11-future30', self::provider_manifest( array() )['file11-future30'] );
-	}
-
-	public static function assets() {
-		$css = '.rsv-a11y-high-contrast .rsv-reel-card,.rsv-a11y-high-contrast .rsv-future30-tools{outline:2px solid currentColor}.rsv-a11y-keyboard-first .rsv-reel-card :focus-visible,.rsv-a11y-keyboard-first .rsv-future30-tools :focus-visible{outline:3px solid currentColor;outline-offset:3px}.rsv-a11y-reduced-motion .rsv-reels-feed *,.rsv-a11y-reduced-motion .rsv-future30-tools *{scroll-behavior:auto!important;transition-duration:.001ms!important;animation-duration:.001ms!important;animation-iteration-count:1!important}.rsv-captions-large video::cue{font-size:125%}.rsv-captions-extra-large video::cue{font-size:150%}';
-		wp_add_inline_style( 'rsv', $css );
-		$js = "document.addEventListener('DOMContentLoaded',function(){if(!document.body.classList.contains('rsv-a11y-transcript-only'))return;document.querySelectorAll('video').forEach(function(v){v.pause();v.autoplay=false;});document.querySelectorAll('.rsv-future30-tools').forEach(function(d){d.open=true;});});";
-		wp_add_inline_script( 'rsv', $js, 'after' );
-	}
-
-	public static function single_reel_tools() {
-		$public_id = get_query_var( 'rsv_reel' );
-		if ( ! $public_id ) return;
-		$reel = RSV_Repository::find( $public_id, true );
-		if ( ! $reel || ! RSV_Security::can_view_reel( $reel ) ) return;
-		echo wp_kses_post( self::render_tools( $reel ) );
-	}
-
-	public function routes() {
-		$ns = RSV_Contracts::API_NAMESPACE;
-		register_rest_route( $ns, '/future30/manifest', array( 'methods'=>WP_REST_Server::READABLE, 'callback'=>array($this,'manifest'), 'permission_callback'=>'__return_true' ) );
-		register_rest_route( $ns, '/future30/series', array(
-			array( 'methods'=>WP_REST_Server::READABLE, 'callback'=>array($this,'series_list'), 'permission_callback'=>'__return_true' ),
-			array( 'methods'=>WP_REST_Server::CREATABLE, 'callback'=>array($this,'series_create'), 'permission_callback'=>array($this,'can_publish') ),
-		) );
-		register_rest_route( $ns, '/future30/learning-paths', array(
-			array( 'methods'=>WP_REST_Server::READABLE, 'callback'=>array($this,'path_list'), 'permission_callback'=>'__return_true' ),
-			array( 'methods'=>WP_REST_Server::CREATABLE, 'callback'=>array($this,'path_create'), 'permission_callback'=>array($this,'can_publish') ),
-		) );
-		register_rest_route( $ns, '/reels/(?P<id>reel_[a-f0-9-]{36})/future30/(?P<feature>F11-FUT-[0-9]{3})', array(
-			array( 'methods'=>WP_REST_Server::READABLE, 'callback'=>array($this,'reel_feature_get'), 'permission_callback'=>'__return_true' ),
-			array( 'methods'=>WP_REST_Server::CREATABLE, 'callback'=>array($this,'reel_feature_write'), 'permission_callback'=>array($this,'can_publish') ),
-		) );
-		register_rest_route( $ns, '/reels/(?P<id>reel_[a-f0-9-]{36})/quiz/attempt', array( 'methods'=>WP_REST_Server::CREATABLE, 'callback'=>array($this,'quiz_attempt'), 'permission_callback'=>'is_user_logged_in' ) );
-		register_rest_route( $ns, '/future30/collections', array(
-			array( 'methods'=>WP_REST_Server::READABLE, 'callback'=>array($this,'collections'), 'permission_callback'=>'is_user_logged_in' ),
-			array( 'methods'=>WP_REST_Server::CREATABLE, 'callback'=>array($this,'collection_write'), 'permission_callback'=>'is_user_logged_in' ),
-		) );
-		register_rest_route( $ns, '/reels/(?P<id>reel_[a-f0-9-]{36})/notes', array(
-			array( 'methods'=>WP_REST_Server::READABLE, 'callback'=>array($this,'notes'), 'permission_callback'=>'is_user_logged_in' ),
-			array( 'methods'=>WP_REST_Server::CREATABLE, 'callback'=>array($this,'note_write'), 'permission_callback'=>'is_user_logged_in' ),
-		) );
-		register_rest_route( $ns, '/reels/(?P<id>reel_[a-f0-9-]{36})/ai-context', array( 'methods'=>WP_REST_Server::READABLE, 'callback'=>array($this,'ai_context'), 'permission_callback'=>'is_user_logged_in' ) );
-		register_rest_route( $ns, '/future30/search-opportunities', array( 'methods'=>WP_REST_Server::READABLE, 'callback'=>array($this,'search_opportunities'), 'permission_callback'=>array($this,'can_creator') ) );
-		register_rest_route( $ns, '/reels/(?P<id>reel_[a-f0-9-]{36})/why', array( 'methods'=>WP_REST_Server::READABLE, 'callback'=>array($this,'why'), 'permission_callback'=>'__return_true' ) );
-		register_rest_route( $ns, '/future30/feed-preferences', array(
-			array( 'methods'=>WP_REST_Server::READABLE, 'callback'=>array($this,'feed_preferences'), 'permission_callback'=>'is_user_logged_in' ),
-			array( 'methods'=>WP_REST_Server::EDITABLE, 'callback'=>array($this,'feed_preferences_write'), 'permission_callback'=>'is_user_logged_in' ),
-		) );
-		register_rest_route( $ns, '/future30/creator-research', array( 'methods'=>WP_REST_Server::READABLE, 'callback'=>array($this,'creator_research'), 'permission_callback'=>array($this,'can_creator') ) );
-		register_rest_route( $ns, '/reels/(?P<id>reel_[a-f0-9-]{36})/safety-scan', array( 'methods'=>WP_REST_Server::CREATABLE, 'callback'=>array($this,'safety_scan'), 'permission_callback'=>array($this,'can_publish') ) );
-		register_rest_route( $ns, '/future30/accessibility', array(
-			array( 'methods'=>WP_REST_Server::READABLE, 'callback'=>array($this,'accessibility'), 'permission_callback'=>'is_user_logged_in' ),
-			array( 'methods'=>WP_REST_Server::EDITABLE, 'callback'=>array($this,'accessibility_write'), 'permission_callback'=>'is_user_logged_in' ),
-		) );
-		register_rest_route( $ns, '/reels/(?P<id>reel_[a-f0-9-]{36})/knowledge-graph', array( 'methods'=>WP_REST_Server::READABLE, 'callback'=>array($this,'knowledge_graph'), 'permission_callback'=>'__return_true' ) );
-	}
-
-	public function can_publish() { return RSV_Security::can( RSV_Contracts::CAP_PUBLISH ) || RSV_Security::can( RSV_Contracts::CAP_MANAGE ); }
-	public function can_creator() { return RSV_Security::can( RSV_Contracts::CAP_INSIGHTS ) || RSV_Security::can( RSV_Contracts::CAP_SUBMIT ); }
-
-	public function manifest() { return rest_ensure_response( self::requirements( array() )['future30'] ); }
-
-}
+			start_second int unsigned NOT NULL DEEU1P€À°($$%•¹‘}Í•½¹¥¹ÐÕ¹Í¥¹•9=P9U10U1P€À°($$%Á…å±½…‘}©Í½¸±½¹Ñ•áÐ9=P9U10°($$%ÍÑ…ÑÕÌÙ…É¡…È ÌÀ¤9=P9U10U1P€…Ñ¥Ù”œ°($$%Ù•ÉÍ¥½¸‰¥¥¹ÐÕ¹Í¥¹•9=P9U10U1P€Ä°($$%É•…Ñ•‘}…Ð‘…Ñ•Ñ¥µ”9=P9U10°($$%ÕÁ‘…Ñ•‘}…Ð‘…Ñ•Ñ¥µ”9=P9U10°($$%AI%5Id-d€¡¥¤°($$%U9%EU-dÁÕ‰±¥}¥€¡ÁÕ‰±¥}¥¤°($$%-dÍ½ÕÉ•}™•…ÑÕÉ”€¡Í½ÕÉ•}É••±}¥±™•…ÑÕÉ•}¥±ÍÑ…ÑÕÌ±¥¤°($$%-d½Ý¹•É}É•˜€¡Ñ…É•Ñ}½Ý¹•È±Ñ…É•Ñ}É•˜±ÍÑ…ÑÕÌ±¥¤°($$%-d•‘•}ÑåÁ”€¡•‘•}ÑåÁ”±ÍÑ…ÑÕÌ±¥¤($$¤€‘Œìˆì($$‘ÍÅ±mt€ô€IQQ	1€œ€¸IMY}!•±Á•ÉÌèéÑ…‰±” €™ÕÑÕÉ•}ÕÍ•É}ÍÑ…Ñ”œ€¤€¸€ˆ€ ($$%¥‰¥¥¹ÐÕ¹Í¥¹•9=P9U10UQ=}%9I59P°($$%ÕÍ•É}¥‰¥¥¹ÐÕ¹Í¥¹•9=P9U10°($$%™•…ÑÕÉ•}¥Ù…É¡…È ÈÀ¤9=P9U10°($$%½‰©•Ñ}É•˜Ù…É¡…È àÀ¤9=P9U10°($$%ÍÑ…Ñ•}­•äÙ…É¡…È àÀ¤9=P9U10°($$%Á…å±½…‘}©Í½¸±½¹Ñ•áÐ9=P9U10°($$%Ù•ÉÍ¥½¸‰¥¥¹ÐÕ¹Í¥¹•9=P9U10U1P€Ä°($$%É•…Ñ•‘}…Ð‘…Ñ•Ñ¥µ”9=P9U10°($$%ÕÁ‘…Ñ•‘}…Ð‘…Ñ•Ñ¥µ”9=P9U10°($$%AI%5Id-d€¡¥¤°($$%U9%EU-dÕÍ•É}ÍÑ…Ñ”€¡ÕÍ•É}¥±™•…ÑÕÉ•}¥±½‰©•Ñ}É•˜±ÍÑ…Ñ•}­•ä¤°($$%-d™•…ÑÕÉ•}ÕÍ•È€¡™•…ÑÕÉ•}¥±ÕÍ•É}¥±ÕÁ‘…Ñ•‘}…Ð¤($$¤€‘Œìˆì($%™½É•… € €‘ÍÅ°…Ì€‘ÅÕ•Éä€¤‘‰•±Ñ„ €‘ÅÕ•Éä€¤ì($%ÕÁ‘…Ñ•}½ÁÑ¥½¸ €ÉÍÙ}™ÕÑÕÉ”ÌÁ}Í¡•µ…}Ù•ÉÍ¥½¸œ°Í•±˜èéM!5}YIM%=8€¤ì(%ô((%ÁÕ‰±¥ŒÍÑ…Ñ¥Œ™Õ¹Ñ¥½¸É•¥ÍÑ•È ¤ì($%…‘‘}…Ñ¥½¸ €¥¹¥Ðœ°(€€€€€€€€€€€…ÉÉ…ä }}1MM}|°€µ…å‰•}¥¹ÍÑ…±°œ€¤°€ÄÄ€¤ì($%…‘‘}…Ñ¥½¸ €É•ÍÑ}…Á¥}¥¹¥Ðœ°…ÉÉ…ä €‘Ñ¡¥Ì°€É½ÕÑ•Ìœ€¤€¤ì($%…‘‘}…Ñ¥½¸ €ÝÁ}•¹ÅÕ•Õ•}ÍÉ¥ÁÑÌœ°(€€€€€€€€€€€…ÉÉ…ä }}1MM}|°€…ÍÍ•ÑÌœ€¤°€ÐÀ€¤ì($%…‘‘}…Ñ¥½¸ €•Ñ}™½½Ñ•Èœ°…ÉÉ…ä }}1MM}|°€Í¥¹±•}É••±}Ñ½½±Ìœ€¤°€Ì€¤ì($%…‘‘}™¥±Ñ•È €ÝÁ}ÁÉ¥Ù…å}Á•ÉÍ½¹…±}‘…Ñ…}•áÁ½ÉÑ•ÉÌœ°(€€€€€€€€€€€…ÉÉ…ä }}1MM}|°€ÁÉ¥Ù…å}•áÁ½ÉÑ•ÉÌœ¤€¤ì($%…‘‘}™¥±Ñ•È €ÝÁ}ÁÉ¥Ù…å}Á•ÉÍ½¹…±}‘…Ñ…}•É…Í•ÉÌœ°(€€€€€€€€€€€…ÉÉ…ä }}1MM}|°€ÁÉ¥Ù…å}•É…Í•ÉÌœ¤€¤ì($%…‘‘}™¥±Ñ•È €ÉÍÙ}ÁÉ½Ù¥‘•É}µ…¹¥™•ÍÐœ°(€€€€€€€€€€€…ÉÉ…ä }}1MM}|°€ÁÉ½Ù¥‘•É}µ…¹¥™•ÍÐœ¤°€ÐÀ€¤ì($%…‘‘}…Ñ¥½¸ €ÉÍÙ}É•¥ÍÑ•É}ÁÉ½Ù¥‘•ÉÌœ°(€€€€€€€€€€€…ÉÉ…ä }}1MM}|°€…¹¹½Õ¹”œ€¤°€ÐÀ€¤ì($%…‘‘}Í¡½ÉÑ½‘” €ÉÍÙ}™ÕÑÕÉ”ÌÀœ°…ÉÉ…ä }}1MM}|°€Í¡½ÉÑ½‘”œ€¤€¤ì(%ô((%ÁÕ‰±¥ŒÍÑ…Ñ¥Œ™Õ¹Ñ¥½¸µ…å‰•}¥¹ÍÑ…±° ¤ì($%¥˜€ •Ñ}½ÁÑ¥½¸ €ÉÍÙ}™ÕÑÕÉ”ÌÁ}Í¡•µ…}Ù•ÉÍ¥½¸œ°€œœ€¤€„ôôÍ•±˜èéM!5}YIM%=8€¤Í•±˜èé¥¹ÍÑ…±° ¤ì(%ô((%ÁÕ‰±¥ŒÍÑ…Ñ¥Œ™Õ¹Ñ¥½¸É•ÅÕ¥É•µ•¹ÑÌ €‘É•ÅÕ¥É•µ•¹ÑÌ€¤ì($$‘É•ÅÕ¥É•µ•¹ÑÌ€ô¥Í}…ÉÉ…ä €‘É•ÅÕ¥É•µ•¹ÑÌ€¤€ü€‘É•ÅÕ¥É•µ•¹ÑÌ€è…ÉÉ…ä ¤ì($$‘É•ÅÕ¥É•µ•¹ÑÍl™ÕÑÕÉ”ÌÀt€ô…ÉÉ…ä ($$$Á±…¹}É•Ù¥Í¥½¸œôùÍ•±˜èéA19}IY%M%=8°€½¹ÑÉ…Ñ}Ù•ÉÍ¥½¸œôùÍ•±˜èé=9QIQ}YIM%=8°($$$É•ÅÕ¥É•µ•¹Ñ}¥‘ÌœôùÍ•±˜èéQUI}%L°($$$½Õ¹Ðœôù½Õ¹Ð Í•±˜èéQUI}%L€¤°($$$ÍÑ…ÑÕÌœôø½‘•µ…¹‘¥‘…Ñ”µ¹½ÐµÍÑ…¥¹œµ…•ÁÑ•œ°($$$±…¥µ}‰½Õ¹‘…Éäœôø…ÕÑ½µ…Ñ•µÅ„µ¥Ìµ¹½ÐµÁÉ½‘ÕÑ¥½¸µ½Èµ¥¹™É…ÍÑÉÕÑÕÉ”µ•Ù¥‘•¹”œ°($$$…¹½¹¥…±}½Ý¹•ÉÍ¡¥Àœôù…ÉÉ…ä €¥±”€ÄÀœôøÉ…Üµµ•‘¥„µÁ±…å•Èµ…ÁÑ¥½¹Ìœ°€¥±”€ÀÔœôø±•…É¹¥¹œµ½ÕÉÍ”µÑÉÕÑ œ°€¥±”€ÀØœôø­¹½Ý±•‘”µ•Ù¥‘•¹”µÑÉÕÑ œ°€¥±”€ÄØœôø…¤µ•á•ÕÑ¥½¸œ°€¥±”€ÈØœôø±½‰…°µ‘¥Í½Ù•ÉäµÉ…¹­¥¹œœ€¤°($$¤ì($%É•ÑÕÉ¸€‘É•ÅÕ¥É•µ•¹ÑÌì(%ô((%ÁÕ‰±¥ŒÍÑ…Ñ¥Œ™Õ¹Ñ¥½¸ÁÉ½Ù¥‘•É}µ…¹¥™•ÍÐ €‘µ…¹¥™•ÍÐ€¤ì($$‘Á…å±½…€ô…ÉÉ…ä ($$$ÁÉ½Ù¥‘•É}¥œôø™¥±”ÄÄµ™ÕÑÕÉ”ÌÀœ°€Ù•ÉÍ¥½¸œôùÍ•±˜èé=9QIQ}YIM%=8°€Á±…¹}É•Ù¥Í¥½¸œôùÍ•±˜èéA19}IY%M%=8°($$$…Á…‰¥±¥Ñ¥•Ìœôù…ÉÉ…ä €Í•É¥•Ìœ°±•…É¹¥¹œµÁ…Ñ¡Ìœ°¥Ñ…Ñ¥½¹Ìœ°•Ù¥‘•¹”µ±…å•Èœ°½ÉÉ•Ñ¥½¹Ìœ°Ù•ÉÍ¥½¸µ¡¥ÍÑ½Éäœ°É•µ¥àµÁ½±¥äœ°Ñ•µÁ±…Ñ•Ìœ°ÅÕ•ÍÑ¥½¸µ…¹ÍÝ•ÉÌœ°½±±…‰½É…Ñ½ÉÌœ°Á••ÈµÉ•Ù¥•Üœ°±…¹Õ…”µ±¥¹­Ìœ°¡…ÁÑ•ÉÌœ°­¹½Ý±•‘”µ…É‘Ìœ°µ¥É¼µÅÕ¥éé•Ìœ°ÍÑÕ‘äµ½±±•Ñ¥½¹Ìœ°Ñ¥µ•ÍÑ…µÀµ¹½Ñ•Ìœ°‰É½Õ¹‘•µ…¤µ½¹Ñ•áÐˆ°‰Í•…É µ½ÁÁ½ÉÑÕ¹¥Ñäµ½¹ÍÕµ•Èˆ°‰™••µ½¹ÑÉ½±Ìˆ°‰‘¥Ù•ÉÍ¥Ñäµ½¹ÑÉ½°ˆ°‰É•…Ñ½ÈµÉ•Í•…É ˆ°‰±¥¹¥…°µÍ…™•ÑäµÍ…¸ˆ°‰…•ÍÍ¥‰¥±¥ÑäµÁ±ÕÌˆ°‰­¹½Ý±•‘”µÉ…Á µ•‘•Ìˆ€¤°($$$É…Ý}µ•‘¥…}½Ý¹•Èœôø¥±”€ÄÀœ°€…¥}½Ý¹•Èœôø¥±”€ÄØœ°€­¹½Ý±•‘•}½Ý¹•Èœôø¥±”€ÀØœ°€±½‰…±}‘¥Í½Ù•Éå}½Ý¹•Èœôø¥±”€ÈØœ°($$¤ì($%¥˜€ ¥Í}…ÉÉ…ä €‘µ…¹¥™•ÍÐ€¤€˜˜¥ÍÍ•Ð €‘µ…¹¥™•ÍÑlÁÉ½Ù¥‘•É}¥t€¤€˜˜€™¥±”ÄÄµÉ••±Ìœ€ôôô€ €‘µ…¹¥™•ÍÑlÁÉ½Ù¥‘•É}¥t€üü€œœ€¤€¤ì($$$‘µ…¹¥™•ÍÑl™ÕÑÕÉ”ÌÀt€ô€‘Á…å±½…ì($$%É•ÑÕÉ¸€‘µ…¹¥™•ÍÐì($%ô($$‘µ…¹¥™•ÍÐ€ô¥Í}…ÉÉ…ä €‘µ…¹¥™•ÍÐ€¤€ü€‘µ…¹¥™•ÍÐ€è…ÉÉ…ä ¤ì($$‘µ…¹¥™•ÍÑl™¥±”ÄÄµ™ÕÑÕÉ”ÌÀt€ô€‘Á…å±½…ì($%É•ÑÕÉ¸€‘µ…¹¥™•ÍÐì(%ô((%ÁÕ‰±¥ŒÍÑ…Ñ¥Œ™Õ¹Ñ¥½¸…¹¹½Õ¹” ¤ì($%‘½}…Ñ¥½¸ €ÉÍÙ}™ÕÑÕÉ”ÌÁ}É•¥ÍÑ•É•œ°Í•±˜èéA19}IY%M%=8°Í•±˜èéQUI}%L°Í•±˜èé=9QIQ}YIM%=8€¤ì($%‘½}…Ñ¥½¸ €Í…‰É¥}Á±…Ñ™½Éµ}…Á…‰¥±¥Ñå}É•¥ÍÑ•É•œ°€™¥±”ÄÄµ™ÕÑÕÉ”ÌÀœ°Í•±˜èéÁÉ½Ù¥‘•É}µ…¹¥™•ÍÐ …ÉÉ…ä ¤€¥l™¥±”ÄÄµ™ÕÑÕÉ”ÌÀt€¤ì(%ô((%ÁÕ‰±¥ŒÍÑ…Ñ¥Œ™Õ¹Ñ¥½¸…ÍÍ•ÑÌ ¤ì($$‘ÍÌ€ô€œ¹ÉÍØµ„ÄÅäµ¡¥ µ½¹ÑÉ…ÍÐ€¹ÉÍØµÉ••°µ…É°¹ÉÍØµ„ÄÅäµ¡¥ µ½¹ÑÉ…ÍÐ€¹ÉÍØµ™ÕÑÕÉ”ÌÀµÑ½½±Íí½ÕÑ±¥¹”èÉÁàÍ½±¥ÕÉÉ•¹Ñ½±½Éô¹ÉÍØµ„ÄÅäµ­•å‰½…Éµ™¥ÉÍÐ€¹ÉÍØµÉ••°µ…É€é™½ÕÌµÙ¥Í¥‰±”°¹ÉÍØµ„ÄÅäµ­•å‰½…Éµ™¥ÉÍÐ€¹ÉÍØµ™ÕÑÕÉ”ÌÀµÑ½½±Ì€é™½ÕÌµÙ¥Í¥‰±•í½ÕÑ±¥¹”èÍÁàÍ½±¥ÕÉÉ•¹Ñ½±½Èí½ÕÑ±¥¹”µ½™™Í•ÐèÍÁáô¹ÉÍØµ„ÄÅäµÉ•‘Õ•µµ½Ñ¥½¸€¹ÉÍØµÉ••±Ìµ™••€¨°¹ÉÍØµ„ÄÅäµÉ•‘Õ•µµ½Ñ¥½¸€¹ÉÍØµ™ÕÑÕÉ”ÌÀµÑ½½±Ì€©íÍÉ½±°µ‰•¡…Ù¥½Èé…ÕÑ¼…¥µÁ½ÉÑ…¹ÐíÑÉ…¹Í¥Ñ¥½¸µ‘ÕÉ…Ñ¥½¸è¸ÀÀÅµÌ…¥µÁ½ÉÑ…¹Ðí…¹¥µ…Ñ¥½¸µ‘ÕÉ…Ñ¥½¸è¸ÀÀÅµÌ…¥µÁ½ÉÑ…¹Ðí…¹¥µ…Ñ¥½¸µ¥Ñ•É…Ñ¥½¸µ½Õ¹ÐèÄ…¥µÁ½ÉÑ…¹Ñô¹ÉÍØµ…ÁÑ¥½¹Ìµ±…É”Ù¥‘•¼èéÕ•í™½¹ÐµÍ¥é”èÄÈÔ•ô¹ÉÍØµ…ÁÑ¥½¹Ìµ•áÑÉ„µ±…É”Ù¥‘•¼èéÕ•í™½¹ÐµÍ¥é”èÄÔÀ•ôœì($%ÝÁ}…‘‘}¥¹±¥¹•}ÍÑå±” €ÉÌœ°€‘ÍÌ€¤ì($$‘©Ì€ô€‰‘½Õµ•¹Ð¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È =5½¹Ñ•¹Ñ1½…‘•œ±™Õ¹Ñ¥½¸ ¥í¥˜ …‘½Õµ•¹Ð¹‰½‘ä¹±…ÍÍ1¥ÍÐ¹½¹Ñ…¥¹Ì ÉÍØµ„ÄÅäµÑÉ…¹ÍÉ¥ÁÐµ½¹±äœ¤¥É•ÑÕÉ¸í‘½Õµ•¹Ð¹ÅÕ•ÉåM•±•Ñ½É±° Ù¥‘•¼œ¤¹™½É… ¡™Õ¹Ñ¥½¸¡Ø¥íØ¹Á…ÕÍ” ¤íØ¹…ÕÑ½Á±…äõ™…±Í”íô¤í‘½Õµ•¹Ð¹ÅÕ•ÉåM•±•Ñ½É±° œ¹ÉÍØµ™ÕÑÕÉ”ÌÀµÑ½½±Ìœ¤¹™½É… ¡™Õ¹Ñ¥½¸¡¥í¹½Á•¸õÑÉÕ”íô¤íô¤ìˆì($%ÝÁ}…‘‘}¥¹±¥¹•}ÍÉ¥ÁÐ €ÉÍØœ°€‘©Ì°€…™Ñ•Èœ€¤ì(%ô((%ÁÕ‰±¥ŒÍÑ…Ñ¥Œ™Õ¹Ñ¥½¸Í¥¹±•}É••±}Ñ½½±Ì ¤ì($$‘ÁÕ‰±¥}¥€ô•Ñ}ÅÕ•Éå}Ù…È €ÉÍÙ}É••°œ€¤ì($%¥˜€ €„€‘ÁÕ‰±¥}¥€¤É•ÑÕÉ¸ì($$‘É••°€ôIMY}I•Á½Í¥Ñ½Éäèé™¥¹ €‘ÁÕ‰±¥}¥°ÑÉÕ”€¤ì($%¥˜€ €„€‘É••°ñð€„IMY}M•ÕÉ¥Ñäèé…¹}Ù¥•Ý}É••° €‘É••°€¤€¤É•ÑÕÉ¸ì($%•¡¼ÝÁ}­Í•Í}Á½ÍÐ Í•±˜èéÉ•¹‘•É}Ñ½½±Ì €‘É••°€¤€¤ì(%ô((%ÁÕ‰±¥Œ™Õ¹Ñ¥½¸É½ÕÑ•Ì ¤ì($$‘¹Ì€ôIMY}½¹ÑÉ…ÑÌèéA%}95MAì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½™ÕÑÕÉ”ÌÀ½µ…¹¥™•ÍÐœ°…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéI	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°µ…¹¥™•ÍÐœ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôø}}É•ÑÕÉ¹}ÑÉÕ”œ€¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½™ÕÑÕÉ”ÌÀ½Í•É¥•Ìœ°…ÉÉ…ä ($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéI	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°Í•É¥•Í}±¥ÍÐœ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôø}}É•ÑÕÉ¹}ÑÉÕ”œ€¤°($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéIQ	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°Í•É¥•Í}É•…Ñ” ¤œ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÕ‰±¥Í œ¤€¤°($$¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½™ÕÑÕÉ”ÌÀ½±•…É¹¥¹œµÁ…Ñ¡Ìœ°…ÉÉ…ä ($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéI	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°Á…Ñ¡}±¥ÍÐœ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôø}}É•ÑÕÉ¹}ÑÉÕ”œ€¤°($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéIQ	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°Á…Ñ¡}É•…Ñ”œ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÕ‰±¥Í œ¤€¤°($$¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½É••±Ì¼ ý@ñ¥ùÉ••±}m„µ˜À´äµuìÌÙô¤½™ÕÑÕÉ”ÌÀ¼ ý@ñ™•…ÑÕÉ”ùÄÄµUPµlÀ´åuìÍô¤œ°…ÉÉ…ä ($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéI	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°É••±}™•…ÑÕÉ•}•Ðœ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôø}}É•ÑÕÉ¹}ÑÉÕ”œ€¤°($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéIQ	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°É••±}™•…ÑÕÉ•}ÝÉ¥Ñ”œ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÕ‰±¥Í œ¤€¤°($$¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½É••±Ì¼ ý@ñ¥ùÉ••±}m„µ˜À´äµuìÌÙô¤½ÅÕ¥è½…ÑÑ•µÁÐœ°…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéIQ	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°ÅÕ¥é}…ÑÑ•µÁÐœ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÉ¥Ù…Ñ•}ÕÍ•Èœ¤€¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½™ÕÑÕÉ”ÌÀ½½±±•Ñ¥½¹Ìœ°…ÉÉ…ä ($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéI	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°½±±•Ñ¥½¹Ìœ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÉ¥Ù…Ñ•}ÕÍ•Èœ¤€¤°($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéIQ	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°½±±•Ñ¥½¹}ÝÉ¥Ñ”œ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÉ¥Ù…Ñ•}ÕÍ•Èœ¤€¤°($$¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½É••±Ì¼ ý@ñ¥ùÉ••±}m„µ˜À´äµuìÌÙô¤½¹½Ñ•Ìœ°…ÉÉ…ä ($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéI	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°¹½Ñ•Ìœ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÉ¥Ù…Ñ•}ÕÍ•Èœ¤€¤°($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéIQ	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°¹½Ñ•}ÝÉ¥Ñ”œ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÉ¥Ù…Ñ•}ÕÍ•Èœ¤€¤°($$¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½É••±Ì¼ ý@ñ¥ùÉ••±}m„µ˜À´äµuìÌÙô¤½…¤µ½¹Ñ•áÐœ°…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéI	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¥}½¹Ñ•áÐœ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÉ¥Ù…Ñ•}ÕÍ•Èœ¤€¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½™ÕÑÕÉ”ÌÀ½Í•…É µ½ÁÁ½ÉÑÕ¹¥Ñ¥•Ìœ°…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéI	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°Í•…É¡}½ÁÁ½ÉÑÕ¹¥Ñ¥•Ìœ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}É•…Ñ½Èœ¤€¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½É••±Ì¼ ý@ñ¥ùÉ••±}m„µ˜À´äµuìÌÙô¤½Ý¡äœ°…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéI	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°Ý¡äœ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôø}}É•ÑÕÉ¹}ÑÉÕ”œ€¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½™ÕÑÕÉ”ÌÀ½™••µÁÉ•™•É•¹•Ìœ°…ÉÉ…ä ($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéI	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°™••‘}ÁÉ•™•É•¹•Ìœ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÉ¥Ù…Ñ•}ÕÍ•Èœ¤€¤°($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•Èèé%Q	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°™••‘}ÁÉ•™•É•¹•Í}ÝÉ¥Ñ”œ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÉ¥Ù…Ñ•}ÕÍ•Èœ¤€¤°($$¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½™ÕÑÕÉ”ÌÀ½É•…Ñ½ÈµÉ•Í•…É œ°…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéI	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°É•…Ñ½É}É•Í•…É œ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}É•…Ñ½Èœ¤€¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½É••±Ì¼ ý@ñ¥ùÉ••±}m„µ˜À´äµuìÌÙô¤½Í…™•ÑäµÍ…¸œ°…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéIQ	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°Í…™•Ñå}Í…¸œ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÕ‰±¥Í œ¤€¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½™ÕÑÕÉ”ÌÀ½…•ÍÍ¥‰¥±¥Ñäœ°…ÉÉ…ä ($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéI	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…•ÍÍ¥‰¥±¥Ñäœ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÉ¥Ù…Ñ•}ÕÍ•Èœ¤€¤°($$%…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•Èèé%Q	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…•ÍÍ¥‰¥±¥Ñå}ÝÉ¥Ñ”œ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°…¹}ÁÉ¥Ù…Ñ•}ÕÍ•Èœ¤€¤°($$¤€¤ì($%É•¥ÍÑ•É}É•ÍÑ}É½ÕÑ” €‘¹Ì°€œ½É••±Ì¼ ý@ñ¥ùÉ••±}m„µ˜À´äµuìÌÙô¤½­¹½Ý±•‘”µÉ…Á œ°…ÉÉ…ä €µ•Ñ¡½‘Ìœôù]A}IMQ}M•ÉÙ•ÈèéI	1°€…±±‰…¬œôù…ÉÉ…ä ‘Ñ¡¥Ì°­¹½Ý±•‘•}É…Á œ¤°€Á•Éµ¥ÍÍ¥½¹}…±±‰…¬œôø}}É•ÑÕÉ¹}ÑÉÕ”œ€¤€¤ì(%ô((%ÁÕ‰±¥Œ™Õ¹Ñ¥½¸…¹}ÁÉ¥Ù…Ñ•}ÕÍ•È ¤ì($%¥˜€ €„¥Í}ÕÍ•É}±½•‘}¥¸ ¤€¤É•ÑÕÉ¸™…±Í”ì($$‘±…¥µÌ€ôIMY}M•ÕÉ¥Ñäèé±…¥µÌ ¤ì($%É•ÑÕÉ¸€…Ñ¥Ù”œ€ôôô€ €‘±…¥µÍlÍÑ…ÑÕÌt€üü€œœ€¤($$$˜˜•µÁÑä €‘±…¥µÍl¥Í}ÍÕÍÁ•¹‘•t€¤($$$˜˜€„•µÁÑä €‘±…¥µÍlµ•µ‰•ÉÍ¡¥Á}…ÁÁÉ½Ù•t€¤($$$˜˜€„•µÁÑä €‘±…¥µÍlÕ…É‘¥…¹}½¬t€¤ì(%ô((%ÁÕ‰±¥Œ™Õ¹Ñ¥½¸…¹}ÁÕ‰±¥Í  ¤ìÉ•ÑÕÉ¸IMY}M•ÕÉ¥Ñäèé…¸ IMY}½¹ÑÉ…ÑÌèéA}AU	1%M €¤ñðIMY}M•ÕÉ¥Ñäèé…¸ IMY}½¹ÑÉ…ÑÌèéA}59€¤ìô(%ÁÕ‰±¥Œ™Õ¹Ñ¥½¸…¹}É•…Ñ½È ¤ìÉ•ÑÕÉ¸IMY}M•ÕÉ¥Ñäèé…¸ IMY}½¹ÑÉ…ÑÌèéA}%9M%!QL€¤ñðIMY}M•ÕÉ¥Ñäèé…¸ IMY}½¹ÑÉ…ÑÌèéA}MU	5%P€¤ìô((%ÁÕ‰±¥Œ™Õ¹Ñ¥½¸µ…¹¥™•ÍÐ ¤ìÉ•ÑÕÉ¸É•ÍÑ}•¹ÍÕÉ•}É•ÍÁ½¹Í” Í•±˜èéÉ•ÅÕ¥É•µ•¹ÑÌ …ÉÉ…ä ¤€¥l™ÕÑÕÉ”ÌÀt€¤ìô()ô(
