@@ -33,6 +33,10 @@ final class RSV_Fresh_Review_Hardening {
 			$validation = self::validate_ai_target_language( $reel, $params );
 			return is_wp_error( $validation ) ? $validation : $response;
 		}
+		if ( 'F11-FUT-019' === $m[2] ) {
+			$validation = self::validate_quiz_payload_schema( (array) ( $params['questions'] ?? array() ) );
+			return is_wp_error( $validation ) ? $validation : $response;
+		}
 		return $response;
 	}
 
@@ -112,6 +116,25 @@ final class RSV_Fresh_Review_Hardening {
 		if ( ! hash_equals( $raw, $lang ) ) return RSV_Helpers::error( 'rsv_translation_language_not_canonical', __( 'Use the canonical target language-tag form.', RSV_TEXT_DOMAIN ), 422, array( 'canonical_language' => $lang ) );
 		$source = self::canonical_language_tag( $reel['language'] ?? '' );
 		if ( $source && hash_equals( strtolower( $source ), strtolower( $lang ) ) ) return RSV_Helpers::error( 'rsv_translation_source_language_invalid', __( 'AI translation or dubbing must target an additional language, not duplicate the canonical source language.', RSV_TEXT_DOMAIN ), 409 );
+		return true;
+	}
+
+	private static function validate_quiz_payload_schema( $questions ) {
+		$allowed = array( 'type', 'prompt', 'options', 'correct', 'explanation_public' );
+		foreach ( $questions as $question ) {
+			if ( ! is_array( $question ) ) return RSV_Helpers::error( 'rsv_quiz_schema_invalid', __( 'Every quiz question must use the governed structured schema.', RSV_TEXT_DOMAIN ), 422 );
+			$unknown = array_diff( array_keys( $question ), $allowed );
+			if ( $unknown ) return RSV_Helpers::error( 'rsv_quiz_unknown_field', __( 'Quiz questions may not contain undeclared or private answer fields.', RSV_TEXT_DOMAIN ), 422 );
+			if ( isset( $question['prompt'] ) && ! is_scalar( $question['prompt'] ) ) return RSV_Helpers::error( 'rsv_quiz_prompt_invalid', __( 'Quiz prompts must be plain text.', RSV_TEXT_DOMAIN ), 422 );
+			if ( isset( $question['explanation_public'] ) && ! is_scalar( $question['explanation_public'] ) ) return RSV_Helpers::error( 'rsv_quiz_explanation_invalid', __( 'Public quiz explanations must be plain text.', RSV_TEXT_DOMAIN ), 422 );
+			foreach ( (array) ( $question['options'] ?? array() ) as $option ) if ( ! is_scalar( $option ) ) return RSV_Helpers::error( 'rsv_quiz_option_invalid', __( 'Quiz options must be plain scalar values.', RSV_TEXT_DOMAIN ), 422 );
+			$correct = $question['correct'] ?? null;
+			if ( is_array( $correct ) ) {
+				foreach ( $correct as $answer ) if ( ! is_scalar( $answer ) ) return RSV_Helpers::error( 'rsv_quiz_answer_schema_invalid', __( 'Private quiz answers must be scalar option values.', RSV_TEXT_DOMAIN ), 422 );
+			} elseif ( null !== $correct && ! is_scalar( $correct ) ) {
+				return RSV_Helpers::error( 'rsv_quiz_answer_schema_invalid', __( 'Private quiz answers must be scalar option values.', RSV_TEXT_DOMAIN ), 422 );
+			}
+		}
 		return true;
 	}
 
