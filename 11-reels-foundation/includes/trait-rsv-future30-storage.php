@@ -56,22 +56,128 @@ trait RSV_Future30_Storage_Trait {
 
 	private static function public_projection( $feature_id, $reel ) {
 		$objects = self::object_rows( $feature_id, $reel['id'], 0, 100 );
-		$edges = self::edge_rows( $feature_id, $reel['id'], 200 );
+		$edges   = self::edge_rows( $feature_id, $reel['id'], 200 );
+		$duration = self::authoritative_duration( $reel );
 		foreach ( $objects as &$object ) unset( $object['owner_id'] );
+		unset( $object );
+
+		if ( in_array( $feature_id, array( 'F11-FUT-003','F11-FUT-004','F11-FUT-006','F11-FUT-011','F11-FUT-014','F11-FUT-030' ), true ) ) {
+			$edges = array_values( array_filter( $edges, static function( $row ) use ( $feature_id, $reel, $duration ) {
+				$owner = RSV_Helpers::text( $row['target_owner'] ?? '', 30 );
+				$ref   = RSV_Helpers::text( $row['target_ref'] ?? '', 255 );
+				if ( ! self::canonical_ref_public_valid( $owner, $ref, 'public-projection-' . strtolower( $feature_id ) ) ) return false;
+				if ( 'F11-FUT-004' === $feature_id ) {
+					$start = absint( $row['start_second'] ?? 0 );
+					$end   = absint( $row['end_second'] ?? 0 );
+					if ( $duration < 60 || $duration > 600 || $start > $duration || ( $end && ( $end < $start || $end > $duration ) ) ) return false;
+				}
+				if ( 'F11-FUT-014' === $feature_id ) {
+					$target = RSV_Repository::find( $ref, true );
+					$declared = strtolower( str_replace( '_', '-', RSV_Helpers::text( $row['payload']['language'] ?? '', 20 ) ) );
+					$actual = $target ? strtolower( str_replace( '_', '-', RSV_Helpers::text( $target['language'] ?? '', 20 ) ) ) : '';
+					if ( ! $declared || ! $actual || ! hash_equals( $actual, $declared ) ) return false;
+				}
+				if ( 'F11-FUT-030' === $feature_id ) {
+					$source_ref = RSV_Helpers::text( $row['payload']['source_ref'] ?? '', 255 );
+					if ( $source_ref && ! self::canonical_ref_public_valid( 'File 06', $source_ref, 'knowledge-graph-evidence-current' ) ) return false;
+				}
+				return true;
+			} ) );
+		}
+
+		if ( 'F11-FUT-005' === $feature_id ) {
+			$objects = array_values( array_filter( $objects, static function( $row ) {
+				$payload = (array) ( $row['payload'] ?? array() );
+				$owner = RSV_Helpers::text( $payload['source_owner'] ?? 'File 06', 30 );
+				foreach ( (array) ( $payload['source_refs'] ?? array() ) as $ref ) {
+					if ( ! self::canonical_ref_public_valid( $owner, RSV_Helpers::text( $ref, 255 ), 'evidence-layer-current' ) ) return false;
+				}
+				return true;
+			} ) );
+		}
+
 		if ( 'F11-FUT-006' === $feature_id ) foreach ( $edges as &$row ) $row['payload'] = array( 'effective_at'=>$row['payload']['effective_at'] ?? '' );
+		unset( $row );
+
 		if ( 'F11-FUT-007' === $feature_id ) foreach ( $objects as &$row ) $row['payload'] = array( 'reel_version'=>absint($row['payload']['reel_version'] ?? 0), 'snapshot_hash'=>RSV_Helpers::text($row['payload']['snapshot_hash'] ?? '',64) );
+		unset( $row );
+
+		if ( 'F11-FUT-008' === $feature_id ) {
+			$edges = array_values( array_filter( $edges, static function( $row ) use ( $reel ) {
+				$ref = RSV_Helpers::text( $row['target_ref'] ?? '', 255 );
+				$source = RSV_Repository::find( $ref, true );
+				if ( ! $source || ! RSV_Security::can_view_reel( $source, 0 ) ) return false;
+				$mode = sanitize_key( $row['edge_type'] ?? 'response' );
+				if ( true !== apply_filters( 'rsv_future30_remix_allowed', false, $source, $reel, $mode, 0 ) ) return false;
+				$derivative = RSV_Helpers::text( $row['payload']['file10_derivative_ref'] ?? '', 255 );
+				return $derivative && true === apply_filters( 'rsv_future30_file10_derivative_valid', false, $derivative, $reel, $mode );
+			} ) );
+		}
+
+		if ( 'F11-FUT-010' === $feature_id ) {
+			$objects = array_values( array_filter( $objects, static function( $row ) use ( $reel ) {
+				$payload = (array) ( $row['payload'] ?? array() );
+				$recipe = RSV_Helpers::text( $payload['file10_media_recipe_ref'] ?? '', 255 );
+				if ( ! $recipe ) return true;
+				$type = sanitize_key( $payload['template_type'] ?? 'clinical-pearl' );
+				return true === apply_filters( 'rsv_future30_file10_media_recipe_ref_valid', false, $recipe, $reel, $type );
+			} ) );
+		}
+
 		if ( 'F11-FUT-012' === $feature_id ) {
-			$edges = array_values( array_filter( $edges, static function( $row ) { return ! empty( $row['payload']['accepted'] ); } ) );
+			$edges = array_values( array_filter( $edges, static function( $row ) use ( $reel ) {
+				$ref = RSV_Helpers::text( $row['target_ref'] ?? '', 255 );
+				return ! empty( $row['payload']['accepted'] )
+					&& self::identity_ref_valid( $ref, 'coauthor-public-current' )
+					&& self::canonical_ref_public_valid( 'File 00', $ref, 'coauthor-public-current' )
+					&& true === apply_filters( 'rsv_future30_coauthor_consent_valid', false, $ref, $reel, 0 );
+			} ) );
 		}
+
 		if ( 'F11-FUT-013' === $feature_id ) {
-			$edges = array_values( array_filter( $edges, static function( $row ) { return 'approved' === ( $row['payload']['decision'] ?? '' ); } ) );
+			$edges = array_values( array_filter( $edges, static function( $row ) use ( $reel ) {
+				$payload = (array) ( $row['payload'] ?? array() );
+				$ref = RSV_Helpers::text( $row['target_ref'] ?? '', 255 );
+				$attestation = RSV_Helpers::text( $payload['attestation_ref'] ?? '', 255 );
+				$decision = sanitize_key( $payload['decision'] ?? '' );
+				return 'approved' === $decision
+					&& empty( $payload['conflict_declared'] )
+					&& self::identity_ref_valid( $ref, 'peer-reviewer-public-current' )
+					&& self::canonical_ref_public_valid( 'File 00', $ref, 'peer-reviewer-public-current' )
+					&& $attestation
+					&& true === apply_filters( 'rsv_future30_peer_review_attestation_valid', false, $attestation, $ref, $reel, $decision );
+			} ) );
 			foreach ( $edges as &$row ) {
-				$row['payload'] = array( 'decision'=>'approved', 'reviewed_at'=>$row['payload']['reviewed_at'] ?? '', 'conflict_declared'=>! empty( $row['payload']['conflict_declared'] ) );
+				$row['payload'] = array( 'decision'=>'approved', 'reviewed_at'=>$row['payload']['reviewed_at'] ?? '', 'conflict_declared'=>false );
 			}
+			unset( $row );
 		}
+
 		if ( 'F11-FUT-016' === $feature_id ) {
-			$objects = array_values( array_filter( $objects, static function( $row ) { return ! empty( $row['payload']['reviewed'] ); } ) );
+			$objects = array_values( array_filter( $objects, static function( $row ) use ( $reel ) {
+				$payload = (array) ( $row['payload'] ?? array() );
+				$ref = RSV_Helpers::text( $payload['transcript_ref'] ?? '', 255 );
+				return ! empty( $payload['reviewed'] ) && $ref && true === apply_filters( 'rsv_future30_transcript_ref_public_valid', false, $ref, $reel );
+			} ) );
 		}
+
+		if ( 'F11-FUT-017' === $feature_id ) {
+			$edges = array_values( array_filter( $edges, static function( $row ) use ( $duration ) {
+				$start = absint( $row['start_second'] ?? 0 );
+				$end = absint( $row['end_second'] ?? 0 );
+				return $duration >= 60 && $duration <= 600 && $start <= $duration && ( ! $end || ( $end >= $start && $end <= $duration ) );
+			} ) );
+		}
+
+		if ( 'F11-FUT-018' === $feature_id ) {
+			$objects = array_values( array_filter( $objects, static function( $row ) {
+				$payload = (array) ( $row['payload'] ?? array() );
+				$refs = array_merge( (array) ( $payload['remedy_refs'] ?? array() ), (array) ( $payload['disease_refs'] ?? array() ), (array) ( $payload['book_refs'] ?? array() ), (array) ( $payload['source_refs'] ?? array() ) );
+				foreach ( $refs as $ref ) if ( ! self::canonical_ref_public_valid( 'File 06', RSV_Helpers::text( $ref, 255 ), 'knowledge-card-current' ) ) return false;
+				return true;
+			} ) );
+		}
+
 		if ( 'F11-FUT-019' === $feature_id ) {
 			foreach ( $objects as &$row ) {
 				$questions = array();
@@ -82,6 +188,7 @@ trait RSV_Future30_Storage_Trait {
 				}
 				$row['payload']['questions'] = $questions;
 			}
+			unset( $row );
 		}
 		return array( 'objects'=>$objects, 'edges'=>$edges );
 	}
