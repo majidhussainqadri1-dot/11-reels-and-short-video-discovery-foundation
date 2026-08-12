@@ -4,7 +4,7 @@ Tags: reels, educational-video, learning, citations, accessibility, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0-rc4
+Stable tag: 1.2.0-rc5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,7 +14,7 @@ Canonical educational Reels plus the Founder-approved Future Reel Knowledge & Le
 
 File 11 owns the vertical educational Reel entity, 60–600 second eligibility, Reel-native discovery, moderation, private progress/history and Reel-domain Future30 orchestration. File 10 remains the sole raw-media/player/track/transcript owner; File 05 learning truth, File 06 knowledge/evidence, File 16 AI execution, File 00 identity and File 26 cross-platform discovery/graph remain authoritative.
 
-RC4 preserves all 30 Future30 capabilities and adds the third fresh 20-round hardening cycle: canonical public projections now revalidate current external references at read time; creator-research metrics require provider-carried minimum-sample proof before exposure; Future30 privacy erasure evidence uses opaque subject references rather than recreating the erased WordPress user ID. RC4 also advances the immutable File 11 contract identity to 10 while retaining the same database schemas.
+RC5 preserves all 30 Future30 capabilities and the complete third fresh 20-round hardening set. Generic public Future30 projections revalidate current external references at read time; Creator Research metrics require provider-carried minimum-sample proof; Future30 privacy erasure evidence uses opaque subject references rather than recreating erased WordPress user IDs. Linked translated Reel versions are canonically File 11-owned edges to current public File 11 Reels; legacy rc1–rc4 rows are read-compatible but are revalidated as File 11 targets before public projection. RC5 advances the immutable File 11 contract identity to 11 while retaining the existing database schemas.
 
 Public content remains browseable without login where eligible. Protected actions require current File 00 capability/state. External provider refs fail closed. Patient-case remix defaults to deny. AI execution is never performed by File 11, and no automated diagnosis/prescription/dose/emergency replacement is introduced.
 
@@ -36,12 +36,18 @@ No. File 11 stores/uses verified references and orchestration contracts only. Ra
 No. Public coauthor acceptance, expert-review attribution and dubbing voice consent require canonical/provider-verifiable assertions.
 
 = How many languages can a Reel have? =
-The Reel has one canonical source language plus at most nine linked language versions, each backed by a different current public Reel whose actual language matches the declared language. Stale or revoked language links do not permanently consume active capacity.
+The Reel has one canonical source language plus at most nine linked language versions, each backed by a different current public File 11 Reel whose actual language matches the declared language. Stale or revoked language links do not permanently consume active capacity.
 
 = Can payment or donation improve Reel ranking? =
 No. Payment/donation status is not an allowed recommendation-priority reason.
 
 == Changelog ==
+
+= 1.2.0-rc5 =
+* Corrected canonical ownership for F11-FUT-014 linked language Reel edges: new edges now target `File 11`, never a generic translation provider.
+* Preserved legacy rc1–rc4 language-edge compatibility by validating legacy target refs as current public File 11 Reels before public projection.
+* Retained all third fresh20 public-reference, Creator Research privacy-threshold and identifier-minimized erasure hardening.
+* Advanced File 11 contract to 11 and created a distinct rc5 workflow/package/release identity.
 
 = 1.2.0-rc4 =
 * Third fresh 20-round corrective review candidate over the amended 2026-08-12 File 11 plan.
