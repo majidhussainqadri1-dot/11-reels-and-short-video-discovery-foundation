@@ -43,6 +43,7 @@ $files = array(
 	'trait-rsv-future30-experience.php',
 	'class-rsv-future30.php',
 	'class-rsv-future30-public-safety.php',
+	'class-rsv-future30-write-integrity.php',
 	'trait-rsv-top20-context.php',
 	'trait-rsv-top20-stories.php',
 	'trait-rsv-top20-responses.php',
