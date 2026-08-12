@@ -274,8 +274,13 @@ final class RSV_Security {
 			return RSV_Helpers::error( 'rsv_idempotency_unavailable', __( 'The request could not be safely deduplicated.', RSV_TEXT_DOMAIN ), 503 );
 		}
 		if ( ! empty( $row['expires_at'] ) && strtotime( $row['expires_at'] . ' UTC' ) < time() ) {
-			$deleted = $wpdb->delete( $table, array( 'id' => absint( $row['id'] ) ), array( '%d' ) );
-			return 1 === $deleted ? self::idempotency_begin( $scope, $key, $payload ) : RSV_Helpers::error( 'rsv_idempotency_unavailable', __( 'The expired request key could not be safely renewed.', RSV_TEXT_DOMAIN ), 503 );
+			$deleted = self::delete_idempotency_snapshot( $row, $actor, $scope, $key );
+			if ( false === $deleted ) {
+				return RSV_Helpers::error( 'rsv_idempotency_unavailable', __( 'The expired request key could not be safely renewed.', RSV_TEXT_DOMAIN ), 503 );
+			}
+			// A zero-row CAS means another request changed the record after our read.
+			// Re-read through the canonical begin path instead of deleting newer evidence.
+			return self::idempotency_begin( $scope, $key, $payload );
 		}
 		if ( ! hash_equals( (string) $row['payload_hash'], $hash ) ) {
 			return RSV_Helpers::error( 'rsv_idempotency_conflict', __( 'The idempotency key was reused with different data.', RSV_TEXT_DOMAIN ), 409 );
@@ -284,10 +289,31 @@ final class RSV_Security {
 			return array( 'replay' => true, 'response' => RSV_Helpers::json_decode( $row['response_json'] ) );
 		}
 		if ( 'failed' === $row['status'] ) {
-			$deleted = $wpdb->delete( $table, array( 'id' => absint( $row['id'] ) ), array( '%d' ) );
-			return $deleted ? self::idempotency_begin( $scope, $key, $payload ) : RSV_Helpers::error( 'rsv_request_in_progress', __( 'The request is already in progress.', RSV_TEXT_DOMAIN ), 409 );
+			$deleted = self::delete_idempotency_snapshot( $row, $actor, $scope, $key );
+			if ( false === $deleted ) {
+				return RSV_Helpers::error( 'rsv_idempotency_unavailable', __( 'The failed request key could not be safely renewed.', RSV_TEXT_DOMAIN ), 503 );
+			}
+			return self::idempotency_begin( $scope, $key, $payload );
 		}
 		return RSV_Helpers::error( 'rsv_request_in_progress', __( 'The request is already in progress.', RSV_TEXT_DOMAIN ), 409 );
+	}
+
+	private static function delete_idempotency_snapshot( $row, $actor, $scope, $key ) {
+		global $wpdb;
+		$table = RSV_Helpers::table( 'idempotency' );
+		$sql = $wpdb->prepare(
+			"DELETE FROM $table WHERE id=%d AND actor_id=%d AND scope_key=%s AND idem_key=%s AND status=%s AND payload_hash=%s AND updated_at=%s AND expires_at=%s",
+			absint( $row['id'] ?? 0 ),
+			absint( $actor ),
+			$scope,
+			$key,
+			(string) ( $row['status'] ?? '' ),
+			(string) ( $row['payload_hash'] ?? '' ),
+			(string) ( $row['updated_at'] ?? '' ),
+			(string) ( $row['expires_at'] ?? '' )
+		);
+		$deleted = $wpdb->query( $sql );
+		return false === $deleted ? false : (int) $deleted;
 	}
 
 	public static function idempotency_finish( $scope, $key, $response ) {
