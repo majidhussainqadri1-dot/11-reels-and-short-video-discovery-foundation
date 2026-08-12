@@ -3,14 +3,14 @@ $root = dirname( __DIR__ ) . '/11-reels-foundation';
 $read = static function ( $path ) { $v = file_get_contents( $path ); if ( false === $v ) throw new RuntimeException( "Cannot read $path" ); return $v; };
 $f = array(
  'bootstrap'=>$read($root.'/11-reels-foundation.php'),
- 'future'=>$read($root.'/includes/class-rsv-future30.php').$read($root.'/includes/trait-rsv-future30-storage.php').$read($root.'/includes/trait-rsv-future30-feature-write.php').$read($root.'/includes/trait-rsv-future30-user-features.php').$read($root.'/includes/trait-rsv-future30-experience.php'),
+ 'future'=>$read($root.'/includes/class-rsv-future30.php').$read($root.'/includes/trait-rsv-future30-storage.php').$read($root.'/includes/trait-rsv-future30-feature-write.php').$read($root.'/includes/trait-rsv-future30-user-features.php').$read($root.'/includes/trait-rsv-future30-experience.php').$read($root.'/includes/class-rsv-fresh20-hardening.php'),
  'contracts'=>$read($root.'/includes/class-rsv-contracts.php'),
  'plugin'=>$read($root.'/includes/class-rsv-plugin.php'),
  'frontend'=>$read($root.'/includes/class-rsv-frontend.php'),
  'uninstall'=>$read($root.'/uninstall.php'),
 );
 $must = array(
- ['bootstrap','Version: 1.2.0-rc1'], ['bootstrap',"define( 'RSV_CONTRACT_VERSION', 7 )"], ['bootstrap',"'class-rsv-future30.php'"],
+ ['bootstrap','Version: 1.2.0-rc2'], ['bootstrap',"define( 'RSV_CONTRACT_VERSION', 8 )"], ['bootstrap',"'class-rsv-future30.php'"], ['bootstrap',"'class-rsv-fresh20-hardening.php'"],
  ['future',"const SCHEMA_VERSION = '1.0.0'"], ['future',"const PLAN_REVISION = '2026-08-12'"],
  ['future','Educational Reel Series / Playlists'], ['future','Structured Learning Paths'], ['future','Source-at-Time Citation Cards'],
  ['future','Correction & Supersession System'], ['future','Advanced Remix Studio'], ['future','Remix Permission Matrix'],
@@ -32,11 +32,11 @@ $must = array(
  ['future','feed_allows_row'], ['future','body_classes'], ['future','rsv-a11y-'],
  ['future','unset( $question[\'correct\']'], ['future','Authoritative Reel duration'],
  ['plugin','RSV_Future30::install'], ['plugin','new RSV_Future30'], ['future','single_reel_tools'], ['future','wp_add_inline_style'], ['future','wp_add_inline_script'],
- ['uninstall','future_user_state'], ['contracts','F11-FUT-030'],
+ ['uninstall','future_user_state'], ['contracts','F11-FUT-030'], ['future','rsv_translation_language_mismatch'], ['future','ReelQuizAttemptUpdated'], ['future','render_safe_tools'],
 );
 foreach ($must as [$key,$needle]) if (false === strpos($f[$key], $needle)) { fwrite(STDERR,"Missing Future30 marker [$key]: $needle\n"); exit(1); }
 if (30 !== preg_match_all("/'F11-FUT-[0-9]{3}'/", $f['contracts'])) { fwrite(STDERR,"Expected exactly 30 Future30 requirement IDs in contracts\n"); exit(1); }
 if (30 !== preg_match_all("/'F11-FUT-[0-9]{3}'/", substr($f['future'], strpos($f['future'],'const FEATURE_IDS'), strpos($f['future'],'public static function definitions')-strpos($f['future'],'const FEATURE_IDS')))) { fwrite(STDERR,"Expected exactly 30 Feature IDs in Future30 manifest\n"); exit(1); }
 $forbidden = array('raw media owner File 11','autonomous diagnosis','paid ranking advantage');
 foreach($forbidden as $needle) if(false!==stripos($f['future'],$needle)){fwrite(STDERR,"Forbidden Future30 claim: $needle\n");exit(1);}
-echo "File 11 Future30 contracts PASS\n";
+echo "File 11 Future30 rc2 contracts PASS\n";
