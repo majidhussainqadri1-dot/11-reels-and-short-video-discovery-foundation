@@ -1,7 +1,7 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-/** Additional fail-closed guards around Future30 write identities. */
+/** Additional fail-closed guards around Future30 write identities and payload integrity. */
 final class RSV_Future30_Write_Integrity {
 	public static function register() {
 		add_filter( 'rest_pre_dispatch', array( __CLASS__, 'pre_dispatch' ), 15, 3 );
@@ -25,6 +25,21 @@ final class RSV_Future30_Write_Integrity {
 			return $result;
 		}
 		$params = (array) $request->get_json_params();
+
+		if ( 'F11-FUT-019' === $feature ) {
+			$quiz_error = self::validate_quiz( (array) ( $params['questions'] ?? array() ) );
+			if ( is_wp_error( $quiz_error ) ) return $quiz_error;
+		}
+		if ( 'F11-FUT-018' === $feature ) {
+			foreach ( (array) ( $params['source_refs'] ?? array() ) as $ref ) {
+				if ( ! self::external_public_ref_valid( 'File 06', $ref, 'knowledge-card-source' ) ) return RSV_Helpers::error( 'rsv_knowledge_source_invalid', __( 'Every knowledge-card source must be a current public File 06 reference.', RSV_TEXT_DOMAIN ), 422 );
+			}
+		}
+		if ( 'F11-FUT-030' === $feature && ! empty( $params['source_ref'] ) ) {
+			$source_owner = RSV_Helpers::text( $params['source_owner'] ?? 'File 06', 30 );
+			if ( ! self::external_public_ref_valid( $source_owner, $params['source_ref'], 'knowledge-graph-evidence' ) ) return RSV_Helpers::error( 'rsv_graph_source_invalid', __( 'The knowledge-graph evidence source is not current and public.', RSV_TEXT_DOMAIN ), 422 );
+		}
+
 		$public_id = RSV_Helpers::text( $params['public_id'] ?? '', 80 );
 		if ( ! $public_id ) return $result;
 		global $wpdb;
@@ -38,6 +53,34 @@ final class RSV_Future30_Write_Integrity {
 			return RSV_Helpers::error( 'rsv_future_public_id_conflict', __( 'This Future30 public identity belongs to a different feature or Reel and cannot be reassigned.', RSV_TEXT_DOMAIN ), 409 );
 		}
 		return $result;
+	}
+
+	private static function validate_quiz( $questions ) {
+		if ( count( $questions ) < 1 || count( $questions ) > 5 ) return RSV_Helpers::error( 'rsv_quiz_size_invalid', __( 'A Reel quiz must contain 1 to 5 questions.', RSV_TEXT_DOMAIN ), 422 );
+		foreach ( $questions as $question ) {
+			if ( ! is_array( $question ) ) return RSV_Helpers::error( 'rsv_quiz_question_invalid', __( 'Every quiz question must be structured data.', RSV_TEXT_DOMAIN ), 422 );
+			$type = RSV_Helpers::enum( $question['type'] ?? 'single-choice', array( 'single-choice','multiple-choice','true-false' ), '' );
+			$prompt = RSV_Helpers::text( $question['prompt'] ?? '', 1200 );
+			if ( ! $type || '' === trim( $prompt ) || ! array_key_exists( 'correct', $question ) ) return RSV_Helpers::error( 'rsv_quiz_question_incomplete', __( 'Each quiz question needs a supported type, prompt and private correct answer.', RSV_TEXT_DOMAIN ), 422 );
+			if ( 'true-false' === $type ) {
+				$correct = strtolower( trim( (string) $question['correct'] ) );
+				if ( ! in_array( $correct, array( 'true','false','1','0' ), true ) ) return RSV_Helpers::error( 'rsv_quiz_answer_invalid', __( 'A true/false question must have a valid true or false answer.', RSV_TEXT_DOMAIN ), 422 );
+				continue;
+			}
+			$options = array_values( array_map( static function( $value ) { return RSV_Helpers::text( $value, 500 ); }, (array) ( $question['options'] ?? array() ) ) );
+			if ( count( $options ) < 2 || count( $options ) > 8 || count( array_unique( $options ) ) !== count( $options ) || in_array( '', $options, true ) ) return RSV_Helpers::error( 'rsv_quiz_options_invalid', __( 'Choice questions require 2 to 8 distinct non-empty options.', RSV_TEXT_DOMAIN ), 422 );
+			$correct = (array) $question['correct'];
+			if ( 'single-choice' === $type && 1 !== count( $correct ) ) return RSV_Helpers::error( 'rsv_quiz_answer_invalid', __( 'A single-choice question must have exactly one correct option.', RSV_TEXT_DOMAIN ), 422 );
+			if ( 'multiple-choice' === $type && count( $correct ) < 1 ) return RSV_Helpers::error( 'rsv_quiz_answer_invalid', __( 'A multiple-choice question must have at least one correct option.', RSV_TEXT_DOMAIN ), 422 );
+			foreach ( $correct as $answer ) if ( ! in_array( RSV_Helpers::text( $answer, 500 ), $options, true ) ) return RSV_Helpers::error( 'rsv_quiz_answer_invalid', __( 'Every correct answer must match one of the declared options.', RSV_TEXT_DOMAIN ), 422 );
+		}
+		return true;
+	}
+
+	private static function external_public_ref_valid( $owner, $ref, $purpose ) {
+		$owner = RSV_Helpers::text( $owner, 30 );
+		$ref = RSV_Helpers::text( $ref, 255 );
+		return $owner && $ref && true === apply_filters( 'rsv_future30_public_ref_valid', false, $owner, $ref, sanitize_key( $purpose ) );
 	}
 }
 
