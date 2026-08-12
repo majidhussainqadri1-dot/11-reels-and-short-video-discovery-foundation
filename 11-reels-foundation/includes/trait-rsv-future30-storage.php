@@ -65,7 +65,8 @@ trait RSV_Future30_Storage_Trait {
 			$edges = array_values( array_filter( $edges, static function( $row ) use ( $feature_id, $reel, $duration ) {
 				$owner = RSV_Helpers::text( $row['target_owner'] ?? '', 30 );
 				$ref   = RSV_Helpers::text( $row['target_ref'] ?? '', 255 );
-				if ( ! self::canonical_ref_public_valid( $owner, $ref, 'public-projection-' . strtolower( $feature_id ) ) ) return false;
+				$validation_owner = 'F11-FUT-014' === $feature_id ? 'File 11' : $owner;
+				if ( ! self::canonical_ref_public_valid( $validation_owner, $ref, 'public-projection-' . strtolower( $feature_id ) ) ) return false;
 				if ( 'F11-FUT-004' === $feature_id ) {
 					$start = absint( $row['start_second'] ?? 0 );
 					$end   = absint( $row['end_second'] ?? 0 );
