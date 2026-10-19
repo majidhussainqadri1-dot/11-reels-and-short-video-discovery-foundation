@@ -143,7 +143,32 @@ trait RSV_Future30_Feature_Write_Trait {
 				if ( ! $refs ) return RSV_Helpers::error( 'rsv_knowledge_source_required', __( 'A knowledge card requires at least one current public File 06 source.', RSV_TEXT_DOMAIN ), 422 );
 				foreach ( $refs as $ref ) if ( ! self::canonical_ref_public_valid( 'File 06', $ref, 'knowledge-card' ) ) return RSV_Helpers::error( 'rsv_knowledge_ref_invalid', __( 'A knowledge-card reference is not currently public and valid.', RSV_TEXT_DOMAIN ), 422 );
 				return self::put_object( $fid, 'knowledge_card', $reel['id'], $p['title'] ?? $reel['title'], array( 'summary'=>$p['summary']??'', 'key_points'=>array_slice((array)($p['key_points']??array()),0,20), 'remedy_refs'=>$remedies, 'disease_refs'=>$diseases, 'book_refs'=>$books, 'difficulty'=>$p['difficulty']??'', 'source_refs'=>$sources ), $p['public_id']??'' );
-			case 'F11-FUT-019': $questions=(array)($p['questions']??array());if(count($questions)<1||count($questions)>5)return RSV_Helpers::error('rsv_quiz_size_invalid',__('A Reel quiz must contain 1 to 5 questions.',RSV_TEXT_DOMAIN),422);return self::put_object($fid,'micro_quiz',$reel['id'],$p['title']??'Quick learning check',array('questions'=>$questions,'streaks'=>false,'ranking_effect'=>false),$p['public_id']??'');
+			case 'F11-FUT-019':
+                $raw_questions=(array)($p['questions']??array());
+                if(count($raw_questions)<1||count($raw_questions)>5)return RSV_Helpers::error('rsv_quiz_size_invalid',__('A Reel quiz must contain 1 to 5 questions.',RSV_TEXT_DOMAIN),422);
+                $questions=array();
+                foreach($raw_questions as $question){
+                    if(!is_array($question))return RSV_Helpers::error('rsv_quiz_question_invalid',__('Quiz questions must be structured data.',RSV_TEXT_DOMAIN),422);
+                    $type=RSV_Helpers::enum($question['type']??'single-choice',array('single-choice','multiple-choice','true-false'),'');
+                    $prompt=isset($question['prompt'])&&is_scalar($question['prompt'])?RSV_Helpers::text($question['prompt'],1200):'';
+                    if(!$type||!$prompt||!array_key_exists('correct',$question))return RSV_Helpers::error('rsv_quiz_question_incomplete',__('A quiz question requires a type, prompt and private answer.',RSV_TEXT_DOMAIN),422);
+                    $item=array('type'=>$type,'prompt'=>$prompt);
+                    if('true-false'===$type){
+                        $correct=$question['correct'];
+                        if(!is_scalar($correct))return RSV_Helpers::error('rsv_quiz_answer_invalid',__('The true/false answer is invalid.',RSV_TEXT_DOMAIN),422);
+                        $item['correct']=is_bool($correct)?($correct?'true':'false'):strtolower(RSV_Helpers::text($correct,10));
+                    }else{
+                        $choices=array();
+                        foreach((array)($question['options']??array()) as $option)if(is_scalar($option))$choices[]=RSV_Helpers::text($option,500);
+                        $item['options']=array_slice($choices,0,8);
+                        $answers=array();
+                        foreach((array)$question['correct'] as $answer)if(is_scalar($answer))$answers[]=RSV_Helpers::text($answer,500);
+                        $item['correct']=array_slice($answers,0,8);
+                    }
+                    if(isset($question['explanation_private'])&&is_scalar($question['explanation_private']))$item['explanation_private']=RSV_Helpers::textarea($question['explanation_private'],1500);
+                    $questions[]=$item;
+                }
+                return self::put_object($fid,'micro_quiz',$reel['id'],$p['title']??'Quick learning check',array('questions'=>$questions,'streaks'=>false,'ranking_effect'=>false),$p['public_id']??'');
 			case 'F11-FUT-024': return self::put_object($fid,'explanation_policy',$reel['id'],'Why this Reel',array('allowed_reasons'=>(array)($p['allowed_reasons']??array('topic-interest','followed-doctor','recent-learning','diversity','latest')),'commercial_reason'=>false,'donor_reason'=>false),$p['public_id']??'');
 			case 'F11-FUT-028': return self::run_safety_scan($reel,$p);
 			case 'F11-FUT-030':
