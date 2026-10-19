@@ -21,6 +21,7 @@ php "$ROOT/tests/fresh40-oct2026-contracts.php"
 php "$ROOT/tests/fresh40-cycle2-quiz-series.php"
 php "$ROOT/tests/fresh40-cycle2-ai-context.php"
 php "$ROOT/tests/fresh40-cycle2-sequential-audit.php"
+php "$ROOT/tests/rc8-governing-plan-guards.php"
 bash "$ROOT/tests/static-contracts.sh"
 A="$(mktemp -d)"; B="$(mktemp -d)"; trap 'rm -rf "$A" "$B"' EXIT
 bash "$ROOT/tools/build-package.sh" "$A/file11.zip" >/dev/null
