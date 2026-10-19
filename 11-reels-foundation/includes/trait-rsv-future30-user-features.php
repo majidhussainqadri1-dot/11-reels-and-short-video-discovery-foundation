@@ -2,7 +2,73 @@
 defined( 'ABSPATH' ) || exit;
 
 trait RSV_Future30_User_Features_Trait {
-	public function quiz_attempt( $request ) { $reel=self::reel($request['id']);if(is_wp_error($reel))return $reel;if(!RSV_Security::can_view_reel($reel))return RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404);$p=(array)$request->get_json_params();$answers=(array)($p['answers']??array());$quiz=self::object_rows('F11-FUT-019',$reel['id'],0,1);if(!$quiz)return RSV_Helpers::error('rsv_quiz_unavailable',__('No quiz is available for this Reel.',RSV_TEXT_DOMAIN),404);$questions=(array)($quiz[0]['payload']['questions']??array());$score=0;$total=count($questions);foreach($questions as $i=>$q){if(isset($q['correct'])&&isset($answers[$i])&&(string)$answers[$i]===(string)$q['correct'])$score++;}$state=self::state_put('F11-FUT-019',$reel['public_id'],'quiz_attempt',array('score'=>$score,'total'=>$total,'completed_at'=>RSV_Helpers::now()));return is_wp_error($state)?$state:rest_ensure_response(array('score'=>$score,'total'=>$total,'learning_only'=>true,'ranking_effect'=>false)); }
+	/** Grade against server-side answers without PHP array-to-string coercion. */
+	private static function quiz_answer_matches( $question, $answer ) {
+		if ( ! is_array( $question ) || ! array_key_exists( 'correct', $question ) ) return false;
+		$type = sanitize_key( $question['type'] ?? 'single-choice' );
+		if ( 'true-false' === $type ) {
+			$normalize = static function ( $value ) {
+				if ( is_bool( $value ) ) return $value ? 'true' : 'false';
+				if ( ! is_scalar( $value ) ) return '';
+				$value = strtolower( trim( (string) $value ) );
+				if ( in_array( $value, array( 'true', '1' ), true ) ) return 'true';
+				if ( in_array( $value, array( 'false', '0' ), true ) ) return 'false';
+				return '';
+			};
+			$expected = $normalize( $question['correct'] );
+			return '' !== $expected && $expected === $normalize( $answer );
+		}
+		if ( ! in_array( $type, array( 'single-choice', 'multiple-choice' ), true ) ) return false;
+		$expected = (array) $question['correct'];
+		$given = is_array( $answer ) ? $answer : array( $answer );
+		if ( ! $expected || ! $given || ( 'single-choice' === $type && ( 1 !== count( $expected ) || 1 !== count( $given ) ) ) ) return false;
+		$normalize = static function ( $values ) {
+			$out = array();
+			foreach ( $values as $value ) {
+				if ( ! is_scalar( $value ) ) return array();
+				$value = trim( (string) $value );
+				if ( '' === $value ) return array();
+				$out[] = $value;
+			}
+			return count( $out ) === count( array_unique( $out ) ) ? $out : array();
+		};
+		$expected = $normalize( $expected );
+		$given = $normalize( $given );
+		if ( ! $expected || count( $expected ) !== count( $given ) ) return false;
+		sort( $expected, SORT_STRING );
+		sort( $given, SORT_STRING );
+		return $expected === $given;
+	}
+
+	public function quiz_attempt( $request ) {
+		RSV_Helpers::no_cache_private();
+		$rate = RSV_Security::rate_limit( 'future30_quiz_attempt', 60, HOUR_IN_SECONDS );
+		if ( is_wp_error( $rate ) ) return $rate;
+		$reel = self::reel( $request['id'] );
+		if ( is_wp_error( $reel ) || ! RSV_Security::can_view_reel( $reel ) )
+			return RSV_Helpers::error( 'rsv_not_found', __( 'Reel not found.', RSV_TEXT_DOMAIN ), 404 );
+		$p = (array) $request->get_json_params();
+		$answers = (array) ( $p['answers'] ?? array() );
+		$quiz = self::object_rows( 'F11-FUT-019', $reel['id'], 0, 1 );
+		if ( ! $quiz ) return RSV_Helpers::error( 'rsv_quiz_unavailable', __( 'No quiz is available for this Reel.', RSV_TEXT_DOMAIN ), 404 );
+		$questions = (array) ( $quiz[0]['payload']['questions'] ?? array() );
+		$total = count( $questions );
+		if ( $total < 1 || $total > 5 ) return RSV_Helpers::error( 'rsv_quiz_invalid', __( 'The quiz is not in a valid reviewable state.', RSV_TEXT_DOMAIN ), 422 );
+		$score = 0;
+		foreach ( $questions as $i => $question ) {
+			if ( array_key_exists( $i, $answers ) && self::quiz_answer_matches( $question, $answers[ $i ] ) ) ++$score;
+		}
+		$user_id = get_current_user_id();
+		$result = RSV_DB::transaction( static function () use ( $reel, $score, $total, $user_id ) {
+			$state = self::state_put( 'F11-FUT-019', $reel['public_id'], 'quiz_attempt', array( 'score'=>$score, 'total'=>$total, 'completed_at'=>RSV_Helpers::now() ) );
+			if ( is_wp_error( $state ) ) return $state;
+			if ( ! RSV_Helpers::audit( 'reel', absint( $reel['id'] ), 'quiz_attempt', '', 'complete', 'F11-FUT-019', array( 'learning_only'=>true ), $user_id ) ||
+				! RSV_Helpers::outbox( 'ReelLearningQuizAttempted', 'reel', absint( $reel['id'] ), array( 'reel_public_id'=>$reel['public_id'], 'user_ref'=>RSV_Helpers::opaque_user_ref( $user_id, 'future30-quiz' ), 'learning_only'=>true ) ) )
+				return RSV_Helpers::error( 'rsv_quiz_evidence_failed', __( 'Quiz progress could not be committed with audit evidence.', RSV_TEXT_DOMAIN ), 500 );
+			return array( 'score'=>$score, 'total'=>$total, 'learning_only'=>true, 'ranking_effect'=>false );
+		} );
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
+	}
 
 	public function collections() { RSV_Helpers::no_cache_private();return rest_ensure_response(self::state_get('F11-FUT-020','user','collections',array('payload'=>array('collections'=>array()),'version'=>0))); }
 	public function collection_write( $request ) { RSV_Helpers::no_cache_private();$rate=RSV_Security::rate_limit('future30_collections',60,HOUR_IN_SECONDS);if(is_wp_error($rate))return $rate;$p=(array)$request->get_json_params();$current=self::state_get('F11-FUT-020','user','collections',array('payload'=>array('collections'=>array()),'version'=>0));$collections=(array)($current['payload']['collections']??array());$name=RSV_Helpers::text($p['name']??'',80);if(!$name)return RSV_Helpers::error('rsv_collection_name_required',__('Collection name is required.',RSV_TEXT_DOMAIN),422);$key=sanitize_key($p['key']??$name);$refs=array_values(array_unique(array_map('sanitize_text_field',(array)($p['reels']??($collections[$key]['reels']??array())))));if(count($refs)>500)return RSV_Helpers::error('rsv_collection_too_large',__('A study collection may contain at most 500 Reels.',RSV_TEXT_DOMAIN),422);foreach($refs as $ref)if(!self::canonical_ref_public_valid('File 11',$ref,'study-collection'))return RSV_Helpers::error('rsv_collection_reel_invalid',__('Every study-collection item must be a current public Reel.',RSV_TEXT_DOMAIN),422);$collections[$key]=array('name'=>$name,'reels'=>$refs,'private'=>true,'updated_at'=>RSV_Helpers::now());return self::state_put('F11-FUT-020','user','collections',array('collections'=>$collections)); }
