@@ -90,6 +90,7 @@ trait RSV_Future30_Storage_Trait {
 			$objects = array_values( array_filter( $objects, static function( $row ) {
 				$payload = (array) ( $row['payload'] ?? array() );
 				$owner = RSV_Helpers::text( $payload['source_owner'] ?? 'File 06', 30 );
+				if ( ! (array) ( $payload['source_refs'] ?? array() ) ) return false;
 				foreach ( (array) ( $payload['source_refs'] ?? array() ) as $ref ) {
 					if ( ! self::canonical_ref_public_valid( $owner, RSV_Helpers::text( $ref, 255 ), 'evidence-layer-current' ) ) return false;
 				}
@@ -174,6 +175,7 @@ trait RSV_Future30_Storage_Trait {
 			$objects = array_values( array_filter( $objects, static function( $row ) {
 				$payload = (array) ( $row['payload'] ?? array() );
 				$refs = array_merge( (array) ( $payload['remedy_refs'] ?? array() ), (array) ( $payload['disease_refs'] ?? array() ), (array) ( $payload['book_refs'] ?? array() ), (array) ( $payload['source_refs'] ?? array() ) );
+				if ( ! $refs ) return false;
 				foreach ( $refs as $ref ) if ( ! self::canonical_ref_public_valid( 'File 06', RSV_Helpers::text( $ref, 255 ), 'knowledge-card-current' ) ) return false;
 				return true;
 			} ) );
