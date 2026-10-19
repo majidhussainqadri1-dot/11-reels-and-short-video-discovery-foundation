@@ -3,10 +3,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 P="$ROOT/11-reels-foundation"
 
-grep -F "Version: 1.2.0-rc5" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_VERSION', '1.2.0-rc5' )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "Version: 1.2.0-rc6" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_VERSION', '1.2.0-rc6' )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "define( 'RSV_SCHEMA_VERSION', '1.2.0' )" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_CONTRACT_VERSION', 11 )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_CONTRACT_VERSION', 12 )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "class-rsv-current-plan.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "trait-rsv-future30-storage.php" "$P/11-reels-foundation.php" >/dev/null
 grep -F "trait-rsv-future30-feature-write.php" "$P/11-reels-foundation.php" >/dev/null
@@ -113,4 +113,4 @@ grep -F "subject_ref" "$P/includes/class-rsv-future30-privacy-integrity.php" >/d
 ! grep -F ":root{" "$P/assets/css/rsv.css"
 ! grep -F ":root" "$P/assets/css/rsv-top20.css"
 
-echo "static contracts Future30 rc5 PASS"
+echo "static contracts Future30 rc6 PASS"
