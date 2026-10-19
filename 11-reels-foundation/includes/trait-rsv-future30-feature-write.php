@@ -30,7 +30,51 @@ trait RSV_Future30_Feature_Write_Trait {
 	public function series_list() { return rest_ensure_response( self::public_series_rows() ); }
 	public function series_create( $request ) { $p=(array)$request->get_json_params();$rate=RSV_Security::rate_limit('future30_series',30,HOUR_IN_SECONDS);if(is_wp_error($rate))return $rate;$idem=$request->get_header('Idempotency-Key');$begin=RSV_Security::idempotency_begin('future30_series',$idem,$p);if(is_wp_error($begin))return $begin;if(!empty($begin['replay']))return rest_ensure_response($begin['response']);$refs=array_values(array_unique(array_map('sanitize_text_field',(array)($p['ordered_reels']??array()))));if(!count($refs)||count($refs)>100){RSV_Security::idempotency_fail('future30_series',$idem);return RSV_Helpers::error('rsv_series_size_invalid',__('A Reel series must contain 1 to 100 current public Reels.',RSV_TEXT_DOMAIN),422);}foreach($refs as $ref)if(!self::canonical_ref_public_valid('File 11',$ref,'series')){RSV_Security::idempotency_fail('future30_series',$idem);return RSV_Helpers::error('rsv_series_reel_invalid',__('Every series item must be a current public Reel.',RSV_TEXT_DOMAIN),422);}return self::idempotent_finish_result('future30_series',$idem,static function() use($p,$refs){return self::put_object('F11-FUT-001','series',0,$p['title']??'',array('description'=>$p['description']??'','difficulty'=>$p['difficulty']??'','ordered_reels'=>$refs),$p['public_id']??'');},array('entity_type'=>'future30','action'=>'series_update','reason'=>'F11-FUT-001','event'=>'ReelSeriesUpdated','event_data'=>array('feature_id'=>'F11-FUT-001'))); }
 	public function path_list() { $rows=self::object_rows('F11-FUT-002',0,0,50);foreach($rows as &$row)unset($row['owner_id']);return rest_ensure_response($rows); }
-	public function path_create( $request ) { $p=(array)$request->get_json_params();$rate=RSV_Security::rate_limit('future30_learning_paths',30,HOUR_IN_SECONDS);if(is_wp_error($rate))return $rate;$idem=$request->get_header('Idempotency-Key');$begin=RSV_Security::idempotency_begin('future30_learning_path',$idem,$p);if(is_wp_error($begin))return $begin;if(!empty($begin['replay']))return rest_ensure_response($begin['response']);$refs=array_values(array_unique(array_map('sanitize_text_field',(array)($p['file05_course_refs']??array()))));foreach($refs as $ref)if(true!==apply_filters('rsv_future30_file05_public_ref_valid',false,$ref)){RSV_Security::idempotency_fail('future30_learning_path',$idem);return RSV_Helpers::error('rsv_learning_ref_invalid',__('Every learning reference must be current and public according to File 05.',RSV_TEXT_DOMAIN),422);}$steps=array_slice((array)($p['steps']??array()),0,100);return self::idempotent_finish_result('future30_learning_path',$idem,static function() use($p,$steps,$refs){return self::put_object('F11-FUT-002','learning_path',0,$p['title']??'',array('level'=>RSV_Helpers::enum($p['level']??'beginner',array('beginner','intermediate','advanced'),'beginner'),'description'=>$p['description']??'','steps'=>$steps,'file05_course_refs'=>$refs),$p['public_id']??'');},array('entity_type'=>'future30','action'=>'learning_path_update','reason'=>'F11-FUT-002','event'=>'ReelLearningPathUpdated','event_data'=>array('feature_id'=>'F11-FUT-002'))); }
+	/** Validate File 05 course and lesson truth before persisting a path. */
+	private static function validated_path_steps( $raw ) {
+		if ( ! is_array( $raw ) || count( $raw ) < 1 || count( $raw ) > 100 ) {
+			return RSV_Helpers::error( 'rsv_learning_steps_invalid', __( 'A learning path requires 1 to 100 valid File 05 steps.', RSV_TEXT_DOMAIN ), 422 );
+		}
+		$steps = array();
+		foreach ( $raw as $row ) {
+			if ( ! is_array( $row ) ) return RSV_Helpers::error( 'rsv_learning_step_invalid', __( 'Each learning step must be structured data.', RSV_TEXT_DOMAIN ), 422 );
+			$ref = RSV_Helpers::text( $row['file05_ref'] ?? '', 255 );
+			if ( ! $ref || true !== apply_filters( 'rsv_future30_file05_public_ref_valid', false, $ref ) ) {
+				return RSV_Helpers::error( 'rsv_learning_ref_invalid', __( 'Each learning step must reference a current public File 05 record.', RSV_TEXT_DOMAIN ), 422 );
+			}
+			$steps[] = array( 'file05_ref'=>$ref, 'level'=>RSV_Helpers::enum( $row['level'] ?? 'beginner', array( 'beginner','intermediate','advanced' ), 'beginner' ) );
+		}
+		return $steps;
+	}
+	public function path_create( $request ) {
+		$p = (array) $request->get_json_params();
+		$rate = RSV_Security::rate_limit( 'future30_learning_paths', 30, HOUR_IN_SECONDS );
+		if ( is_wp_error( $rate ) ) return $rate;
+		$idem = $request->get_header( 'Idempotency-Key' );
+		$begin = RSV_Security::idempotency_begin( 'future30_learning_path', $idem, $p );
+		if ( is_wp_error( $begin ) ) return $begin;
+		if ( ! empty( $begin['replay'] ) ) return rest_ensure_response( $begin['response'] );
+		$refs = array_values( array_unique( array_map( 'sanitize_text_field', (array) ( $p['file05_course_refs'] ?? array() ) ) ) );
+		if ( count( $refs ) > 100 ) {
+			RSV_Security::idempotency_fail( 'future30_learning_path', $idem );
+			return RSV_Helpers::error( 'rsv_learning_refs_too_large', __( 'A learning path may reference at most 100 courses.', RSV_TEXT_DOMAIN ), 422 );
+		}
+		foreach ( $refs as $ref ) if ( ! $ref || true !== apply_filters( 'rsv_future30_file05_public_ref_valid', false, $ref ) ) {
+			RSV_Security::idempotency_fail( 'future30_learning_path', $idem );
+			return RSV_Helpers::error( 'rsv_learning_ref_invalid', __( 'Every learning reference must be current and public according to File 05.', RSV_TEXT_DOMAIN ), 422 );
+		}
+		$steps = self::validated_path_steps( $p['steps'] ?? null );
+		if ( is_wp_error( $steps ) ) {
+			RSV_Security::idempotency_fail( 'future30_learning_path', $idem );
+			return $steps;
+		}
+		return self::idempotent_finish_result( 'future30_learning_path', $idem, static function() use ( $p, $steps, $refs ) {
+			return self::put_object( 'F11-FUT-002', 'learning_path', 0, $p['title'] ?? '', array(
+				'level'=>RSV_Helpers::enum( $p['level'] ?? 'beginner', array( 'beginner','intermediate','advanced' ), 'beginner' ),
+				'description'=>$p['description']??'', 'steps'=>$steps, 'file05_course_refs'=>$refs
+			), $p['public_id']??'' );
+		}, array( 'entity_type'=>'future30', 'action'=>'learning_path_update', 'reason'=>'F11-FUT-002', 'event'=>'ReelLearningPathUpdated', 'event_data'=>array( 'feature_id'=>'F11-FUT-002' ) ) );
+	}
 
 	public function reel_feature_get( $request ) {
 		list($fid,$def)=self::feature($request['feature']); if(!$fid)return RSV_Helpers::error('rsv_future_unknown',__('Unknown future feature.',RSV_TEXT_DOMAIN),404);if(!self::generic_public_allowed($fid))return RSV_Helpers::error('rsv_future_private',__('This capability is private and available only through its dedicated endpoint.',RSV_TEXT_DOMAIN),404);$reel=self::reel($request['id']);if(is_wp_error($reel))return $reel;
