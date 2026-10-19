@@ -77,7 +77,26 @@ trait RSV_Future30_User_Features_Trait {
 
 	public function ai_context( $request ) { RSV_Helpers::no_cache_private();$reel=self::reel($request['id']);if(is_wp_error($reel))return $reel;if(!RSV_Security::can_view_reel($reel))return RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404);$context=array('reel'=>RSV_Repository::public_dto($reel),'citations'=>self::edge_rows('F11-FUT-004',$reel['id'],100),'evidence'=>self::object_rows('F11-FUT-005',$reel['id'],0,20),'knowledge_card'=>self::object_rows('F11-FUT-018',$reel['id'],0,1),'chapters'=>self::edge_rows('F11-FUT-017',$reel['id'],100),'medical_authority'=>'education-only-no-diagnosis-prescription-dose-or-emergency-replacement');$context=apply_filters('rsv_future30_ai_grounded_context',$context,$reel,get_current_user_id());return rest_ensure_response(array('owner'=>'File 16','context'=>$context,'execute_ai'=>false)); }
 	public function search_opportunities( $request ) { RSV_Helpers::no_cache_private();$limit=min(50,max(1,absint($request->get_param('limit')?:20)));$args=array('user_id'=>get_current_user_id(),'limit'=>$limit,'privacy'=>'aggregate-only','minimum_count'=>5,'ranking_advantage'=>'none');$data=apply_filters('rsv_future30_search_opportunities',null,$args);if(!is_array($data))return RSV_Helpers::error('rsv_search_intelligence_unavailable',__('Search opportunity intelligence is unavailable.',RSV_TEXT_DOMAIN),503);$items=array();foreach(array_slice($data,0,$limit) as $row){if(!is_array($row))continue;$count=absint($row['aggregate_count']??0);if($count&&$count<5)continue;$items[]=array('topic'=>RSV_Helpers::text($row['topic']??'',80),'query_label'=>RSV_Helpers::text($row['query_label']??'',160),'language'=>RSV_Helpers::text($row['language']??'',20),'region'=>RSV_Helpers::text($row['region']??'',80),'demand_band'=>RSV_Helpers::text($row['demand_band']??'',30),'content_gap'=>RSV_Helpers::text($row['content_gap']??'',30),'freshness'=>RSV_Helpers::text($row['freshness']??'',40),'source_ref'=>RSV_Helpers::text($row['source_ref']??'',255),'aggregate_count'=>$count?:null);};return rest_ensure_response(array('owner'=>'File 26','privacy'=>'aggregate-only','items'=>$items)); }
-	public function why( $request ) { $reel=self::reel($request['id']);if(is_wp_error($reel))return $reel;if(!RSV_Security::can_view_reel($reel))return RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404);$reasons=RSV_Integrations::recommendation_explanation($reel,sanitize_key($request->get_param('sort')?:'recommended'));$global=apply_filters('rsv_future30_global_recommendation_reasons',array(),$reel,get_current_user_id());return rest_ensure_response(array('reasons'=>array_values(array_unique(array_merge($reasons,is_array($global)?$global:array()))),'editable_controls'=>array('more-like-this','less-like-this','not-interested','mute-topic','mute-doctor','keyword-filters','reset-recommendations','explore-more'),'payment_or_donation_reason'=>false)); }
+	public function why( $request ) {
+		$reel = self::reel( $request['id'] );
+		if ( is_wp_error( $reel ) || ! RSV_Security::can_view_reel( $reel ) )
+			return RSV_Helpers::error( 'rsv_not_found', __( 'Reel not found.', RSV_TEXT_DOMAIN ), 404 );
+		$native = RSV_Integrations::recommendation_explanation( $reel, sanitize_key( $request->get_param( 'sort' ) ?: 'recommended' ) );
+		$provider = apply_filters( 'rsv_future30_global_recommendation_reasons', array(), $reel, get_current_user_id() );
+		$reasons = array();
+		foreach ( array_merge( (array) $native, is_array( $provider ) ? $provider : array() ) as $reason ) {
+			// A provider may return a malformed nested value; never forward unbounded internal data.
+			if ( ! is_scalar( $reason ) ) continue;
+			$reason = RSV_Helpers::text( $reason, 280 );
+			if ( '' !== $reason && ! in_array( $reason, $reasons, true ) ) $reasons[] = $reason;
+			if ( count( $reasons ) >= 12 ) break;
+		}
+		return rest_ensure_response( array(
+			'reasons'=>$reasons,
+			'editable_controls'=>array( 'more-like-this','less-like-this','not-interested','mute-topic','mute-doctor','keyword-filters','reset-recommendations','explore-more' ),
+			'payment_or_donation_reason'=>false,
+		) );
+	}
 
 	private static function default_feed_preferences(){return array('muted_topics'=>array(),'muted_doctors'=>array(),'keywords'=>array(),'topic_affinity'=>array(),'diversity'=>50,'explore_more'=>false,'autoplay'=>false,'history_paused'=>false);}
 	public function feed_preferences(){RSV_Helpers::no_cache_private();return rest_ensure_response(self::state_get('F11-FUT-025','user','feed_preferences',array('payload'=>self::default_feed_preferences(),'version'=>0)));}
