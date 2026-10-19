@@ -1,6 +1,6 @@
 # File 11 — Reels and Short Video Discovery
 
-**Current repository candidate:** `1.2.0-rc5`  
+**Current repository candidate:** `1.2.0-rc6`  
 **Future30 amendment:** `SSH-F11-FUTURE-REEL-KNOWLEDGE-INTELLIGENCE-30-2026`  
 **Canonical package root:** `reels-foundation-11`
 
@@ -23,11 +23,11 @@ The 2026-08-12 Founder-approved amendment retains all `F11-FUT-001` through `F11
 
 ## Release identity
 
-- Plugin: `1.2.0-rc5`
+- Plugin: `1.2.0-rc6`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
 - Future30 schema: `1.0.0`
-- File 11 contract: `11`
+- File 11 contract: `12`
 - Event contract: `4`
 - Provider contract: `3`
 - Future30 sub-contract: `1`
@@ -37,7 +37,7 @@ The 2026-08-12 Founder-approved amendment retains all `F11-FUT-001` through `F11
 
 ```bash
 bash tests/run-all.sh
-bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc5.zip
+bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc6.zip
 ```
 
 The exact-head release workflow must pass PHP 8.1/8.3/8.4 suites, JavaScript syntax, inherited corrective regressions, current-plan/Future30 and all three fresh20 contract suites, deterministic double build, checksum, ZIP integrity and exact runtime source/package parity.
