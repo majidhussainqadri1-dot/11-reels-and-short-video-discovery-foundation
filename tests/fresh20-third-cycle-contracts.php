@@ -9,8 +9,8 @@ $f = array(
     'privacy' => $read( $root . '/includes/class-rsv-future30-privacy-integrity.php' ),
 );
 $markers = array(
-    array( 'bootstrap', 'Version: 1.2.0-rc6' ),
-    array( 'bootstrap', "define( 'RSV_CONTRACT_VERSION', 12 )" ),
+    array( 'bootstrap', 'Version: 1.2.0-rc7' ),
+    array( 'bootstrap', "define( 'RSV_CONTRACT_VERSION', 13 )" ),
     array( 'storage', 'public_projection' ),
     array( 'storage', "'public-projection-' . strtolower( \$feature_id )" ),
     array( 'storage', "'F11-FUT-004' === \$feature_id" ),
