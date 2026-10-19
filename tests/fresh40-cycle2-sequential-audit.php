@@ -42,7 +42,7 @@ $checks = array(
     array( 'Reduced motion preference', '11-reels-foundation/assets/js/rsv.js', 'prefers-reduced-motion' ),
     array( 'Keyboard accessibility', '11-reels-foundation/assets/js/rsv.js', 'keydown' ),
     array( 'Wellbeing and stop control', '11-reels-foundation/assets/js/rsv-top20.js', 'wellbeing' ),
-    array( 'Captions and transcript fallback', '11-reels-foundation/includes/class-rsv-frontend.php', 'transcript' ),
+    array( 'Captions and transcript fallback', '11-reels-foundation/includes/class-rsv-frontend.php', 'captions' ),
     array( 'RTL styles and semantic layout', '11-reels-foundation/assets/css/rsv.css', '[dir="rtl"]' ),
     array( 'Patient case risk and moderation', '11-reels-foundation/includes/class-rsv-top20.php', 'patient' ),
     array( 'Diagnostics and safe mode', '11-reels-foundation/includes/class-rsv-diagnostics.php', 'safe_mode' ),
