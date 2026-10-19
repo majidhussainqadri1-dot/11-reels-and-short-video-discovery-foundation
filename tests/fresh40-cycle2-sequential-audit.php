@@ -46,7 +46,7 @@ $checks = array(
     array( 'RTL styles and semantic layout', '11-reels-foundation/assets/css/rsv.css', '[dir="rtl"]' ),
     array( 'Patient case risk and moderation', '11-reels-foundation/includes/class-rsv-top20.php', 'patient' ),
     array( 'Diagnostics and safe mode', '11-reels-foundation/includes/class-rsv-diagnostics.php', 'safe_mode' ),
-    array( 'Admin review and auditability', '11-reels-foundation/includes/class-rsv-admin.php', 'review' ),
+    array( 'Admin review and auditability', '11-reels-foundation/includes/class-rsv-admin.php', 'moderate' ),
     array( 'Release guard/test wiring', 'tests/run-all.sh', 'fresh40-cycle2-quiz-series.php' ),
 );
 if ( count( $checks ) !== 40 ) throw new RuntimeException( 'Exactly forty review scopes required.' );
