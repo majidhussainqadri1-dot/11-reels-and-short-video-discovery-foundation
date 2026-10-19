@@ -50,6 +50,50 @@ final class RSV_Future30_AI_Context_Safety {
             && ( ! $end || ( $end >= $start && $end <= $duration ) );
     }
 
+    /** Only declared public source metadata may cross the File 16 context boundary. */
+    private static function safe_context_row( $bucket, $row ) {
+        $safe = array();
+        foreach ( array( 'public_id','feature_id','object_type','edge_type','version','start_second','end_second','created_at','updated_at' ) as $key ) {
+            if ( isset( $row[ $key ] ) && is_scalar( $row[ $key ] ) ) $safe[ $key ] = $row[ $key ];
+        }
+        if ( in_array( $bucket, array( 'citations','chapters' ), true ) ) {
+            if ( 'citations' === $bucket ) {
+                $safe['target_owner'] = RSV_Helpers::text( $row['target_owner'] ?? '', 30 );
+                $safe['target_ref'] = RSV_Helpers::text( $row['target_ref'] ?? '', 255 );
+            }
+            if ( 'chapters' === $bucket ) {
+                $p = (array) ( $row['payload'] ?? array() );
+                $safe['payload'] = array( 'title'=>RSV_Helpers::text( $p['title'] ?? '', 255 ), 'summary'=>RSV_Helpers::textarea( $p['summary'] ?? '', 1000 ) );
+            }
+            return $safe;
+        }
+        $payload = (array) ( $row['payload'] ?? array() );
+        if ( 'evidence' === $bucket ) {
+            $owner = RSV_Helpers::text( $payload['source_owner'] ?? 'File 06', 30 );
+            $safe['payload'] = array(
+                'grade'=>RSV_Helpers::text( $payload['grade'] ?? '', 50 ),
+                'source_owner'=>$owner,
+                'source_refs'=>array_values( array_map( static function( $v ) { return RSV_Helpers::text( $v, 255 ); }, (array) ( $payload['source_refs'] ?? array() ) ) ),
+                'claim_scope'=>RSV_Helpers::textarea( $payload['claim_scope'] ?? '', 1500 ),
+                'limitations'=>RSV_Helpers::textarea( $payload['limitations'] ?? '', 1500 ),
+            );
+        } elseif ( 'knowledge_card' === $bucket ) {
+            $points = array();
+            foreach ( array_slice( (array) ( $payload['key_points'] ?? array() ), 0, 20 ) as $point ) {
+                if ( is_scalar( $point ) ) $points[] = RSV_Helpers::text( $point, 500 );
+            }
+            $safe['payload'] = array(
+                'summary'=>RSV_Helpers::textarea( $payload['summary'] ?? '', 2000 ),
+                'key_points'=>$points,
+                'difficulty'=>RSV_Helpers::text( $payload['difficulty'] ?? '', 30 ),
+            );
+            foreach ( array( 'remedy_refs','disease_refs','book_refs','source_refs' ) as $key ) {
+                $safe['payload'][ $key ] = array_values( array_map( static function( $v ) { return RSV_Helpers::text( $v, 255 ); }, (array) ( $payload[ $key ] ?? array() ) ) );
+            }
+        }
+        return $safe;
+    }
+
     public static function filter_response( $response, $server, $request ) {
         unset( $server );
         if ( ! ( $response instanceof WP_REST_Response )
@@ -68,7 +112,7 @@ final class RSV_Future30_AI_Context_Safety {
             foreach ( (array) ( $context[ $bucket ] ?? array() ) as $row ) {
                 if ( ! is_array( $row ) || ! self::source_object_valid( $bucket, $row ) ) continue;
                 unset( $row['id'], $row['owner_id'], $row['reel_id'], $row['payload_json'] );
-                $clean[] = $row;
+                $clean[] = self::safe_context_row( $bucket, $row );
             }
             $context[ $bucket ] = $clean;
         }
@@ -83,11 +127,19 @@ final class RSV_Future30_AI_Context_Safety {
                     'ai-timestamp-citation'
                 ) ) continue;
                 unset( $row['id'], $row['owner_id'], $row['reel_id'], $row['source_reel_id'], $row['payload_json'] );
-                $clean[] = $row;
+                $clean[] = self::safe_context_row( $bucket, $row );
             }
             $context[ $bucket ] = $clean;
         }
-        $context['medical_authority'] = 'education-only-no-diagnosis-prescription-dose-or-emergency-replacement';
+        // Discard undeclared provider keys, even when external filters supplied them.
+        $context = array(
+            'reel' => RSV_Repository::public_dto( $reel ),
+            'citations' => array_values( (array) ( $context['citations'] ?? array() ) ),
+            'evidence' => array_values( (array) ( $context['evidence'] ?? array() ) ),
+            'knowledge_card' => array_values( (array) ( $context['knowledge_card'] ?? array() ) ),
+            'chapters' => array_values( (array) ( $context['chapters'] ?? array() ) ),
+            'medical_authority' => 'education-only-no-diagnosis-prescription-dose-or-emergency-replacement',
+        );
         $data['context'] = $context;
         $data['execute_ai'] = false;
         $response->set_data( $data );
