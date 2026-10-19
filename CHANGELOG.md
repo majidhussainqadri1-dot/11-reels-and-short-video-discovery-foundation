@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0-rc6 — 2026-10-19
+
+### Public knowledge / canonical reference integrity
+- Corrected direct Knowledge Graph public endpoint to use owner-validated, source-current File 11 projections; verified optional provider evidence against File 06.
+- Corrected Public Study Tools to use the same current source-safe projections for related links, citations, evidence, chapters, knowledge cards, transcripts and graph.
+- Rejected source-free historical public evidence/knowledge-card projections; validated File 06 source references on write and current read.
+- Added October regression suite and retained existing PHP 8.1/8.3/8.4, source/package parity and all prior suites.
+- Advanced candidate runtime to immutable 1.2.0-rc6 / File 11 contract 12. Staging, deployment, database state and live parity still require separate proof.
+
+
 ## 1.2.0-rc5 — 2026-08-12
 
 ### Third fresh 20-round corrective closure
