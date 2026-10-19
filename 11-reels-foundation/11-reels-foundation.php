@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Reels and Short Video Discovery
  * Description: Canonical educational Reels, Stories/Status, Highlights and attributed Response/Remix domain for the Sabri Social Homeopathy Platform. File 10 remains the sole raw-media owner.
- * Version: 1.2.0-rc7
+ * Version: 1.2.0-rc8
  * Requires at least: 6.7
  * Requires PHP: 8.1
  * Author: Dr. Allamah Majid Hussain Sabri
@@ -11,9 +11,9 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'RSV_VERSION', '1.2.0-rc7' );
+define( 'RSV_VERSION', '1.2.0-rc8' );
 define( 'RSV_SCHEMA_VERSION', '1.2.0' );
-define( 'RSV_CONTRACT_VERSION', 13 );
+define( 'RSV_CONTRACT_VERSION', 14 );
 define( 'RSV_FILE', __FILE__ );
 define( 'RSV_DIR', plugin_dir_path( __FILE__ ) );
 define( 'RSV_URL', plugin_dir_url( __FILE__ ) );
@@ -37,6 +37,7 @@ $files = array(
 	'class-rsv-migration-lock-guard.php',
 	'class-rsv-diagnostics.php',
 	'class-rsv-integrations.php',
+	'class-rsv-file26-connector.php',
 	'class-rsv-current-plan.php',
 	'trait-rsv-future30-storage.php',
 	'trait-rsv-future30-feature-write.php',
@@ -64,6 +65,8 @@ $files = array(
 	'class-rsv-plugin.php',
 );
 foreach ( $files as $file ) require_once RSV_DIR . 'includes/' . $file;
+// Register the owner adapter before File 26 collects manifests at plugins_loaded priority 5.
+add_filter( 'sabri_file26_owner_connector_adapters', array( 'RSV_File26_Connector', 'collect' ), 10 );
 
 register_activation_hook( RSV_FILE, array( 'RSV_Plugin', 'activate' ) );
 register_deactivation_hook( RSV_FILE, array( 'RSV_Plugin', 'deactivate' ) );

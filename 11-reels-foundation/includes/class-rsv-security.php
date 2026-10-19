@@ -144,7 +144,11 @@ final class RSV_Security {
 			}
 		}
 		if ( $object && ! current_user_can( 'manage_options' ) && (int) ( $object['owner_id'] ?? 0 ) !== get_current_user_id() ) {
-			if ( ! in_array( $capability, array( RSV_Contracts::CAP_PUBLISH, RSV_Contracts::CAP_MODERATE, RSV_Contracts::CAP_MANAGE ), true ) ) {
+			// A publishing privilege is not an authorization to publish another creator's Reel.
+			// An explicitly authorized manager may perform the cross-owner editorial action.
+			if ( RSV_Contracts::CAP_PUBLISH === $capability ) {
+				if ( ! self::can( RSV_Contracts::CAP_MANAGE, $object, 'publish_foreign_reel' ) ) return false;
+			} elseif ( ! in_array( $capability, array( RSV_Contracts::CAP_MODERATE, RSV_Contracts::CAP_MANAGE ), true ) ) {
 				return false;
 			}
 		}
