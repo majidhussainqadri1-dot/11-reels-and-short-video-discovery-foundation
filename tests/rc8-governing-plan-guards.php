@@ -48,7 +48,7 @@ ensure( ! isset( $row['payload']['patient_name'] ) && $row['payload']['source_re
 $card = $safe->invoke( null, 'knowledge_card', array( 'payload'=>array( 'summary'=>'Safe summary','private_note'=>'do not expose', 'remedy_refs'=>array( 'source_public' ) ) ) );
 ensure( ! isset( $card['payload']['private_note'] ) && $card['payload']['remedy_refs'] === array( 'source_public' ), 'Knowledge card private fields leaked' );
 $impl = file_get_contents( dirname( __DIR__ ) . '/11-reels-foundation/includes/class-rsv-future30-ai-context-safety.php' );
-ensure( strpos( $impl, "'reel' => RSV_Repository::public_dto( $reel )" ) !== false, 'File16 context does not restore canonical Reel DTO' );
+ensure( strpos( $impl, "'reel' => RSV_Repository::public_dto( \$reel )" ) !== false, 'File16 context does not restore canonical Reel DTO' );
 $why = file_get_contents( dirname( __DIR__ ) . '/11-reels-foundation/includes/trait-rsv-future30-user-features.php' );
 ensure( strpos( $why, "if ( ! is_scalar( \$reason ) ) continue;" ) !== false && strpos( $why, "count( \$reasons ) >= 12" ) !== false, 'Global recommendation provider values are not bounded' );
 echo "File11 rc8 object authorization, File05 steps, File16 data minimization and File26 reason contracts PASS\n";
