@@ -26,7 +26,7 @@ trait RSV_Future30_Experience_Trait {
 	public static function public_tools( $reel ) {
 		if(!$reel||!is_array($reel))return array();
 		return array(
-			'series'=>self::object_rows('F11-FUT-001',0,0,20),
+			'series'=>array_slice(self::public_series_rows(),0,20),
 			'related'=>array_slice(self::public_projection('F11-FUT-003',$reel)['edges'],0,12),
 			'citations'=>array_slice(self::public_projection('F11-FUT-004',$reel)['edges'],0,20),
 			'evidence'=>array_slice(self::public_projection('F11-FUT-005',$reel)['objects'],0,10),
