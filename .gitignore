@@ -1,0 +1,18 @@
+# Operating-system and editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Local build and test output
+*.log
+coverage/
+build/
+dist/
+vendor/
+node_modules/
+
+# Generated packages
+*.zip

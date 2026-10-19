@@ -1,0 +1,55 @@
+# Reels and Short Video Discovery RC5 translation additions.
+# Copyright (C) 2026 Dr. Allamah Majid Hussain Sabri
+msgid ""
+msgstr ""
+"Project-Id-Version: Reels and Short Video Discovery 1.1.0-rc5\n"
+"POT-Creation-Date: 2026-08-07 09:17+0500\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: reels-short-video-discovery\n"
+
+msgid "Create Story / Status"
+msgstr ""
+
+msgid "Story type"
+msgstr ""
+
+msgid "Internal destination URL (optional)"
+msgstr ""
+
+msgid "Hours before expiry"
+msgstr ""
+
+msgid "Submit Story for review"
+msgstr ""
+
+msgid "Add to Highlight"
+msgstr ""
+
+msgid "New Highlight title"
+msgstr ""
+
+msgid "Existing Highlight public ID (optional)"
+msgstr ""
+
+msgid "Add Story to Highlight"
+msgstr ""
+
+msgid "A meaningful attribution is required."
+msgstr ""
+
+msgid "This response is not awaiting publication review."
+msgstr ""
+
+msgid "This Story is not awaiting publication review."
+msgstr ""
+
+msgid "The response could not be finalized safely."
+msgstr ""
+
+msgid "The Highlight could not be finalized safely."
+msgstr ""
+
+msgid "Private Reel data could not be erased with complete audit evidence."
+msgstr ""
