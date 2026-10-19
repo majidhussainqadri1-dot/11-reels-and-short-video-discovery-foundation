@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.0-rc8 — 2026-10-19
+
+### Current-plan ownership and external-provider hardening
+- Restricted cross-owner publication to a fully authorized File 11 manager; an ordinary doctor/publisher may publish only their own Reel.
+- Validated each File 05 learning-path step against the current canonical public provider, requiring 1–100 steps and bounding courses to 100.
+- Applied an explicit allowlist to the File 16 grounded AI context and nested evidence/knowledge-card fields, preventing arbitrary provider-added private keys.
+- Bounded and sanitized File 26 global recommendation reasons, ignoring malformed nested provider values.
+- Added executable regression fixtures for object ownership, provider validation, context minimization and recommendation reasons.
+- Kept all DB schema versions and File 10/05/06/16/26 ownership unchanged; runtime 1.2.0-rc8, File 11 contract 14.
+- Staging, live code, migration state and deployment parity remain independent unverified acceptance gates.
+
+
 ## 1.2.0-rc7 — 2026-10-19
 
 ### Forty sequential source reviews and corrective closure
