@@ -69,6 +69,28 @@ final class RSV_Future30_Public_Safety {
 		return (bool) $next_ref;
 	}
 
+	/** Explicit public schema: never relay arbitrary nested/private quiz metadata. */
+	public static function public_quiz_questions( $questions ) {
+		$safe = array();
+		foreach ( array_slice( (array) $questions, 0, 5 ) as $question ) {
+			if ( ! is_array( $question ) ) continue;
+			$type = RSV_Helpers::enum( $question['type'] ?? '', array( 'single-choice','multiple-choice','true-false' ), '' );
+			$prompt = isset( $question['prompt'] ) && is_scalar( $question['prompt'] ) ? RSV_Helpers::text( $question['prompt'], 1200 ) : '';
+			if ( ! $type || ! $prompt ) continue;
+			$item = array( 'type' => $type, 'prompt' => $prompt );
+			if ( 'true-false' !== $type ) {
+				$options = array();
+				foreach ( array_slice( (array) ( $question['options'] ?? array() ), 0, 8 ) as $option ) {
+					if ( ! is_scalar( $option ) ) continue;
+					$options[] = RSV_Helpers::text( $option, 500 );
+				}
+				$item['options'] = $options;
+			}
+			$safe[] = $item;
+		}
+		return $safe;
+	}
+
 	private static function safe_objects( $feature, $objects, $reel ) {
 		$out = array();
 		foreach ( $objects as $row ) {
@@ -89,14 +111,12 @@ final class RSV_Future30_Public_Safety {
 					if ( ! self::all_public_refs_valid( 'File 06', (array) ( $p[ $key ] ?? array() ), 'knowledge-card-public-read' ) ) continue 2;
 				}
 			}
-			if ( 'F11-FUT-019' === $feature && isset( $row['payload']['questions'] ) ) {
-				$questions = array();
-				foreach ( (array) $row['payload']['questions'] as $question ) {
-					if ( ! is_array( $question ) ) continue;
-					unset( $question['correct'], $question['answer'], $question['explanation_private'] );
-					$questions[] = $question;
-				}
-				$row['payload']['questions'] = $questions;
+			if ( 'F11-FUT-019' === $feature ) {
+				$row['payload'] = array(
+					'questions' => self::public_quiz_questions( $p['questions'] ?? array() ),
+					'streaks' => false,
+					'ranking_effect' => false,
+				);
 			}
 			$out[] = $row;
 		}
