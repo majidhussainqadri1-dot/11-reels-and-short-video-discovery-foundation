@@ -17,7 +17,7 @@ $checks = array(
     array( 'File10 consent/rights', '11-reels-foundation/includes/class-rsv-file10.php', 'consent_status' ),
     array( 'Guardian and suspension', '11-reels-foundation/includes/class-rsv-security.php', 'guardian_ok' ),
     array( 'Atomic state transitions', '11-reels-foundation/includes/class-rsv-state-machine.php', 'published' ),
-    array( 'Inter-module provider manifest', '11-reels-foundation/includes/class-rsv-integrations.php', 'File 10' ),
+    array( 'Inter-module provider manifest', '11-reels-foundation/includes/class-rsv-integrations.php', 'PROVIDER_VERSION' ),
     array( 'REST permission guard', '11-reels-foundation/includes/class-rsv-rest.php', 'permission_callback' ),
     array( 'Idempotency and duplicate safety', '11-reels-foundation/includes/class-rsv-security.php', 'idempotency_begin' ),
     array( 'SQL prepared statements', '11-reels-foundation/includes/class-rsv-repository.php', '$wpdb->prepare' ),
