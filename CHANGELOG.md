@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.0-rc7 — 2026-10-19
+
+### Forty sequential source reviews and corrective closure
+- Fixed typed Micro-Quiz scoring for single/multiple choice and true-false; removed PHP array-to-string answer ambiguity and replayable fake answers.
+- Applied rate-limited, private/no-store transactional persistence with audit and outbox evidence for quiz attempts.
+- Revalidated every Reel Series public reference on read, rejected empty series, and removed raw series reuse in public Study Tools.
+- Removed withdrawn File 06 citations, source-free evidence/knowledge cards and expired/out-of-range timestamp rows from the File 16 grounded AI context.
+- Added behavioral quiz tests, AI provider/temporal boundary tests and 40 sequential whole-source static/plan-contract inspection rounds.
+- Assigned distinct immutable runtime 1.2.0-rc7 and File 11 contract 13; main/Top20/Future30 schema, event and provider versions unchanged.
+- Repository QA is not staging or live acceptance.
+
+
 ## 1.2.0-rc6 — 2026-10-19
 
 ### Public knowledge / canonical reference integrity
