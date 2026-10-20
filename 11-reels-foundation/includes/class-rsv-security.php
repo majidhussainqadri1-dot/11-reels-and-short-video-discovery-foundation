@@ -10,7 +10,9 @@ final class RSV_Security {
 			try {
 				$membership = smc_membership_assertions( $user_id );
 				$membership = is_array( $membership ) ? apply_filters( 'smc_assertions_v1', $membership, $user_id ) : array();
-				$publishing = function_exists( 'smc_publishing_assertions' ) ? smc_publishing_assertions( $user_id ) : array();
+				// Consume the same current File 00 assertion snapshot. Calling a second
+				// publisher provider after an advanced-trust restriction can regrant access.
+				$publishing = is_array( $membership['publishing'] ?? null ) ? $membership['publishing'] : array();
 			} catch ( Throwable $error ) {
 				return self::unavailable_claims( $user_id, 'file00-exception' );
 			}
@@ -145,17 +147,26 @@ final class RSV_Security {
 				return false;
 			}
 		}
-		if ( $object && ! current_user_can( 'manage_options' ) && (int) ( $object['owner_id'] ?? 0 ) !== get_current_user_id() ) {
+		if ( $object && (int) ( $object['owner_id'] ?? 0 ) !== get_current_user_id() ) {
 			// A publishing privilege is not an authorization to publish another creator's Reel.
 			// An explicitly authorized manager may perform the cross-owner editorial action.
 			if ( RSV_Contracts::CAP_PUBLISH === $capability ) {
-				if ( ! self::can( RSV_Contracts::CAP_MANAGE, $object, 'publish_foreign_reel' ) ) return false;
+				// WordPress manage_options alone is not a File 11 editorial delegation.
+				$editor = current_user_can( RSV_Contracts::CAP_MANAGE )
+					|| in_array( RSV_Contracts::CAP_MANAGE, (array) $claims['capabilities'], true );
+				if ( ! $editor || ! self::can( RSV_Contracts::CAP_MANAGE, $object, 'publish_foreign_reel' ) ) return false;
 			} elseif ( ! in_array( $capability, array( RSV_Contracts::CAP_MODERATE, RSV_Contracts::CAP_MANAGE ), true ) ) {
 				return false;
 			}
 		}
 
 		$base_allowed = $native || $asserted;
+		// File 00's current publishing capability is authoritative. WordPress
+		// roles never bypass its can_open_composer / can_direct_publish result.
+		if ( 'file00' === ( $claims['source'] ?? '' )
+			&& in_array( $capability, array( RSV_Contracts::CAP_SUBMIT, RSV_Contracts::CAP_PUBLISH ), true ) ) {
+			$base_allowed = $asserted;
+		}
 		// Integration filters may narrow authorization, never manufacture it.
 		$filtered = (bool) apply_filters( 'rsv_authorize', $base_allowed, $capability, $object, $purpose, $claims );
 		return $base_allowed && $filtered;
@@ -177,9 +188,9 @@ final class RSV_Security {
 				&& ( 'unlisted' === $visibility || 'public' === ( $video['visibility'] ?? '' ) );
 		} else {
 			$user_id = $explicit_user ? absint( $user_id ) : get_current_user_id();
-			if ( $user_id && user_can( $user_id, 'manage_options' ) ) {
-				$allowed = true;
-			} elseif ( $user_id ) {
+			if ( $user_id ) {
+				// WP administrators also require current File 00 eligibility
+				// and may not bypass private viewer/entitlement policy.
 				$claims = self::claims( $user_id );
 				$active = 'active' === ( $claims['status'] ?? '' ) && empty( $claims['is_suspended'] ) && ! empty( $claims['membership_approved'] ) && ! empty( $claims['guardian_ok'] );
 				if ( $active ) {
@@ -188,8 +199,13 @@ final class RSV_Security {
 						$allowed = true;
 					} elseif ( 'entitled' === $visibility ) {
 						$entitlements = (array) $claims['entitlements'];
-						$entitled = ! empty( $entitlements['reels'] ) || ! empty( $entitlements['base_services']['reels'] );
-						$allowed = (bool) apply_filters( 'rsv_reel_entitled', $entitled, $user_id, $reel, $claims );
+						// The approved single free tier calls Reel learning "education",
+						// not "reels", in File 00 base_services.
+						$entitled = ! empty( $entitlements['reels'] )
+							|| ! empty( $entitlements['base_services']['reels'] )
+							|| ! empty( $entitlements['base_services']['education'] );
+						// External policies may narrow, never manufacture a grant.
+						$allowed = $entitled && (bool) apply_filters( 'rsv_reel_entitled', $entitled, $user_id, $reel, $claims );
 					}
 				}
 			}
