@@ -1,12 +1,16 @@
 # File 11 — Reels and Short Video Discovery
 
-**Current repository candidate:** `1.2.0-rc16`  
+**Current repository candidate:** `1.2.0-rc17`  
 **Future30 amendment:** `SSH-F11-FUTURE-REEL-KNOWLEDGE-INTELLIGENCE-30-2026`  
 **Canonical package root:** `reels-foundation-11`
 
 File 11 owns the vertical educational Reel entity, the authoritative 60–600-second Reel eligibility rule through File 10, Reel-native discovery, moderation, private history/progress and the approved Reel-domain Future30 orchestration layer. It does not duplicate File 10 raw media, File 05 learning truth, File 06 canonical knowledge, File 16 AI execution, File 00 identity, File 19 delivery, File 20 shell, File 24 assurance, File 25 visual system or File 26 cross-platform discovery/graph ownership.
 
-## Current rc16 unified source safeguards
+## Current rc17 publication-and-restore safeguards
+
+RC17 unifies the native mandatory first-publication and moderation-restoration eligibility gates. File10 media must still be published, source visibility must match public Reel visibility, and Source/Safety Card, captions/transcripts and cover requirements must all be satisfied before a former restricted or removed Reel may become published again. New `tests/rc17-restoration-gate-behavior.php` exercises 17 isolated restore cases (negative/positive and no-write-on-denial). All earlier 40 File00 authorization scenarios and 40 sequential source reviews remain mandatory; they are not equivalent to staging or live tests.
+
+## Prior rc16 unified source safeguards
 
 RC16 integrates separate RC15 PRs and strengthens canonical File 00 publishing-snapshot integrity, explicit owner/editor approval, access to the File00 single-free educational Reel tier and non-escalation of entitlements. Runtime-shaped forty distinct positive/negative cases are in `tests/rc16-forty-owner-behavior-scenarios.php`; these are **not** live WordPress user journeys. No changes to File 10 canonical media ownership, File 16 execution or File 26 global discovery ownership. Production deployment and WordPress DB/migration parity are not established.
 
@@ -77,7 +81,7 @@ The 2026-08-12 Founder-approved amendment retains all `F11-FUT-001` through `F11
 
 ```bash
 bash tests/run-all.sh
-bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc16.zip
+bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc17.zip
 ```
 
 The exact-head rc15 release workflow must pass PHP 8.1/8.3/8.4 suites, JavaScript syntax, inherited corrective regressions, current-plan/Future30 and all three fresh20 contract suites, deterministic double build, checksum, ZIP integrity and exact runtime source/package parity.

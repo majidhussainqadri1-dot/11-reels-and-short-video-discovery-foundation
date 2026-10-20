@@ -119,6 +119,35 @@ final class RSV_Reels {
 		if ( is_wp_error( $video ) || 'published' !== ( $video['status'] ?? '' ) ) {
 			return is_wp_error( $video ) ? $video : RSV_Helpers::error( 'rsv_video_not_published', __( 'File 10 video must be published first.', RSV_TEXT_DOMAIN ), 422 );
 		}
+		$publication = self::publication_eligibility( $reel, $video );
+		if ( is_wp_error( $publication ) ) return $publication;
+		$assert = RSV_State_Machine::assert( $reel['status'], 'published' );
+		if ( is_wp_error( $assert ) ) {
+			return $assert;
+		}
+		return RSV_DB::transaction(
+			static function () use ( $reel, $expected_version, $video ) {
+				$updated = RSV_Repository::update_versioned(
+					$reel['id'],
+					$expected_version,
+					array( 'status' => 'published', 'published_at' => RSV_Helpers::now(), 'rank_score' => self::base_rank_score( $reel, $video ) )
+				);
+				if ( is_wp_error( $updated ) ) {
+					return $updated;
+				}
+				if ( ! RSV_Helpers::audit( 'reel', $reel['id'], 'publish', $reel['status'], 'published', 'Publication gates passed' ) || ! RSV_Helpers::outbox( 'ReelPublished', 'reel', $reel['id'], array( 'public_id' => $reel['public_id'], 'video_id' => $reel['video_id'] ) ) ) {
+					return RSV_Helpers::error( 'rsv_publish_evidence_failed', __( 'The Reel could not be published with complete audit evidence.', RSV_TEXT_DOMAIN ), 500 );
+				}
+				return RSV_Repository::public_dto( $updated, true );
+			}
+		);
+	}
+
+	/**
+	 * One mandatory publication policy for first publication AND moderation restore.
+	 * A restore is a new public availability decision, not a shortcut around review.
+	 */
+	private static function publication_eligibility( $reel, $video ) {
 		// File 11 must not publicly publish a Reel whose authoritative File 10
 		// asset is still unlisted/private; a later visibility change also
 		// fails closed through RSV_Security::can_view_reel().
@@ -142,26 +171,7 @@ final class RSV_Reels {
 		if ( ! trim( (string) $reel['caption'] ) && (bool) apply_filters( 'rsv_caption_text_required', false, $reel, $video ) ) {
 			return RSV_Helpers::error( 'rsv_caption_required', __( 'A reviewed caption or transcript is required.', RSV_TEXT_DOMAIN ), 422 );
 		}
-		$assert = RSV_State_Machine::assert( $reel['status'], 'published' );
-		if ( is_wp_error( $assert ) ) {
-			return $assert;
-		}
-		return RSV_DB::transaction(
-			static function () use ( $reel, $expected_version, $video ) {
-				$updated = RSV_Repository::update_versioned(
-					$reel['id'],
-					$expected_version,
-					array( 'status' => 'published', 'published_at' => RSV_Helpers::now(), 'rank_score' => self::base_rank_score( $reel, $video ) )
-				);
-				if ( is_wp_error( $updated ) ) {
-					return $updated;
-				}
-				if ( ! RSV_Helpers::audit( 'reel', $reel['id'], 'publish', $reel['status'], 'published', 'Publication gates passed' ) || ! RSV_Helpers::outbox( 'ReelPublished', 'reel', $reel['id'], array( 'public_id' => $reel['public_id'], 'video_id' => $reel['video_id'] ) ) ) {
-					return RSV_Helpers::error( 'rsv_publish_evidence_failed', __( 'The Reel could not be published with complete audit evidence.', RSV_TEXT_DOMAIN ), 500 );
-				}
-				return RSV_Repository::public_dto( $updated, true );
-			}
-		);
+		return true;
 	}
 
 	private static function base_rank_score( $reel, $video ) {
@@ -505,10 +515,8 @@ final class RSV_Reels {
 						if ( is_wp_error( $video ) || 'published' !== ( $video['status'] ?? '' ) ) {
 							return is_wp_error( $video ) ? $video : RSV_Helpers::error( 'rsv_restore_media_invalid', __( 'The Reel cannot be restored until File 10 media is published and eligible.', RSV_TEXT_DOMAIN ), 422 );
 						}
-						if ( class_exists( 'RSV_Top20' ) ) {
-							$gate = RSV_Top20::publication_gate( $reel );
-							if ( is_wp_error( $gate ) ) return $gate;
-						}
+						$gate = self::publication_eligibility( $reel, $video );
+						if ( is_wp_error( $gate ) ) return $gate;
 					}
 					$reel_assert = RSV_State_Machine::assert( $reel['status'], $to );
 					if ( is_wp_error( $reel_assert ) ) {
