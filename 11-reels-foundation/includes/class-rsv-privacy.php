@@ -39,6 +39,11 @@ final class RSV_Privacy {
 		$data   = array();
 
 		$history = RSV_Repository::history( $user_id, $limit, $offset );
+		// A SQL failure must never become an incomplete personal-data export.
+		// WordPress's privacy exporter supports WP_Error and halts completion.
+		if ( is_wp_error( $history ) || ! is_array( $history ) ) {
+			return RSV_Helpers::error( 'rsv_privacy_history_export_unavailable', __( 'Reel history could not be exported safely. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		foreach ( $history as $row ) {
 			$data[] = array(
 				'group_id'    => 'rsv-history',
@@ -56,7 +61,7 @@ final class RSV_Privacy {
 
 		global $wpdb;
 		$reports_table = RSV_Helpers::table( 'reports' );
-		$reports = (array) $wpdb->get_results(
+		$reports = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT DISTINCT rp.* FROM $reports_table rp WHERE rp.reporter_id=%d OR rp.appellant_id=%d ORDER BY rp.id ASC LIMIT %d OFFSET %d",
 				$user_id,
@@ -66,6 +71,9 @@ final class RSV_Privacy {
 			),
 			ARRAY_A
 		);
+		if ( ! is_array( $reports ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_privacy_reports_export_unavailable', __( 'Reel reports could not be exported safely. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		foreach ( $reports as $report ) {
 			$data[] = array(
 				'group_id'    => 'rsv-reports',
@@ -82,10 +90,13 @@ final class RSV_Privacy {
 			);
 		}
 
-		$reels = (array) $wpdb->get_results(
+		$reels = $wpdb->get_results(
 			$wpdb->prepare( 'SELECT * FROM ' . RSV_Helpers::table( 'reels' ) . ' WHERE owner_id=%d ORDER BY id ASC LIMIT %d OFFSET %d', $user_id, $limit, $offset ),
 			ARRAY_A
 		);
+		if ( ! is_array( $reels ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_privacy_owned_export_unavailable', __( 'Owned Reels could not be exported safely. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		foreach ( $reels as $reel ) {
 			$data[] = array(
 				'group_id'    => 'rsv-owned-reels',
