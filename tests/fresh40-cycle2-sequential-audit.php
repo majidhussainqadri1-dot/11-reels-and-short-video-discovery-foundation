@@ -13,7 +13,7 @@ $checks = array(
     array( 'File 10 canonical media provider', '11-reels-foundation/includes/class-rsv-file10.php', 'VWLB_Videos' ),
     array( 'Verified 60–600 duration', '11-reels-foundation/includes/class-rsv-file10.php', '$duration >= 60 && $duration <= 600' ),
     array( 'Restricted publishing', '11-reels-foundation/includes/class-rsv-reels.php', 'RSV_Security::can' ),
-    array( 'Two-factor publisher claims', '11-reels-foundation/includes/class-rsv-security.php', 'session_two_factor' ),
+    array( 'Current File00 MFA-policy publisher claims', '11-reels-foundation/includes/class-rsv-security.php', 'mfa_required' ),
     array( 'File10 consent/rights', '11-reels-foundation/includes/class-rsv-file10.php', 'consent_status' ),
     array( 'Guardian and suspension', '11-reels-foundation/includes/class-rsv-security.php', 'guardian_ok' ),
     array( 'Atomic state transitions', '11-reels-foundation/includes/class-rsv-state-machine.php', 'published' ),
@@ -102,6 +102,15 @@ for ( $round = 1; $round <= 40; ++$round ) {
          false === strpos( $storageSource, "public_template_or_reason_payload" ) ) {
          throw new RuntimeException( "Round $round: File10 template or File26 explanation safeguards regressed." );
     }
+    $identity = file_get_contents( $source_root . '/includes/class-rsv-security.php' );
+    if ( false === strpos( $identity, "function_exists( 'smc_membership_assertions' )" )
+        || false === strpos( $identity, "'mfa_required'" )
+        || false === strpos( $identity, '$canonical_eligible' )
+        || false === strpos( $identity, "'unlisted' === " . '$visibility' ) )
+        throw new RuntimeException( "Round $round: File00/10 current authority and public media gates regressed." );
+    $publication = file_get_contents( $source_root . '/includes/class-rsv-reels.php' );
+    if ( false === strpos( $publication, 'RSV_Top20::publication_gate( $reel )' ) )
+        throw new RuntimeException( "Round $round: native source/safety/caption publication gate regressed." );
     $file10 = file_get_contents( $source_root . '/includes/class-rsv-file10.php' );
     if ( ( false === strpos( $file10, 'esc_url_raw(' ) || false === strpos( $file10, "array( 'https' )" ) ) )
         throw new RuntimeException( "Round $round: File10 transcript HTTPS-only guard regressed." );

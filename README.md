@@ -1,12 +1,16 @@
 # File 11 — Reels and Short Video Discovery
 
-**Current repository candidate:** `1.2.0-rc14`  
+**Current repository candidate:** `1.2.0-rc15`  
 **Future30 amendment:** `SSH-F11-FUTURE-REEL-KNOWLEDGE-INTELLIGENCE-30-2026`  
 **Canonical package root:** `reels-foundation-11`
 
 File 11 owns the vertical educational Reel entity, the authoritative 60–600-second Reel eligibility rule through File 10, Reel-native discovery, moderation, private history/progress and the approved Reel-domain Future30 orchestration layer. It does not duplicate File 10 raw media, File 05 learning truth, File 06 canonical knowledge, File 16 AI execution, File 00 identity, File 19 delivery, File 20 shell, File 24 assurance, File 25 visual system or File 26 cross-platform discovery/graph ownership.
 
-## Current rc14 source safeguards
+## Current rc15 source safeguards
+
+The 20 October 2026 cross-file review corrected File 00 membership/age/guardian/retired-MFA claim consumption, eliminated WordPress administrator substitution for approved Founder or verified doctor in Reel publication, required canonical File10 owner for linked media, denied promotion of unlisted File10 media to a public Reel, and made reviewed source/safety/captions a mandatory native publish gate independent of filter registration. Static 40-round and runtime behavioral tests remain distinct from Hostinger staging/live acceptance.
+
+## Prior rc14 source safeguards
 
 The exact candidate now distinguishes SQL outages from genuine empty results in private history, previous/next Reel navigation, public author timelines, public search and privacy-safe creator insights. REST/UI preserve typed 503 errors; cross-owner read-only provider hooks report degradation without changing another owner's document type. New behavioral SQL tests and the existing 40-round whole-source static audit are mandatory; these are not live WordPress acceptance.
 
@@ -55,11 +59,11 @@ The 2026-08-12 Founder-approved amendment retains all `F11-FUT-001` through `F11
 
 ## Release identity
 
-- Plugin: `1.2.0-rc14`
+- Plugin: `1.2.0-rc15`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
 - Future30 schema: `1.0.0`
-- File 11 contract: `16`
+- File 11 contract: `19`
 - Event contract: `4`
 - Provider contract: `3`
 - Future30 sub-contract: `1`
@@ -69,10 +73,10 @@ The 2026-08-12 Founder-approved amendment retains all `F11-FUT-001` through `F11
 
 ```bash
 bash tests/run-all.sh
-bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc14.zip
+bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc15.zip
 ```
 
-The exact-head release workflow must pass PHP 8.1/8.3/8.4 suites, JavaScript syntax, inherited corrective regressions, current-plan/Future30 and all three fresh20 contract suites, deterministic double build, checksum, ZIP integrity and exact runtime source/package parity.
+The exact-head rc15 release workflow must pass PHP 8.1/8.3/8.4 suites, JavaScript syntax, inherited corrective regressions, current-plan/Future30 and all three fresh20 contract suites, deterministic double build, checksum, ZIP integrity and exact runtime source/package parity.
 
 ## Claim boundary
 

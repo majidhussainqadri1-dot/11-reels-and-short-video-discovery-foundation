@@ -3,8 +3,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 P="$ROOT/11-reels-foundation"
 
-grep -F "Version: 1.2.0-rc14" "$P/11-reels-foundation.php" >/dev/null
-grep -F "define( 'RSV_VERSION', '1.2.0-rc14' )" "$P/11-reels-foundation.php" >/dev/null
+grep -F "Version: 1.2.0-rc15" "$P/11-reels-foundation.php" >/dev/null
+grep -F "define( 'RSV_VERSION', '1.2.0-rc15' )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "define( 'RSV_SCHEMA_VERSION', '1.2.0' )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "define( 'RSV_CONTRACT_VERSION', 19 )" "$P/11-reels-foundation.php" >/dev/null
 grep -F "class-rsv-current-plan.php" "$P/11-reels-foundation.php" >/dev/null
