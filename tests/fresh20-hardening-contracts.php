@@ -25,5 +25,15 @@ $must = array(
 );
 foreach ( $must as $pair ) { list( $key, $needle ) = $pair; if ( false === strpos( $f[$key], $needle ) ) { fwrite( STDERR, "Missing fresh20 marker [$key]: $needle\n" ); exit( 1 ); } }
 if ( 30 !== preg_match_all( "/'F11-FUT-[0-9]{3}'/", substr( $f['future'], strpos( $f['future'], 'const FEATURE_IDS' ), strpos( $f['future'], 'public static function definitions' ) - strpos( $f['future'], 'const FEATURE_IDS' ) ) ) ) { fwrite( STDERR, "Future30 manifest no longer contains exactly 30 stable IDs\n" ); exit( 1 ); }
-foreach ( array( 'Version: 1.2.0-rc1', 'Version: 1.2.0-rc2', 'Version: 1.2.0-rc3', 'Version: 1.2.0-rc4', "define( 'RSV_CONTRACT_VERSION', 7 )", "define( 'RSV_CONTRACT_VERSION', 8 )", "define( 'RSV_CONTRACT_VERSION', 9 )", "define( 'RSV_CONTRACT_VERSION', 10 )" ) as $needle ) if ( false !== strpos( $f['bootstrap'], $needle ) ) { fwrite( STDERR, "Stale release identity remains: $needle\n" ); exit( 1 ); }
+// Match complete release identifiers: rc10 must not be misread as stale rc1.
+if ( preg_match( '/Version:\\s+1\\.2\\.0-rc(?:1|2|3|4)(?![0-9])/i', $f['bootstrap'] ) ) {
+    fwrite( STDERR, "Stale full release version found in bootstrap\\n" );
+    exit( 1 );
+}
+foreach ( array( "define( 'RSV_CONTRACT_VERSION', 7 )", "define( 'RSV_CONTRACT_VERSION', 8 )", "define( 'RSV_CONTRACT_VERSION', 9 )", "define( 'RSV_CONTRACT_VERSION', 10 )" ) as $needle ) {
+    if ( false !== strpos( $f['bootstrap'], $needle ) ) {
+        fwrite( STDERR, "Stale contract identity remains: $needle\\n" );
+        exit( 1 );
+    }
+}
 echo "fresh 20-round hardening contracts PASS under rc5\n";
