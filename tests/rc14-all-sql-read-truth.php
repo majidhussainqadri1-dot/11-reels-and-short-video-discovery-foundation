@@ -13,6 +13,7 @@ require dirname(__DIR__).'/11-reels-foundation/includes/class-rsv-helpers.php';
 require dirname(__DIR__).'/11-reels-foundation/includes/class-rsv-contracts.php';
 require dirname(__DIR__).'/11-reels-foundation/includes/class-rsv-repository.php';
 require dirname(__DIR__).'/11-reels-foundation/includes/class-rsv-reels.php';
+function apply_filters($name,$value){return $value;}
 function rc14_assert($ok,$label){if(!$ok){fwrite(STDERR,"FAIL: $label\n");exit(1);}}
 $wpdb=$GLOBALS['wpdb'];
 $GLOBALS['rc14_reel']=array('published_at'=>'2026-08-12 12:00:00','updated_at'=>'2026-08-12 12:00:00','id'=>1);
