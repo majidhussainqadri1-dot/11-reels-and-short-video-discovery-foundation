@@ -1,15 +1,26 @@
 # Changelog
 
-## 1.2.0-rc11 integrated — 2026-10-20
+## 1.2.0-rc12 — 2026-10-20
 
-- Preserves File26 proposed public-only native connector and k-anonymity/search-ref safety from prior RC10 branch; no automatic production activation.
-- Sanitizes public File10 Reel Template sections on write and read, rejects withdrawn media recipes on write.
-- Restricts File26 explanation reason codes to approved educational noncommercial values.
-- Rejects HTTP transcript links; HTTPS-only under central CV-263 transport security.
-- Runs new PHP behavioral tests and forty automated source/contract reviews; real deployment remains unverified.
+- Unified PR #18 Study Collection revocation-safe reads, Unicode-safe keys, transactional audit/outbox and private-safe version history with PR #19 File10 Template/Media Recipe, File26 reason policy and HTTPS transcript protections.
+- Preserved proposed native File26 search connector and its k-anonymity/source checks; staging is required before activation.
+- Corrected accidentally overwritten WordPress readme release identities, restoring historical rc1–rc11 from verified source.
+- Forty automated code/contract sweeps, PHP 8.1/8.3/8.4 and deterministic package acceptance are required at the exact final rc12 HEAD. No live-deployed status claimed.
 
 
 ## 1.2.0-rc11 — 2026-10-20
+
+### Privacy-safe historical Reels and private study mutations
+- F11-FUT-020: revalidate every saved Study Collection Reel on each private read; suppress withdrawn, deleted, non-public, malformed and duplicate refs and minimize returned payload.
+- F11-FUT-007: public Version History now includes only version number and verified SHA256 metadata; old caption/title, submitted labels and extra PII cannot appear via generic or filtered REST projections.
+- F11-FUT-020: atomic study collection update now commits private state with mandatory Audit and Outbox event evidence, and returns the currently safe DTO.
+- F11-FUT-020: Unicode/Urdu-only collection names receive stable nonempty deterministic keys instead of colliding in an empty sanitized key.
+- Added adversarial PHP behavior tests for revoked read paths, historical snapshots, Urdu identifiers, audit/outbox success and simulated rollback failure.
+- Aligned PHP unit's WordPress sanitize_key with lowercase-before-filter behavior and fixed interpolated duration source markers in the 40-scope test.
+- Immutable runtime 1.2.0-rc11 / File 11 contract 17, no schema-version changes. Repository CI does not establish live/staging parity.
+
+
+## 1.2.0-rc10 — 2026-10-20
 
 ### Provider-current public read integrity
 - Fixed F11-FUT-002 public Learning Paths: verify every File 05 lesson/course source remains public/current on each read; suppress withdrawn paths and remove undeclared private payload and owner fields.
@@ -17,7 +28,7 @@
 - Added live-PHP behavior tests for revoked File 05 paths and File 26 k>=5 limits, as well as forty distinct governing-plan source probes.
 - Existing 40 sequential full-source static/55-ID scans remain, alongside all prior behavioral tests, syntax and deterministic release/package parity gates.
 - Reconciled newly added rc9 File26 proposed connector without activating it and removed raw WordPress author IDs from the public search connector; retained upstream regression.
-- New immutable candidate: plugin 1.2.0-rc11 / contract 16; database schema versions unchanged.
+- New immutable candidate: plugin 1.2.0-rc10 / contract 16; database schema versions unchanged.
 - Package-root disagreement with early File 11 plan is a pending deployment-parity decision: do not silently rename an existing WordPress plugin.
 - Not staged or deployed; DB and runtime migration state are unverified.
 
