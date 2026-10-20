@@ -15,8 +15,10 @@ $must=array(
  'RSV_Security::can_view_reel($native, 0)',
  "status=%s AND visibility=%s",
  "source_owner_file' => 'File 11'",
+ "RSV_Helpers::opaque_user_ref( absint( \$row['owner_id'] ), 'file26-public-reel-author' )",
 );
 foreach($must as $value){if(strpos($src,$value)===false){fwrite(STDERR,"FAIL: File11 native search adapter contract missing: $value\n");exit(1);}}
+if(strpos($src,"'author_key' => (string) absint(")!==false){fwrite(STDERR,"FAIL: raw WordPress author ID is not a canonical safe public key\\n");exit(1);}
 if(strpos($src,"'status' => 'active'")!==false){fwrite(STDERR,"FAIL: File11 automatically activates an unverified connector\n");exit(1);}
 if(strpos($entry, 'sabri_file26_owner_connector_adapters')===false || strpos($entry,'class-rsv-file26-connector.php')===false) {fwrite(STDERR,"FAIL: adapter not registered before File26 boot\n");exit(1);}
 echo "PASS: File11 native proposed File26 read-only adapter contract\n";
