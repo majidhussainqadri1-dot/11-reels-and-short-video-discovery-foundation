@@ -1,6 +1,15 @@
 # Changelog
 
-## 1.2.0-rc10 — 2026-10-20
+## 1.2.0-rc11 integrated — 2026-10-20
+
+- Preserves File26 proposed public-only native connector and k-anonymity/search-ref safety from prior RC10 branch; no automatic production activation.
+- Sanitizes public File10 Reel Template sections on write and read, rejects withdrawn media recipes on write.
+- Restricts File26 explanation reason codes to approved educational noncommercial values.
+- Rejects HTTP transcript links; HTTPS-only under central CV-263 transport security.
+- Runs new PHP behavioral tests and forty automated source/contract reviews; real deployment remains unverified.
+
+
+## 1.2.0-rc11 — 2026-10-20
 
 ### Provider-current public read integrity
 - Fixed F11-FUT-002 public Learning Paths: verify every File 05 lesson/course source remains public/current on each read; suppress withdrawn paths and remove undeclared private payload and owner fields.
@@ -8,7 +17,7 @@
 - Added live-PHP behavior tests for revoked File 05 paths and File 26 k>=5 limits, as well as forty distinct governing-plan source probes.
 - Existing 40 sequential full-source static/55-ID scans remain, alongside all prior behavioral tests, syntax and deterministic release/package parity gates.
 - Reconciled newly added rc9 File26 proposed connector without activating it and removed raw WordPress author IDs from the public search connector; retained upstream regression.
-- New immutable candidate: plugin 1.2.0-rc10 / contract 16; database schema versions unchanged.
+- New immutable candidate: plugin 1.2.0-rc11 / contract 16; database schema versions unchanged.
 - Package-root disagreement with early File 11 plan is a pending deployment-parity decision: do not silently rename an existing WordPress plugin.
 - Not staged or deployed; DB and runtime migration state are unverified.
 
