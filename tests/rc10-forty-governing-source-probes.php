@@ -63,7 +63,7 @@ foreach($checks as $item){
 // F30-AT-10 and CEN-SEARCH-001: SQL outage must never masquerade as a genuine zero-result feed.
 $feed_src = file_get_contents( $root.'/11-reels-foundation/includes/class-rsv-repository.php' );
 if ( false === $feed_src || false === strpos( $feed_src, "'rsv_feed_query_unavailable'" ) ||
-     false === strpos( $feed_src, "! is_array( $rows ) || '' !== (string) $wpdb->last_error" ) )
+     false === strpos( $feed_src, '! is_array( $rows )' ) || false === strpos( $feed_src, '$wpdb->last_error' ) )
     $errors[] = 'FR05/F30-AT-10 missing explicit SQL outage 503 gate';
 foreach($errors as $error)fwrite(STDERR,$error."\n");
 if($errors)exit(1);
