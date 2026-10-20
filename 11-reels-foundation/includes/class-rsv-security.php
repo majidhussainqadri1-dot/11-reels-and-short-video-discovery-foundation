@@ -4,15 +4,16 @@ defined( 'ABSPATH' ) || exit;
 final class RSV_Security {
 	public static function claims( $user_id = 0 ) {
 		$user_id = $user_id ? absint( $user_id ) : get_current_user_id();
-		$claims  = apply_filters( 'rsv_identity_claims', null, $user_id, RSV_CONTRACT_VERSION );
-		if ( is_array( $claims ) ) {
-			$normalized = self::normalize_claims( $claims, $user_id, 'filter' );
-			return self::contract_compatible( $normalized, 'filter' ) ? $normalized : self::unavailable_claims( $user_id, 'filter-incompatible' );
-		}
-
+		// File 00 owns identity. Historical filters are used only when File 00
+		// itself is absent (e.g. older test fixtures), never to override its truth.
 		if ( function_exists( 'smc_membership_assertions' ) ) {
-			$membership = smc_membership_assertions( $user_id );
-			$publishing = function_exists( 'smc_publishing_assertions' ) ? smc_publishing_assertions( $user_id ) : array();
+			try {
+				$membership = smc_membership_assertions( $user_id );
+				$membership = is_array( $membership ) ? apply_filters( 'smc_assertions_v1', $membership, $user_id ) : array();
+				$publishing = function_exists( 'smc_publishing_assertions' ) ? smc_publishing_assertions( $user_id ) : array();
+			} catch ( Throwable $error ) {
+				return self::unavailable_claims( $user_id, 'file00-exception' );
+			}
 			if ( is_array( $membership ) ) {
 				$approved_types = (array) ( $membership['approved_membership_types'] ?? array() );
 				$capabilities   = array();
@@ -22,22 +23,32 @@ final class RSV_Security {
 				if ( ! empty( $publishing['can_direct_publish'] ) ) {
 					$capabilities[] = RSV_Contracts::CAP_PUBLISH;
 				}
-				$guardian_required = ! empty( $membership['guardian_required'] );
-				$guardian_verified = ! empty( $membership['guardian_verified'] );
+				$age = is_array( $membership['age_context'] ?? null ) ? $membership['age_context'] : array();
+				$institutional = ! empty( $membership['institutional_account'] );
+				$age_known = ! empty( $age['known'] );
+				$minor = ! $institutional && ( ! $age_known || ! empty( $age['minor'] ) );
+				$guardian_required = $minor;
+				$guardian_verified = $institutional || ( $age_known && ( ! $minor || ! empty( $membership['guardian_verified'] ) ) );
+				$canonical_eligible = ! empty( $membership['approved'] )
+					&& ! empty( $membership['eligible'] )
+					&& empty( $membership['suspended'] )
+					&& ! empty( $membership['contract_version'] )
+					&& absint( $membership['user_id'] ?? 0 ) === $user_id;
 				$mapped = array(
 					'user_id'             => $user_id,
 					'contract_version'     => (string) ( $membership['contract_version'] ?? '' ),
 					'source'               => 'file00',
-					'status'               => ! empty( $membership['approved'] ) && empty( $membership['suspended'] ) ? 'active' : sanitize_key( $membership['status'] ?? 'unavailable' ),
-					'is_founder'           => 'founder' === ( $membership['account_class'] ?? '' ),
+					'status'               => $canonical_eligible ? 'active' : 'unavailable',
+					'is_founder'           => function_exists( 'smc_is_founder' ) && (bool) smc_is_founder( $user_id ),
 					'is_verified_doctor'   => in_array( 'doctor', $approved_types, true ) && ! empty( $membership['professional_verified'] ),
 					'is_suspended'         => ! empty( $membership['suspended'] ),
-					'is_minor'             => ! empty( $membership['is_minor'] ) || 'minor' === sanitize_key( $membership['age_band'] ?? '' ),
-					'age_band'             => sanitize_key( $membership['age_band'] ?? '' ),
+					'is_minor'             => $minor,
+					'age_band'             => $age_known ? ( $minor ? 'minor' : 'adult' ) : 'unknown',
 					'guardian_required'    => $guardian_required,
-					'guardian_ok'          => ! $guardian_required || $guardian_verified,
+					'guardian_ok'          => $guardian_verified,
+					'mfa_required'         => ! array_key_exists( 'mfa_required', $membership ) || ! empty( $membership['mfa_required'] ),
 					'session_two_factor'   => ! empty( $membership['session_two_factor'] ),
-					'membership_approved'  => ! empty( $membership['approved'] ),
+					'membership_approved'  => $canonical_eligible,
 					'entitlements'         => (array) ( $membership['entitlements'] ?? array() ),
 					'capabilities'         => $capabilities,
 				);
@@ -46,26 +57,14 @@ final class RSV_Security {
 			}
 		}
 
-		$is_admin = $user_id && user_can( $user_id, 'manage_options' );
-		return self::normalize_claims(
-			array(
-				'user_id'            => $user_id,
-				'contract_version'    => 'wordpress-recovery-v1',
-				'source'              => 'recovery',
-				'status'              => $is_admin ? 'active' : 'unavailable',
-				'is_founder'          => false,
-				'is_verified_doctor'  => false,
-				'is_suspended'        => ! $is_admin,
-				'is_minor'            => false,
-				'guardian_required'   => false,
-				'guardian_ok'         => $is_admin,
-				'session_two_factor'  => $is_admin,
-				'membership_approved' => $is_admin,
-				'capabilities'        => array(),
-			),
-			$user_id,
-			'recovery'
-		);
+		// No File 00: deny instead of promoting WordPress administrator
+		// privileges to canonical publisher, professional or Founder identity.
+		$claims = apply_filters( 'rsv_identity_claims', null, $user_id, RSV_CONTRACT_VERSION );
+		if ( is_array( $claims ) ) {
+			$normalized = self::normalize_claims( $claims, $user_id, 'filter' );
+			return self::contract_compatible( $normalized, 'filter' ) ? $normalized : self::unavailable_claims( $user_id, 'filter-incompatible' );
+		}
+		return self::unavailable_claims( $user_id, 'file00-unavailable' );
 	}
 
 	private static function unavailable_claims( $user_id, $source ) {
@@ -101,6 +100,7 @@ final class RSV_Security {
 			'guardian_required'   => false,
 			'guardian_ok'         => false,
 			'session_two_factor'  => false,
+			'mfa_required'       => true,
 			'membership_approved' => false,
 			'entitlements'        => array(),
 			'capabilities'        => array(),
@@ -113,7 +113,7 @@ final class RSV_Security {
 		$claims['age_band']         = sanitize_key( $claims['age_band'] );
 		$claims['capabilities']     = array_values( array_unique( array_filter( array_map( 'sanitize_key', (array) $claims['capabilities'] ) ) ) );
 		$claims['entitlements']     = is_array( $claims['entitlements'] ) ? $claims['entitlements'] : array();
-		foreach ( array( 'is_founder', 'is_verified_doctor', 'is_suspended', 'is_minor', 'guardian_required', 'guardian_ok', 'session_two_factor', 'membership_approved' ) as $flag ) {
+		foreach ( array( 'is_founder', 'is_verified_doctor', 'is_suspended', 'is_minor', 'guardian_required', 'guardian_ok', 'session_two_factor', 'mfa_required', 'membership_approved' ) as $flag ) {
 			$claims[ $flag ] = ! empty( $claims[ $flag ] );
 		}
 		return $claims;
@@ -131,14 +131,16 @@ final class RSV_Security {
 		}
 
 		$sensitive = in_array( $capability, array( RSV_Contracts::CAP_SUBMIT, RSV_Contracts::CAP_PUBLISH, RSV_Contracts::CAP_MODERATE, RSV_Contracts::CAP_MANAGE ), true );
-		if ( $sensitive && empty( $claims['session_two_factor'] ) && ! current_user_can( 'manage_options' ) ) {
+		// File 00 retired mandatory MFA on 2026-08-10; use its *current*
+		// declared policy instead of reviving it or allowing an admin shortcut.
+		if ( $sensitive && ! empty( $claims['mfa_required'] ) && empty( $claims['session_two_factor'] ) ) {
 			return false;
 		}
 
 		$native   = current_user_can( $capability ) || current_user_can( 'manage_options' );
 		$asserted = in_array( $capability, (array) $claims['capabilities'], true );
-		if ( RSV_Contracts::CAP_SUBMIT === $capability ) {
-			$identity = ! empty( $claims['is_founder'] ) || ! empty( $claims['is_verified_doctor'] ) || current_user_can( 'manage_options' );
+		if ( in_array( $capability, array( RSV_Contracts::CAP_SUBMIT, RSV_Contracts::CAP_PUBLISH ), true ) ) {
+			$identity = ! empty( $claims['is_founder'] ) || ! empty( $claims['is_verified_doctor'] );
 			if ( ! $identity ) {
 				return false;
 			}
@@ -167,7 +169,12 @@ final class RSV_Security {
 		$visibility = RSV_Helpers::enum( $reel['visibility'] ?? '', RSV_Contracts::VISIBILITIES, '' );
 		$allowed    = false;
 		if ( in_array( $visibility, array( 'public', 'unlisted' ), true ) ) {
-			$allowed = RSV_File10::publicly_eligible( absint( $reel['video_id'] ?? 0 ) );
+			// Public discovery must never publish a File 10 unlisted asset.
+			// An unlisted Reel remains directly viewable only with a File 10
+			// public/unlisted asset and the normal owner view controls.
+			$video = RSV_File10::video( absint( $reel['video_id'] ?? 0 ) );
+			$allowed = RSV_File10::publicly_eligible( absint( $reel['video_id'] ?? 0 ) )
+				&& ( 'unlisted' === $visibility || 'public' === ( $video['visibility'] ?? '' ) );
 		} else {
 			$user_id = $explicit_user ? absint( $user_id ) : get_current_user_id();
 			if ( $user_id && user_can( $user_id, 'manage_options' ) ) {
