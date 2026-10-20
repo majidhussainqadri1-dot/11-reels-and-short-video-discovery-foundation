@@ -183,13 +183,11 @@ trait RSV_Future30_Storage_Trait {
 
 		if ( 'F11-FUT-019' === $feature_id ) {
 			foreach ( $objects as &$row ) {
-				$questions = array();
-				foreach ( (array) ( $row['payload']['questions'] ?? array() ) as $question ) {
-					if ( ! is_array( $question ) ) continue;
-					unset( $question['correct'], $question['answer'], $question['explanation_private'] );
-					$questions[] = $question;
-				}
-				$row['payload']['questions'] = $questions;
+				$row['payload'] = array(
+					'questions' => RSV_Future30_Public_Safety::public_quiz_questions( $row['payload']['questions'] ?? array() ),
+					'streaks' => false,
+					'ranking_effect' => false,
+				);
 			}
 			unset( $row );
 		}

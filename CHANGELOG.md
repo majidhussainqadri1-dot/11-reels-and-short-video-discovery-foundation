@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2.0-rc9 — 2026-10-19
+
+### Corrected File 11 Future30 read/write canonical source integrity
+- F11-FUT-014: a translated Reel must be a *different* currently public Reel whose canonical language matches the linked version declaration; duplicate linked targets are rejected. Existing source language and 9-linked-language ceilings remain enforced.
+- F11-FUT-019: public Micro-Quiz DTOs allowlist only type, prompt, public options and learning-only flags. Arbitrary hidden/nested answer and patient metadata can no longer be returned through generic public or hardened REST projections.
+- F11-FUT-019: private quiz write storage accepts only the defined question/option/answer/explanation schema, preventing persistence of extraneous client-supplied private keys.
+- Added adversarial typed PHP tests for seven language-link cases and five public quiz privacy cases; all inherited tests/40 static-contract rounds retained.
+- Advances runtime to 1.2.0-rc9, File 11 contract 15; DB schemas unchanged. Production and staging acceptance remain separate, unverified gates.
+
+
 ## 1.2.0-rc8 — 2026-10-19
 
 ### Current-plan ownership and external-provider hardening
