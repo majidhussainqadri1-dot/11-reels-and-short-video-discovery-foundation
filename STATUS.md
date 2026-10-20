@@ -1,4 +1,4 @@
-# File 11 Status — 1.2.0-rc10 Future30
+# File 11 Status — 1.2.0-rc11 Future30
 
 | Gate | Status |
 |---|---|
@@ -11,11 +11,11 @@
 | Third fresh 20-round corrective review | **Completed 20/20**; defect rounds `02, 03, 06, 17, 18`; findings `F11-D-932…937` all corrected |
 | Required post-final-code fresh reviews | Prior rc5 rounds 19/20 CLEAN; new rc6 independent final rounds pending |
 | Canonical owner boundaries | Preserved; F11-FUT-014 linked Reel owner corrected to File 11; no foreign truth tables/raw media/AI engine/global search owner duplicated |
-| Repository source | `1.2.0-rc10`, File 11 contract `16` |
+| Repository source | `1.2.0-rc11`, File 11 contract `17` |
 | Known unresolved repository Blocker/Critical | None demonstrated by the static/automated gates; real staging and live verification pending |
 | Deterministic ZIP/checksum | Final exact-head rc6 workflow required after this evidence-only status commit |
 | Automated QA | Final exact-head rc6 workflow after this completed register/status evidence is authoritative |
-| Current rc10 correction | Micro-Quiz grading/evidence, withdrawn-series safety, public Series projection, File 16 AI context source/timestamp verification; 40 sequential source audits |
+| Current integrated rc11 correction | Micro-Quiz grading/evidence, withdrawn-series safety, public Series projection, File 16 AI context source/timestamp verification; 40 sequential source audits |
 | Known release blocker | Historical File11 plan package folder 11-reels-foundation conflicts with tested reels-foundation-11 top folder; requires exact deployed identity/Founder-approved parity decision |
 | Site connector | No registered WPVibe WordPress site at verification time; deployed source/DB unavailable |
 | Hostinger staging | Pending external execution |
