@@ -103,5 +103,17 @@ $GLOBALS['rsv_is_admin']=true;
 $check(is_wp_error(RSV_File10::validate_for_reel(45,7)),'WordPress admin linked another media owner');
 $GLOBALS['rsv_media']['owner_id']=7;
 $check(is_array(RSV_File10::validate_for_reel(45,7)),'Own approved File10 media denied');
+final class RSV_Repository {
+    public static function find( $id ) {
+        return array( 'id'=>3, 'owner_id'=>7, 'video_id'=>45, 'visibility'=>'public',
+            'status'=>'review', 'cover_id'=>12, 'caption'=>'Valid educational caption', 'version'=>1 );
+    }
+}
+require dirname(__DIR__).'/11-reels-foundation/includes/class-rsv-reels.php';
+$GLOBALS['rsv_media']['visibility']='unlisted';
+$GLOBALS['rsv_is_admin']=false;
+$result=RSV_Reels::publish(3,1);
+$check(is_wp_error($result) && $result->get_error_code()==='rsv_public_media_visibility_mismatch',
+    'Unlisted File10 video was allowed to be published as public Reel');
 if($failures){fwrite(STDERR,"FAIL FILE11 CROSS OWNER\n- ".implode("\n- ",$failures)."\n");exit(1);}
 echo "FILE11 FILE00/FILE10 CROSS OWNER: $assertions behavioral assertions PASS\n";
