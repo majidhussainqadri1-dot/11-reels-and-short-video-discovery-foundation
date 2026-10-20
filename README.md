@@ -8,7 +8,7 @@ File 11 owns the vertical educational Reel entity, the authoritative 60–600-se
 
 ## Current rc15 source safeguards
 
-The 20 October 2026 cross-file review corrected File 00 membership/age/guardian/retired-MFA claim consumption, eliminated WordPress administrator substitution for approved Founder or verified doctor in Reel publication, required canonical File10 owner for linked media, and denied promotion of unlisted File10 media to a public Reel. Static 40-round and runtime behavioral tests remain distinct from Hostinger staging/live acceptance.
+The 20 October 2026 cross-file review corrected File 00 membership/age/guardian/retired-MFA claim consumption, eliminated WordPress administrator substitution for approved Founder or verified doctor in Reel publication, required canonical File10 owner for linked media, denied promotion of unlisted File10 media to a public Reel, and made reviewed source/safety/captions a mandatory native publish gate independent of filter registration. Static 40-round and runtime behavioral tests remain distinct from Hostinger staging/live acceptance.
 
 ## Prior rc14 source safeguards
 
