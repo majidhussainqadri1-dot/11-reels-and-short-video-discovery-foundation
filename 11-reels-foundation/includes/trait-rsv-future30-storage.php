@@ -191,6 +191,13 @@ trait RSV_Future30_Storage_Trait {
 			}
 			unset( $row );
 		}
+		if ( in_array( $feature_id, array( 'F11-FUT-005', 'F11-FUT-018' ), true ) ) {
+			foreach ( $objects as &$row ) {
+				$row['payload'] = RSV_Future30_Public_Safety::public_sourced_payload( $feature_id, $row['payload'] ?? array() );
+				unset( $row['id'], $row['owner_id'], $row['reel_id'] );
+			}
+			unset( $row );
+		}
 		return array( 'objects'=>$objects, 'edges'=>$edges );
 	}
 
