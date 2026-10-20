@@ -49,43 +49,42 @@ No. Payment/donation status is not an allowed recommendation-priority reason.
 * Audit and emit outbox evidence atomically for Study Collection updates.
 * Support Unicode/Urdu-only named Study Collection keys.
 * Staging/production acceptance and installed plugin parity remain pending.
-=
 
-= 1.2.0-rc11 =
+= 1.2.0-rc10 =
 * Public learning paths are filtered against current File05 lesson and course publication status.
 * File26 search opportunity aggregates require proven count at least five and current provider refs.
 * Add focused behavioral regressions and forty distinct source-contract probes.
 * Staging and live deployment require separate acceptance.
 
 
-= 1.2.0-rc11 =
+= 1.2.0-rc9 =
 * Check actual language and different source when linking a translated Reel.
 * Allowlist public Micro-Quiz questions; never expose answers, hidden nested fields or private notes.
 * Restrict stored Micro-Quiz metadata to the declared schema.
 * Add new PHP behavioral regressions; deployment status remains pending.
 
 
-= 1.2.0-rc11 =
+= 1.2.0-rc8 =
 * Require manager privilege for cross-owner Reel publishing.
 * Reject invalid/withdrawn File 05 learning-path steps at write.
 * Minimize and allowlist File 16 grounded-context private fields.
 * Sanitize and bound File 26 recommendation reasons.
 
 
-= 1.2.0-rc11 =
+= 1.2.0-rc7 =
 * Correct typed quiz grading and private audit/outbox persistence.
 * Revalidate public Series Reels at every read; prevent withdrawn Reel exposure.
 * Validate File 16 AI context against current File 06 evidence and File 10 time bounds.
 * Test 40 sequential source-and-contract audit rounds.
 
 
-= 1.2.0-rc11 =
+= 1.2.0-rc6 =
 * Revalidate direct Knowledge Graph and Study Tools references, including withdrawn File 06 source evidence.
 * Require verified File 06 references on knowledge-card creation and graph evidence submission.
 * Add source-integrity regression contracts and advance File 11 contract to 12.
 
 
-= 1.2.0-rc11 =
+= 1.2.0-rc5 =
 * Corrected canonical ownership for F11-FUT-014 linked language Reel edges: new edges now target `File 11`, never a generic translation provider.
 * Preserved legacy rc1–rc4 language-edge compatibility by validating legacy target refs as current public File 11 Reels before public projection.
 * Retained all third fresh20 public-reference, Creator Research privacy-threshold and identifier-minimized erasure hardening.
