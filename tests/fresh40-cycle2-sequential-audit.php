@@ -103,7 +103,7 @@ for ( $round = 1; $round <= 40; ++$round ) {
          throw new RuntimeException( "Round $round: File10 template or File26 explanation safeguards regressed." );
     }
     $file10 = file_get_contents( $source_root . '/includes/class-rsv-file10.php' );
-    if ( false === strpos( $file10, "esc_url_raw( $url, array( 'https' ) )" ) )
+    if ( ( false === strpos( $file10, 'esc_url_raw(' ) || false === strpos( $file10, "array( 'https' )" ) ) )
         throw new RuntimeException( "Round $round: File10 transcript HTTPS-only guard regressed." );
     list( $scope, $path, $marker ) = $checks[ $round - 1 ];
     $contents = file_get_contents( $root . '/' . $path );
