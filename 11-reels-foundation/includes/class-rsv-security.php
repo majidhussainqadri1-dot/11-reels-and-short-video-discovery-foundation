@@ -182,7 +182,8 @@ final class RSV_Security {
 					} elseif ( 'entitled' === $visibility ) {
 						$entitlements = (array) $claims['entitlements'];
 						$entitled = ! empty( $entitlements['reels'] ) || ! empty( $entitlements['base_services']['reels'] );
-						$allowed = (bool) apply_filters( 'rsv_reel_entitled', $entitled, $user_id, $reel, $claims );
+						// External policy may narrow a File 00 entitlement, never grant a missing entitlement.
+						$allowed = $entitled && (bool) apply_filters( 'rsv_reel_entitled', $entitled, $user_id, $reel, $claims );
 					}
 				}
 			}
