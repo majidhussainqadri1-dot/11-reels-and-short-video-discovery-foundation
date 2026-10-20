@@ -29,7 +29,49 @@ trait RSV_Future30_Feature_Write_Trait {
 	}
 	public function series_list() { return rest_ensure_response( self::public_series_rows() ); }
 	public function series_create( $request ) { $p=(array)$request->get_json_params();$rate=RSV_Security::rate_limit('future30_series',30,HOUR_IN_SECONDS);if(is_wp_error($rate))return $rate;$idem=$request->get_header('Idempotency-Key');$begin=RSV_Security::idempotency_begin('future30_series',$idem,$p);if(is_wp_error($begin))return $begin;if(!empty($begin['replay']))return rest_ensure_response($begin['response']);$refs=array_values(array_unique(array_map('sanitize_text_field',(array)($p['ordered_reels']??array()))));if(!count($refs)||count($refs)>100){RSV_Security::idempotency_fail('future30_series',$idem);return RSV_Helpers::error('rsv_series_size_invalid',__('A Reel series must contain 1 to 100 current public Reels.',RSV_TEXT_DOMAIN),422);}foreach($refs as $ref)if(!self::canonical_ref_public_valid('File 11',$ref,'series')){RSV_Security::idempotency_fail('future30_series',$idem);return RSV_Helpers::error('rsv_series_reel_invalid',__('Every series item must be a current public Reel.',RSV_TEXT_DOMAIN),422);}return self::idempotent_finish_result('future30_series',$idem,static function() use($p,$refs){return self::put_object('F11-FUT-001','series',0,$p['title']??'',array('description'=>$p['description']??'','difficulty'=>$p['difficulty']??'','ordered_reels'=>$refs),$p['public_id']??'');},array('entity_type'=>'future30','action'=>'series_update','reason'=>'F11-FUT-001','event'=>'ReelSeriesUpdated','event_data'=>array('feature_id'=>'F11-FUT-001'))); }
-	public function path_list() { $rows=self::object_rows('F11-FUT-002',0,0,50);foreach($rows as &$row)unset($row['owner_id']);return rest_ensure_response($rows); }
+	/** Re-evaluate every File 05 reference on public read; a stored ID is not proof of continued visibility. */
+	private static function public_path_rows() {
+		$rows = self::object_rows( 'F11-FUT-002', 0, 0, 50 );
+		$safe = array();
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) continue;
+			$payload = (array) ( $row['payload'] ?? array() );
+			$steps = (array) ( $payload['steps'] ?? array() );
+			$courses = (array) ( $payload['file05_course_refs'] ?? array() );
+			if ( ! $steps || count( $steps ) > 100 || count( $courses ) > 100 ) continue;
+			$public_steps = array();
+			foreach ( $steps as $step ) {
+				if ( ! is_array( $step ) ) continue 2;
+				$ref = RSV_Helpers::text( $step['file05_ref'] ?? '', 255 );
+				if ( ! $ref || true !== apply_filters( 'rsv_future30_file05_public_ref_valid', false, $ref ) ) continue 2;
+				$public_steps[] = array(
+					'file05_ref' => $ref,
+					'level' => RSV_Helpers::enum( $step['level'] ?? 'beginner', array( 'beginner','intermediate','advanced' ), 'beginner' ),
+				);
+			}
+			$public_courses = array();
+			foreach ( $courses as $ref ) {
+				if ( ! is_scalar( $ref ) ) continue 2;
+				$ref = RSV_Helpers::text( $ref, 255 );
+				if ( ! $ref || true !== apply_filters( 'rsv_future30_file05_public_ref_valid', false, $ref ) ) continue 2;
+				$public_courses[] = $ref;
+			}
+			$safe[] = array(
+				'public_id' => RSV_Helpers::text( $row['public_id'] ?? '', 80 ),
+				'feature_id' => 'F11-FUT-002',
+				'title' => RSV_Helpers::text( $row['title'] ?? '', 255 ),
+				'version' => absint( $row['version'] ?? 1 ),
+				'payload' => array(
+					'level' => RSV_Helpers::enum( $payload['level'] ?? 'beginner', array( 'beginner','intermediate','advanced' ), 'beginner' ),
+					'description' => RSV_Helpers::textarea( $payload['description'] ?? '', 2000 ),
+					'steps' => $public_steps,
+					'file05_course_refs' => $public_courses,
+				),
+			);
+		}
+		return $safe;
+	}
+	public function path_list() { return rest_ensure_response( self::public_path_rows() ); }
 	/** Validate File 05 course and lesson truth before persisting a path. */
 	private static function validated_path_steps( $raw ) {
 		if ( ! is_array( $raw ) || count( $raw ) < 1 || count( $raw ) > 100 ) {
