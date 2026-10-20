@@ -37,6 +37,7 @@ $files = array(
 	'class-rsv-migration-lock-guard.php',
 	'class-rsv-diagnostics.php',
 	'class-rsv-integrations.php',
+	'class-rsv-file26-connector.php',
 	'class-rsv-current-plan.php',
 	'trait-rsv-future30-storage.php',
 	'trait-rsv-future30-feature-write.php',
@@ -64,6 +65,8 @@ $files = array(
 	'class-rsv-plugin.php',
 );
 foreach ( $files as $file ) require_once RSV_DIR . 'includes/' . $file;
+// Expose a proposed read-only connector before File 26 collects owner manifests.
+add_filter( 'sabri_file26_owner_connector_adapters', array( 'RSV_File26_Connector', 'collect' ), 10 );
 
 register_activation_hook( RSV_FILE, array( 'RSV_Plugin', 'activate' ) );
 register_deactivation_hook( RSV_FILE, array( 'RSV_Plugin', 'deactivate' ) );
