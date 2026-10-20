@@ -256,7 +256,13 @@ final class RSV_Security {
 		if ( false === $wpdb->query( $sql ) ) {
 			return self::fail_closed_rate_limit();
 		}
-		$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT request_count FROM $table WHERE actor_key=%s AND scope_key=%s AND window_start=%d", $key, $scope, $bucket ) );
+		// Never interpret a failed/empty counter read as zero requests:
+		// a successful INSERT followed by an unavailable DB read must fail closed.
+		$raw_count = $wpdb->get_var( $wpdb->prepare( "SELECT request_count FROM $table WHERE actor_key=%s AND scope_key=%s AND window_start=%d", $key, $scope, $bucket ) );
+		if ( ! is_scalar( $raw_count ) || 1 !== preg_match( '/^[1-9][0-9]{0,9}$/D', (string) $raw_count ) ) {
+			return self::fail_closed_rate_limit();
+		}
+		$count = (int) $raw_count;
 		if ( $count > $limit ) {
 			return RSV_Helpers::error( 'rsv_rate_limited', __( 'Too many requests. Please wait and try again.', RSV_TEXT_DOMAIN ), 429, array( 'retry_after' => max( 1, $bucket + $window - time() ) ) );
 		}
