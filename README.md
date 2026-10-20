@@ -1,12 +1,16 @@
 # File 11 — Reels and Short Video Discovery
 
-**Current repository candidate:** `1.2.0-rc17`  
+**Current repository candidate:** `1.2.0-rc18`  
 **Future30 amendment:** `SSH-F11-FUTURE-REEL-KNOWLEDGE-INTELLIGENCE-30-2026`  
 **Canonical package root:** `reels-foundation-11`
 
 File 11 owns the vertical educational Reel entity, the authoritative 60–600-second Reel eligibility rule through File 10, Reel-native discovery, moderation, private history/progress and the approved Reel-domain Future30 orchestration layer. It does not duplicate File 10 raw media, File 05 learning truth, File 06 canonical knowledge, File 16 AI execution, File 00 identity, File 19 delivery, File 20 shell, File 24 assurance, File 25 visual system or File 26 cross-platform discovery/graph ownership.
 
-## Current rc17 publication-and-restore safeguards
+## Current rc18 WordPress privacy-request safeguards
+
+The `RSV_Privacy::export` workflow now checks all three DB read families (watch history, reports/appeals and authored Reels) for SQL errors and returns a WordPress-compatible `WP_Error` instead of silently finalizing an incomplete personal-data archive. `RSV_Privacy::erase` checks current owned Reel counts and transactionally rolls back rather than certifying deletion on DB unavailability. `tests/rc18-privacy-export-query-failure.php` (12 cases) and `tests/rc18-privacy-erase-query-failure.php` (5 cases) run within the complete CI suite. Each of the forty frozen-source review sweeps also verifies these read/erase fail-closed guards. No production or staging verification is implied.
+
+## Prior rc17 publication-and-restore safeguards
 
 RC17 unifies the native mandatory first-publication and moderation-restoration eligibility gates. File10 media must still be published, source visibility must match public Reel visibility, and Source/Safety Card, captions/transcripts and cover requirements must all be satisfied before a former restricted or removed Reel may become published again. New `tests/rc17-restoration-gate-behavior.php` exercises 17 isolated restore cases (negative/positive and no-write-on-denial). All earlier 40 File00 authorization scenarios and 40 sequential source reviews remain mandatory; they are not equivalent to staging or live tests.
 
@@ -81,7 +85,7 @@ The 2026-08-12 Founder-approved amendment retains all `F11-FUT-001` through `F11
 
 ```bash
 bash tests/run-all.sh
-bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc17.zip
+bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc18.zip
 ```
 
 The exact-head rc15 release workflow must pass PHP 8.1/8.3/8.4 suites, JavaScript syntax, inherited corrective regressions, current-plan/Future30 and all three fresh20 contract suites, deterministic double build, checksum, ZIP integrity and exact runtime source/package parity.
