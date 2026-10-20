@@ -4,7 +4,7 @@ Tags: reels, educational-video, learning, citations, accessibility, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0-rc15
+Stable tag: 1.2.0-rc16
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,13 @@ The Reel has one canonical source language plus at most nine linked language ver
 No. Payment/donation status is not an allowed recommendation-priority reason.
 
 == Changelog ==
+
+= 1.2.0-rc16 =
+* Unified rc15 owner/visibility/publication-gate safeguards with PR26 File00 entitlement non-escalation.
+* File00 canonical publishing snapshot now governs direct publication; WordPress administrator cannot bypass restricted reads or cross-owner editorial delegation.
+* Honor File00 single-free-tier education entitlement while forbidding filters from manufacturing permissions; add 40 distinct adversarial behavior scenarios.
+* Repository candidate only: staging and deployed code/database parity remain unverified.
+
 
 = 1.2.0-rc15 =
 File 00 current claims, age, guardian and retired-MFA policy; removal of WordPress admin publisher identity bypass; File 10 media owner/public-unlisted separation. Source candidate only, not deployed.

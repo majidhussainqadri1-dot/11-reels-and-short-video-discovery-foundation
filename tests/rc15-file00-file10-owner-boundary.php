@@ -48,6 +48,7 @@ $base=array(
     'guardian_verified'=>false,
     'approved_membership_types'=>array('doctor'),'professional_verified'=>true,
     'mfa_required'=>false,'session_two_factor'=>false,
+    'publishing'=>array('can_open_composer'=>true,'can_direct_publish'=>true),
 );
 $GLOBALS['rsv_raw_claims']=$base;
 $check(RSV_Security::can(RSV_Contracts::CAP_SUBMIT),'Valid doctor denied by retired MFA');
