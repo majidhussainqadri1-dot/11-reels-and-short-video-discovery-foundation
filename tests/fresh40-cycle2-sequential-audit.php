@@ -93,6 +93,17 @@ for ( $round = 1; $round <= 40; ++$round ) {
          false === strpos( $safety, 'public static function public_sourced_payload' ) ||
          false === strpos( $storage, 'RSV_Future30_Public_Safety::public_sourced_payload' ) )
         throw new RuntimeException( "Round $round: File05 current reference or File06 public payload minimization regressed." );
+    if ( false === strpos( $series, "public_template_or_reason_payload" ) ) {
+        // The shared sanitizer is called by both public REST reads and native source projections.
+        $writeSource = file_get_contents( $source_root . '/includes/trait-rsv-future30-feature-write.php' );
+        $publicSource = file_get_contents( $source_root . '/includes/class-rsv-future30-public-safety.php' );
+        $storageSource = file_get_contents( $source_root . '/includes/trait-rsv-future30-storage.php' );
+        if ( false === strpos( $writeSource, "public_template_or_reason_payload" ) ||
+             false === strpos( $publicSource, "public_template_or_reason_payload" ) ||
+             false === strpos( $storageSource, "public_template_or_reason_payload" ) ) {
+             throw new RuntimeException( "Round $round: File10 template or File26 explanation safeguards regressed." );
+        }
+    }
     list( $scope, $path, $marker ) = $checks[ $round - 1 ];
     $contents = file_get_contents( $root . '/' . $path );
     if ( false === $contents || false === strpos( $contents, $marker ) )
