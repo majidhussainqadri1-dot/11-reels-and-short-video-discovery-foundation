@@ -169,7 +169,12 @@ final class RSV_Privacy {
 				if ( false === $audit_redaction ) return RSV_Helpers::error( 'rsv_privacy_audit_redact_failed', __( 'Audit identifiers could not be minimized safely.', RSV_TEXT_DOMAIN ), 500 );
 				$removed = $removed || $audit_redaction > 0;
 
-				$owned = (int) $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . RSV_Helpers::table( 'reels' ) . ' WHERE owner_id=%d', $user_id ) );
+				$owned_count = $wpdb->get_var( $wpdb->prepare( 'SELECT COUNT(*) FROM ' . RSV_Helpers::table( 'reels' ) . ' WHERE owner_id=%d', $user_id ) );
+				// An unavailable DB must not silently certify privacy-erasure completion.
+				if ( null === $owned_count || false === $owned_count || '' !== (string) $wpdb->last_error || ! is_numeric( $owned_count ) ) {
+					return RSV_Helpers::error( 'rsv_privacy_owned_count_unavailable', __( 'Retained Reel ownership could not be verified. Please retry the privacy request.', RSV_TEXT_DOMAIN ), 503 );
+				}
+				$owned = absint( $owned_count );
 				if ( $owned ) {
 					$retained = true;
 					$messages[] = __( 'Published or governed Reel records were retained for editorial, rights and accountability review; request correction or withdrawal through the content workflow.', RSV_TEXT_DOMAIN );
