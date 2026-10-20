@@ -88,7 +88,7 @@ for ( $round = 1; $round <= 40; ++$round ) {
         throw new RuntimeException( "Round $round: a previously corrected cross-file guard regressed." );
     $safety = file_get_contents( $source_root . '/includes/class-rsv-future30-public-safety.php' );
     $storage = file_get_contents( $source_root . '/includes/trait-rsv-future30-storage.php' );
-    if ( false === strpos( $series, 'private static function public_path_rows()' ) ||
+    if ( ( false === strpos( $series, 'private static function public_path_rows()' ) && false === strpos( $series, 'private static function public_learning_path_rows(' ) ) ||
          false === strpos( $series, "'rsv_future30_file05_public_ref_valid'" ) ||
          false === strpos( $safety, 'public static function public_sourced_payload' ) ||
          false === strpos( $storage, 'RSV_Future30_Public_Safety::public_sourced_payload' ) )
