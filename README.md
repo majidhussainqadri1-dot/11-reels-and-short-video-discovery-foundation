@@ -1,12 +1,16 @@
 # File 11 — Reels and Short Video Discovery
 
-**Current repository candidate:** `1.2.0-rc9`  
+**Current repository candidate:** `1.2.0-rc10`  
 **Future30 amendment:** `SSH-F11-FUTURE-REEL-KNOWLEDGE-INTELLIGENCE-30-2026`  
 **Canonical package root:** `reels-foundation-11`
 
 File 11 owns the vertical educational Reel entity, the authoritative 60–600-second Reel eligibility rule through File 10, Reel-native discovery, moderation, private history/progress and the approved Reel-domain Future30 orchestration layer. It does not duplicate File 10 raw media, File 05 learning truth, File 06 canonical knowledge, File 16 AI execution, File 00 identity, File 19 delivery, File 20 shell, File 24 assurance, File 25 visual system or File 26 cross-platform discovery/graph ownership.
 
-## Current rc9 safeguards
+## Current rc10 safeguards
+
+File 05 public learning paths now revalidate every current provider reference; File 06 evidence and knowledge cards expose only declared source-safe fields on every public route. These source controls require staging and live verification.
+
+## Prior rc9 safeguards
 
 Corrected linked-language targets (current File 11 Reel, different source, exact language), locked public quiz DTO to declared fields and minimized private quiz data at write time. The 40 automatic source/contract rounds do not substitute for real provider and WordPress integration tests.
 
@@ -35,11 +39,11 @@ The 2026-08-12 Founder-approved amendment retains all `F11-FUT-001` through `F11
 
 ## Release identity
 
-- Plugin: `1.2.0-rc9`
+- Plugin: `1.2.0-rc10`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
 - Future30 schema: `1.0.0`
-- File 11 contract: `15`
+- File 11 contract: `16`
 - Event contract: `4`
 - Provider contract: `3`
 - Future30 sub-contract: `1`
@@ -49,7 +53,7 @@ The 2026-08-12 Founder-approved amendment retains all `F11-FUT-001` through `F11
 
 ```bash
 bash tests/run-all.sh
-bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc9.zip
+bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc10.zip
 ```
 
 The exact-head release workflow must pass PHP 8.1/8.3/8.4 suites, JavaScript syntax, inherited corrective regressions, current-plan/Future30 and all three fresh20 contract suites, deterministic double build, checksum, ZIP integrity and exact runtime source/package parity.
