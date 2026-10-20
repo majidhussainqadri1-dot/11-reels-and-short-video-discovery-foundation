@@ -23,6 +23,7 @@ php "$ROOT/tests/fresh40-cycle2-ai-context.php"
 php "$ROOT/tests/fresh40-cycle2-sequential-audit.php"
 php "$ROOT/tests/rc8-governing-plan-guards.php"
 php "$ROOT/tests/rc9-language-quiz-behavior.php"
+php "$ROOT/tests/file26-native-connector-contract.php"
 bash "$ROOT/tests/static-contracts.sh"
 A="$(mktemp -d)"; B="$(mktemp -d)"; trap 'rm -rf "$A" "$B"' EXIT
 bash "$ROOT/tools/build-package.sh" "$A/file11.zip" >/dev/null
