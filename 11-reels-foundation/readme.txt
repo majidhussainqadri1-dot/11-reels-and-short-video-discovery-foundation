@@ -4,7 +4,7 @@ Tags: reels, educational-video, learning, citations, accessibility, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0-rc13
+Stable tag: 1.2.0-rc14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,11 @@ The Reel has one canonical source language plus at most nine linked language ver
 No. Payment/donation status is not an allowed recommendation-priority reason.
 
 == Changelog ==
+
+= 1.2.0-rc14 =
+* Fix silent SQL read failures in history, Reel navigation, author timelines, public search and creator insights. Return typed 503 where appropriate; REST/UI show an honest temporary unavailable state.
+* Keep read-only cross-file provider callbacks type-safe and emit structured degradation notifications. Preserve existing safety, rights and privacy checks.
+* Add RC14 regression tests, run forty source rounds, refresh exact release metadata and default ZIP name. No staging/live claim.
 
 = 1.2.0-rc13 =
 * Distinguish Reel Feed SQL outage (HTTP 503) from a true zero-result search, including REST and accessible frontend state.

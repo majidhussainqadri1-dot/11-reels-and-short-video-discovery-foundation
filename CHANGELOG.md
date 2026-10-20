@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0-rc14 — 2026-10-20
+
+- Fixed five additional native SQL-read families that previously coerced failed database reads into valid empty results: private watch history, Reel neighbors, public author timeline, public search and creator insights.
+- Added safe REST and public/private UI error handling; read-only cross-file providers emit a degradation signal and preserve external contract types.
+- New RC14 behavioral regression distinguishes null SQL failure, explicit database error, healthy empty reads and a second-neighbor-query failure. All 40 source/contract rounds and PHP 8.1/8.3/8.4 suites are mandatory at exact HEAD.
+- Corrected stale default build-package naming (rc3) and assigned RC14 a distinct runtime, workflow, artifact, docs and manifest identity. Schema 1.2.0, File 11 contract 19 and canonical boundaries unchanged.
+- Deployed artifact, DB/migration state, WordPress staging, real providers, origin Cloudflare 530 diagnosis, backup/restore, Founder approval and live re-test remain unverified.
+
 ## 1.2.0-rc13 — 2026-10-20
 
 - Corrected F11-FR-005 / CEN-SEARCH-001: an unsuccessful Reel Feed database read must return a typed HTTP 503 rather than a fabricated successful empty feed. The REST and UI error routes already propagate that error.

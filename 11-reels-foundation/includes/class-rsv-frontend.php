@@ -249,6 +249,7 @@ final class RSV_Frontend {
 
 	private function single_neighbors( $reel ) {
 		$neighbors = RSV_Repository::neighbors( $reel );
+		if ( is_wp_error( $neighbors ) ) return $this->state( 'unavailable', __( 'Reel navigation unavailable', RSV_TEXT_DOMAIN ), __( 'Previous and next Reels cannot be loaded right now. Please retry.', RSV_TEXT_DOMAIN ) );
 		if ( ! $neighbors['previous'] && ! $neighbors['next'] ) {
 			return '';
 		}
@@ -280,6 +281,7 @@ final class RSV_Frontend {
 			return $this->state( 'restricted', __( 'Sign in required', RSV_TEXT_DOMAIN ), __( 'Sign in to view private Reel history.', RSV_TEXT_DOMAIN ) );
 		}
 		$items = RSV_Repository::history( get_current_user_id() );
+		if ( is_wp_error( $items ) ) return '<main class="rsv-shell">' . $this->state( 'unavailable', __( 'Reel history unavailable', RSV_TEXT_DOMAIN ), __( 'Your watch history cannot be loaded right now. Please retry.', RSV_TEXT_DOMAIN ) ) . '</main>';
 		ob_start();
 		?><main class="rsv-shell"><?php echo $this->local_nav(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><h1><?php esc_html_e( 'Reel History', RSV_TEXT_DOMAIN ); ?></h1><button type="button" data-rsv-clear-history><?php echo $this->icon( 'delete' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><span><?php esc_html_e( 'Clear history', RSV_TEXT_DOMAIN ); ?></span></button><?php if ( ! $items ) : echo $this->state( 'empty', __( 'No history yet', RSV_TEXT_DOMAIN ), __( 'Reels watched while signed in will appear here.', RSV_TEXT_DOMAIN ) ); else : ?><ol class="rsv-history"><?php foreach ( $items as $item ) : ?><li><?php if ( $item['available'] ) : ?><a href="<?php echo esc_url( $item['url'] ); ?>"><?php echo esc_html( $item['title'] ); ?></a><?php else : ?><span><?php echo esc_html( $item['title'] ); ?></span><?php endif; ?><span><?php echo esc_html( gmdate( 'i:s', $item['progress']['position_seconds'] ) ); ?></span></li><?php endforeach; ?></ol><?php endif; ?></main><?php
 		return ob_get_clean();
@@ -292,6 +294,7 @@ final class RSV_Frontend {
 			return $this->state( 'restricted', __( 'Access restricted', RSV_TEXT_DOMAIN ), __( 'Creator insights are available only to authorized publishers.', RSV_TEXT_DOMAIN ) );
 		}
 		$rows = RSV_Reels::insights( get_current_user_id() );
+		if ( is_wp_error( $rows ) ) return '<main class="rsv-shell">' . $this->state( 'unavailable', __( 'Creator insights unavailable', RSV_TEXT_DOMAIN ), __( 'Creator statistics cannot be loaded right now. Please retry.', RSV_TEXT_DOMAIN ) ) . '</main>';
 		ob_start();
 		?><main class="rsv-shell"><?php echo $this->local_nav(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><h1><?php esc_html_e( 'Creator Reel Insights', RSV_TEXT_DOMAIN ); ?></h1><p><?php esc_html_e( 'Only privacy-safe aggregate metrics are shown; viewer identities are never exposed.', RSV_TEXT_DOMAIN ); ?></p><div class="rsv-table-wrap"><table><thead><tr><th><?php esc_html_e( 'Reel', RSV_TEXT_DOMAIN ); ?></th><th><?php esc_html_e( 'Views', RSV_TEXT_DOMAIN ); ?></th><th><?php esc_html_e( 'Completions', RSV_TEXT_DOMAIN ); ?></th><th><?php esc_html_e( 'Average seconds', RSV_TEXT_DOMAIN ); ?></th><th><?php esc_html_e( 'Rapid swipes', RSV_TEXT_DOMAIN ); ?></th></tr></thead><tbody><?php foreach ( $rows as $row ) : ?><tr><td><?php echo esc_html( $row['title'] ); ?></td><?php if ( $row['insufficient_data'] ) : ?><td colspan="4"><?php esc_html_e( 'Insufficient aggregate data', RSV_TEXT_DOMAIN ); ?></td><?php else : ?><td><?php echo absint( $row['views'] ); ?></td><td><?php echo absint( $row['completions'] ); ?></td><td><?php echo esc_html( round( (float) $row['average_seconds'], 1 ) ); ?></td><td><?php echo absint( $row['rapid_swipes'] ); ?></td><?php endif; ?></tr><?php endforeach; ?></tbody></table></div></main><?php
 		return ob_get_clean();

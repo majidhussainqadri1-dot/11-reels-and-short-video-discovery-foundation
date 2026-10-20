@@ -92,12 +92,13 @@ final class RSV_REST {
 
 	public function history( $request ) {
 		RSV_Helpers::no_cache_private();
-		return rest_ensure_response( RSV_Repository::history( get_current_user_id(), min(100,max(1,absint($request->get_param('limit')?:100))), absint($request->get_param('offset')) ) );
+		$result = RSV_Repository::history( get_current_user_id(), min(100,max(1,absint($request->get_param('limit')?:100))), absint($request->get_param('offset')) );
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
 	}
 	public function clear_history() {
 		$result = RSV_Reels::clear_history( get_current_user_id() );
 		return is_wp_error( $result ) ? $result : rest_ensure_response( $result );
 	}
-	public function insights() { RSV_Helpers::no_cache_private(); return rest_ensure_response( RSV_Reels::insights( get_current_user_id() ) ); }
+	public function insights() { RSV_Helpers::no_cache_private(); $result=RSV_Reels::insights( get_current_user_id() ); return is_wp_error( $result ) ? $result : rest_ensure_response( $result ); }
 	public function moderate( $request ) { return RSV_Reels::moderate( sanitize_text_field( (string) $request['id'] ), $request->get_param( 'decision' ), $request->get_param( 'reason' ), absint( $request->get_param( 'version' ) ), true ); }
 }
