@@ -53,7 +53,7 @@ final class RSV_File10 {
 		if ( ! self::ready() ) return RSV_Helpers::error( 'rsv_file10_unavailable', __( 'File 10 media services are unavailable.', RSV_TEXT_DOMAIN ), 503 );
 		$video = self::video( $id );
 		if ( ! $video ) return RSV_Helpers::error( 'rsv_video_missing', __( 'The selected video does not exist.', RSV_TEXT_DOMAIN ), 404 );
-		if ( $owner_id && ! current_user_can( 'manage_options' ) && absint( $video['owner_id'] ?? 0 ) !== absint( $owner_id ) ) return RSV_Helpers::error( 'rsv_video_forbidden', __( 'You cannot link this video.', RSV_TEXT_DOMAIN ), 403 );
+		if ( $owner_id && absint( $video['owner_id'] ?? 0 ) !== absint( $owner_id ) ) return RSV_Helpers::error( 'rsv_video_forbidden', __( 'You cannot link this video.', RSV_TEXT_DOMAIN ), 403 );
 		$duration = absint( $video['duration_seconds'] ?? 0 );
 		if ( $duration < 60 || $duration > 600 ) return RSV_Helpers::error( 'rsv_duration_invalid', __( 'Reels must be between 60 and 600 seconds using File 10 verified duration.', RSV_TEXT_DOMAIN ), 422 );
 		if ( ! in_array( $video['status'] ?? '', array( 'review', 'scheduled', 'published' ), true ) ) return RSV_Helpers::error( 'rsv_video_not_ready', __( 'File 10 media is still processing or restricted.', RSV_TEXT_DOMAIN ), 422 );
