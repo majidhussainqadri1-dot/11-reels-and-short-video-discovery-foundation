@@ -91,6 +91,85 @@ final class RSV_Future30_Public_Safety {
 		return $safe;
 	}
 
+	/** Permit only documented public File 06 source metadata, never historical PII fields. */
+	public static function public_sourced_payload( $feature, $payload ) {
+		$p = is_array( $payload ) ? $payload : array();
+		$refs = static function ( $values ) {
+			$out = array();
+			foreach ( array_slice( (array) $values, 0, 100 ) as $value ) {
+				if ( ! is_scalar( $value ) ) continue;
+				$ref = RSV_Helpers::text( $value, 255 );
+				if ( '' !== $ref ) $out[] = $ref;
+			}
+			return array_values( array_unique( $out ) );
+		};
+		if ( 'F11-FUT-005' === $feature ) {
+			return array(
+				'grade' => RSV_Helpers::text( $p['grade'] ?? '', 50 ),
+				'source_owner' => RSV_Helpers::text( $p['source_owner'] ?? 'File 06', 30 ),
+				'source_refs' => $refs( $p['source_refs'] ?? array() ),
+				'claim_scope' => RSV_Helpers::textarea( $p['claim_scope'] ?? '', 1500 ),
+				'limitations' => RSV_Helpers::textarea( $p['limitations'] ?? '', 1500 ),
+			);
+		}
+		if ( 'F11-FUT-018' === $feature ) {
+			$points = array();
+			foreach ( array_slice( (array) ( $p['key_points'] ?? array() ), 0, 20 ) as $point ) {
+				if ( is_scalar( $point ) ) $points[] = RSV_Helpers::text( $point, 500 );
+			}
+			return array(
+				'summary' => RSV_Helpers::textarea( $p['summary'] ?? '', 2000 ),
+				'key_points' => $points,
+				'remedy_refs' => $refs( $p['remedy_refs'] ?? array() ),
+				'disease_refs' => $refs( $p['disease_refs'] ?? array() ),
+				'book_refs' => $refs( $p['book_refs'] ?? array() ),
+				'source_refs' => $refs( $p['source_refs'] ?? array() ),
+				'difficulty' => RSV_Helpers::text( $p['difficulty'] ?? '', 40 ),
+			);
+		}
+		return array();
+	}
+
+	/** Return only the File 11 template/reason policy fields allowed by File 10 and File 26 contracts. */
+	public static function public_template_or_reason_payload( $feature, $payload ) {
+		$p = is_array( $payload ) ? $payload : array();
+		if ( 'F11-FUT-010' === $feature ) {
+			$sections = array();
+			foreach ( array_slice( (array) ( $p['sections'] ?? array() ), 0, 12 ) as $item ) {
+				if ( is_scalar( $item ) ) {
+					$sections[] = array( 'text'=>RSV_Helpers::textarea( $item, 800 ) );
+				} elseif ( is_array( $item ) ) {
+					$sections[] = array(
+						'title'=>RSV_Helpers::text( is_scalar( $item['title'] ?? null ) ? $item['title'] : '', 160 ),
+						'text'=>RSV_Helpers::textarea( is_scalar( $item['text'] ?? null ) ? $item['text'] : '', 800 ),
+						'duration_seconds'=>min( 600, absint( $item['duration_seconds'] ?? 0 ) ),
+					);
+				}
+			}
+			return array(
+				'template_type'=>substr( sanitize_key( $p['template_type'] ?? 'clinical-pearl' ), 0, 40 ),
+				'sections'=>$sections,
+				'max_seconds'=>min( 600, max( 60, absint( $p['max_seconds'] ?? 180 ) ) ),
+				'file10_media_recipe_ref'=>RSV_Helpers::text( is_scalar( $p['file10_media_recipe_ref'] ?? null ) ? $p['file10_media_recipe_ref'] : '', 255 ),
+			);
+		}
+		if ( 'F11-FUT-024' === $feature ) {
+			$allowed = array( 'topic-interest', 'followed-doctor', 'recent-learning', 'diversity', 'latest', 'source-quality', 'educational-quality', 'freshness' );
+			$reasons = array();
+			foreach ( array_slice( (array) ( $p['allowed_reasons'] ?? $allowed ), 0, 20 ) as $reason ) {
+				if ( ! is_scalar( $reason ) ) continue;
+				$reason = sanitize_key( $reason );
+				if ( in_array( $reason, $allowed, true ) && ! in_array( $reason, $reasons, true ) ) $reasons[] = $reason;
+			}
+			return array(
+				'allowed_reasons'=>$reasons,
+				'commercial_reason'=>false,
+				'donor_reason'=>false,
+			);
+		}
+		return array();
+	}
+
 	private static function safe_objects( $feature, $objects, $reel ) {
 		$out = array();
 		foreach ( $objects as $row ) {
@@ -110,6 +189,12 @@ final class RSV_Future30_Public_Safety {
 				foreach ( array( 'remedy_refs', 'disease_refs', 'book_refs', 'source_refs' ) as $key ) {
 					if ( ! self::all_public_refs_valid( 'File 06', (array) ( $p[ $key ] ?? array() ), 'knowledge-card-public-read' ) ) continue 2;
 				}
+			}
+			if ( in_array( $feature, array( 'F11-FUT-005', 'F11-FUT-018' ), true ) ) {
+				$row['payload'] = self::public_sourced_payload( $feature, $p );
+			}
+			if ( in_array( $feature, array( 'F11-FUT-010', 'F11-FUT-024' ), true ) ) {
+				$row['payload'] = self::public_template_or_reason_payload( $feature, $p );
 			}
 			if ( 'F11-FUT-019' === $feature ) {
 				$row['payload'] = array(
