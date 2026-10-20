@@ -4,9 +4,15 @@ require __DIR__ . '/bootstrap.php';
 function add_filter( ...$args ) { return true; }
 function apply_filters( $hook, $value, ...$args ) {
     if ( 'rsv_future30_file10_media_recipe_ref_valid' === $hook ) return 'valid-file10-recipe' === ( $args[0] ?? '' );
+    if ( 'rsv_file10_transcript_url' === $hook ) return $GLOBALS['rsv_rc11_transcript_url'] ?? '';
     return $value;
 }
+function esc_url_raw( $url, $protocols = array( 'http', 'https' ) ) {
+    $scheme = strtolower( (string) parse_url( $url, PHP_URL_SCHEME ) );
+    return in_array( $scheme, $protocols, true ) ? $url : '';
+}
 require dirname( __DIR__ ) . '/11-reels-foundation/includes/class-rsv-helpers.php';
+require dirname( __DIR__ ) . '/11-reels-foundation/includes/class-rsv-file10.php';
 require dirname( __DIR__ ) . '/11-reels-foundation/includes/class-rsv-future30-public-safety.php';
 require dirname( __DIR__ ) . '/11-reels-foundation/includes/trait-rsv-future30-feature-write.php';
 final class RSV_RC11_Probe {
@@ -56,4 +62,8 @@ rc11_assert( ! is_wp_error( $written ) && $written['payload'] === $minimal, 'Rea
 rc11_assert( is_wp_error( $source->invoke( null, 'F11-FUT-024', $reel, array( 'allowed_reasons'=>array( 'payment-priority' ) ) ) ), 'Unapproved-only reason policy accepted' );
 $storage = file_get_contents( dirname( __DIR__ ) . '/11-reels-foundation/includes/trait-rsv-future30-storage.php' );
 rc11_assert( strpos( $storage, 'RSV_Future30_Public_Safety::public_template_or_reason_payload' ) !== false, 'Native public read bypasses minimization' );
-echo "RC11 File10 template / File26 reason policies (12 assertions) PASS\n";
+$GLOBALS['rsv_rc11_transcript_url'] = 'http://insecure.example/transcript.vtt';
+rc11_assert( '' === RSV_File10::transcript_url( 17 ), 'Unencrypted transcript URL accepted' );
+$GLOBALS['rsv_rc11_transcript_url'] = 'https://source.example/transcript.vtt';
+rc11_assert( 'https://source.example/transcript.vtt' === RSV_File10::transcript_url( 17 ), 'Valid secure transcript URL rejected' );
+echo "RC11 File10 template / File26 reason / File10 TLS (14 assertions) PASS\n";
