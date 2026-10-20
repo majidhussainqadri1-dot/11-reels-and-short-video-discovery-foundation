@@ -558,7 +558,10 @@ final class RSV_Reels {
 			 FROM $reels r LEFT JOIN $imp i ON i.reel_id=r.id WHERE r.owner_id=%d GROUP BY r.id ORDER BY r.updated_at DESC LIMIT 100",
 			absint( $owner_id )
 		);
-		$rows = (array) $wpdb->get_results( $sql, ARRAY_A );
+		$rows = $wpdb->get_results( $sql, ARRAY_A );
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_insights_query_unavailable', __( 'Creator insights are temporarily unavailable. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		$threshold = max( 5, absint( apply_filters( 'rsv_insights_privacy_threshold', 5 ) ) );
 		foreach ( $rows as &$row ) {
 			$row['insufficient_data'] = absint( $row['views'] ) < $threshold;

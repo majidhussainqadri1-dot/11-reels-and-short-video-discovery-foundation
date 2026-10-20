@@ -42,7 +42,9 @@ final class RSV_Integrations {
 	public static function public_author_items( $items, $author_id, $args = array() ) {
 		$items = is_array( $items ) ? $items : array();
 		$limit = min( 50, max( 1, absint( $args['limit'] ?? 20 ) ) );
-		foreach ( RSV_Repository::public_by_author( absint( $author_id ), $limit ) as $row ) $items[] = self::timeline_item( $row );
+		$rows = RSV_Repository::public_by_author( absint( $author_id ), $limit );
+		if ( is_wp_error( $rows ) ) { do_action( 'rsv_public_provider_degraded', 'author-items', $rows->get_error_code() ); return $items; }
+		foreach ( $rows as $row ) $items[] = self::timeline_item( $row );
 		return $items;
 	}
 
@@ -50,7 +52,9 @@ final class RSV_Integrations {
 		$documents = is_array( $documents ) ? $documents : array();
 		$limit = min( 30, max( 1, absint( $args['limit'] ?? 10 ) ) );
 		$topic = RSV_Helpers::enum( $args['topic'] ?? '', RSV_Contracts::TOPICS, '' );
-		foreach ( RSV_Repository::search_public( (string) $query, $limit, $topic ) as $row ) {
+		$rows = RSV_Repository::search_public( (string) $query, $limit, $topic );
+		if ( is_wp_error( $rows ) ) { do_action( 'rsv_public_provider_degraded', 'search-documents', $rows->get_error_code() ); return $documents; }
+		foreach ( $rows as $row ) {
 			$dto = RSV_Repository::public_dto( $row );
 			$documents[] = array(
 				'provider_id'=>'file11-reels','provider_version'=>self::PROVIDER_VERSION,'native_id'=>$dto['id'],'entity_type'=>'reel',
@@ -65,7 +69,7 @@ final class RSV_Integrations {
 	public static function home_cards( $cards, $args = array() ) {
 		$cards = is_array( $cards ) ? $cards : array();
 		$data = RSV_Repository::feed( array('limit'=>min(12,max(1,absint($args['limit']??6))),'sort'=>'recommended','topic'=>RSV_Helpers::enum($args['topic']??'',RSV_Contracts::TOPICS,''),'youth_safe'=>!empty($args['youth_safe'])) );
-		if ( is_wp_error( $data ) ) return $cards;
+		if ( is_wp_error( $data ) ) { do_action( 'rsv_public_provider_degraded', 'home-cards', $data->get_error_code() ); return $cards; }
 		foreach ( $data['items'] as $dto ) {
 			$cards[] = array('provider_id'=>'file11-reels','provider_version'=>self::PROVIDER_VERSION,'native_id'=>$dto['id'],'title'=>$dto['title'],'excerpt'=>wp_trim_words(wp_strip_all_tags($dto['caption']),22),'canonical_url'=>$dto['url'],'topic'=>$dto['topic'],'duration_seconds'=>$dto['duration_seconds'],'author'=>$dto['owner'],'source_safety'=>$dto['source_safety']??array(),'youth_safe'=>!empty($dto['youth_safe']));
 		}
