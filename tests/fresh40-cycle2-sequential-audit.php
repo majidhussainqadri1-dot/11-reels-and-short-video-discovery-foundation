@@ -86,6 +86,25 @@ for ( $round = 1; $round <= 40; ++$round ) {
          false === strpos( $ai, 'source_object_valid' ) ||
          false === strpos( $ai, 'timed_row_valid' ) )
         throw new RuntimeException( "Round $round: a previously corrected cross-file guard regressed." );
+    $safety = file_get_contents( $source_root . '/includes/class-rsv-future30-public-safety.php' );
+    $storage = file_get_contents( $source_root . '/includes/trait-rsv-future30-storage.php' );
+    if ( false === strpos( $series, 'private static function public_path_rows()' ) ||
+         false === strpos( $series, "'rsv_future30_file05_public_ref_valid'" ) ||
+         false === strpos( $safety, 'public static function public_sourced_payload' ) ||
+         false === strpos( $storage, 'RSV_Future30_Public_Safety::public_sourced_payload' ) )
+        throw new RuntimeException( "Round $round: File05 current reference or File06 public payload minimization regressed." );
+    // The shared sanitizer must be applied on write and in both public read paths.
+    $writeSource = file_get_contents( $source_root . '/includes/trait-rsv-future30-feature-write.php' );
+    $publicSource = file_get_contents( $source_root . '/includes/class-rsv-future30-public-safety.php' );
+    $storageSource = file_get_contents( $source_root . '/includes/trait-rsv-future30-storage.php' );
+    if ( false === strpos( $writeSource, "public_template_or_reason_payload" ) ||
+         false === strpos( $publicSource, "public_template_or_reason_payload" ) ||
+         false === strpos( $storageSource, "public_template_or_reason_payload" ) ) {
+         throw new RuntimeException( "Round $round: File10 template or File26 explanation safeguards regressed." );
+    }
+    $file10 = file_get_contents( $source_root . '/includes/class-rsv-file10.php' );
+    if ( ( false === strpos( $file10, 'esc_url_raw(' ) || false === strpos( $file10, "array( 'https' )" ) ) )
+        throw new RuntimeException( "Round $round: File10 transcript HTTPS-only guard regressed." );
     list( $scope, $path, $marker ) = $checks[ $round - 1 ];
     $contents = file_get_contents( $root . '/' . $path );
     if ( false === $contents || false === strpos( $contents, $marker ) )
