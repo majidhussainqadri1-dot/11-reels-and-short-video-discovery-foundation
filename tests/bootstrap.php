@@ -15,7 +15,7 @@ class WP_Error {
 }
 function is_wp_error( $value ) { return $value instanceof WP_Error; }
 function __( $value ) { return $value; }
-function sanitize_key( $value ) { return strtolower( preg_replace( '/[^a-z0-9_\-]/', '', (string) $value ) ); }
+function sanitize_key( $value ) { return preg_replace( '/[^a-z0-9_\-]/', '', strtolower( (string) $value ) ); }
 function sanitize_text_field( $value ) { return trim( preg_replace( '/[\r\n\t]+/', ' ', strip_tags( (string) $value ) ) ); }
 function sanitize_textarea_field( $value ) { return trim( strip_tags( (string) $value ) ); }
 function absint( $value ) { return abs( (int) $value ); }
