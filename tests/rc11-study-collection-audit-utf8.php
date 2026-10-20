@@ -1,6 +1,7 @@
 <?php
 /** RC11: verify Unicode collection IDs and transactional audit/outbox behavior. */
 require __DIR__ . '/bootstrap.php';
+if ( ! defined( 'HOUR_IN_SECONDS' ) ) define( 'HOUR_IN_SECONDS', 3600 );
 function nocache_headers() {}
 class RSV_RC11_DB_Stub {
     public static function transaction( $callback ) {
