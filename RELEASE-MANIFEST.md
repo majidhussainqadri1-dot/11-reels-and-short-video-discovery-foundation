@@ -1,9 +1,9 @@
-# Release Manifest — File 11 v1.2.0-rc10
+# Release Manifest — File 11 v1.2.0-rc11
 
 - Source directory: `11-reels-foundation`
 - Installable root: `reels-foundation-11`
-- Package: `reels-foundation-11-1.2.0-rc10.zip`
-- Plugin version: `1.2.0-rc10`
+- Package: `reels-foundation-11-1.2.0-rc11.zip`
+- Plugin version: `1.2.0-rc11`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
 - Future30 schema: `1.0.0`
