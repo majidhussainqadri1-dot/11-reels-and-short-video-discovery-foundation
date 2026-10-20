@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.0-rc11 — 2026-10-20
+
+### Privacy-safe historical Reels and private study mutations
+- F11-FUT-020: revalidate every saved Study Collection Reel on each private read; suppress withdrawn, deleted, non-public, malformed and duplicate refs and minimize returned payload.
+- F11-FUT-007: public Version History now includes only version number and verified SHA256 metadata; old caption/title, submitted labels and extra PII cannot appear via generic or filtered REST projections.
+- F11-FUT-020: atomic study collection update now commits private state with mandatory Audit and Outbox event evidence, and returns the currently safe DTO.
+- F11-FUT-020: Unicode/Urdu-only collection names receive stable nonempty deterministic keys instead of colliding in an empty sanitized key.
+- Added adversarial PHP behavior tests for revoked read paths, historical snapshots, Urdu identifiers, audit/outbox success and simulated rollback failure.
+- Aligned PHP unit's WordPress sanitize_key with lowercase-before-filter behavior and fixed interpolated duration source markers in the 40-scope test.
+- Immutable runtime 1.2.0-rc11 / File 11 contract 17, no schema-version changes. Repository CI does not establish live/staging parity.
+
+
 ## 1.2.0-rc10 — 2026-10-20
 
 ### Provider-current public read integrity
