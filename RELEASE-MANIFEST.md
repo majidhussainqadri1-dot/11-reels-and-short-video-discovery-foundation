@@ -1,4 +1,4 @@
-# Release Manifest — File 11 v1.2.0-rc11
+# Release Manifest — File 11 v1.2.0-rc12
 
 - Source directory: `11-reels-foundation`
 - Installable root: `reels-foundation-11`

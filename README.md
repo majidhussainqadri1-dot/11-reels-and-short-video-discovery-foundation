@@ -6,7 +6,11 @@
 
 File 11 owns the vertical educational Reel entity, the authoritative 60–600-second Reel eligibility rule through File 10, Reel-native discovery, moderation, private history/progress and the approved Reel-domain Future30 orchestration layer. It does not duplicate File 10 raw media, File 05 learning truth, File 06 canonical knowledge, File 16 AI execution, File 00 identity, File 19 delivery, File 20 shell, File 24 assurance, File 25 visual system or File 26 cross-platform discovery/graph ownership.
 
-## Current rc11 integrated safeguards
+## Current rc12 unified source safeguards
+
+PR #18 Study Collections and historical Version History safety has been integrated with PR #19 File10 media templates/transcript TLS and File26 search/recommendation safety. Distinct rc1–rc11 release history restored. The File26 native connector remains proposed, and no staging or live acceptance is implied.
+
+## Prior rc11 integrated safeguards
 
 Proposed-only File26 native search connector, minimum aggregation threshold and source validation from upstream remain intact. Current rc11 adds secure File10 Reel Templates and HTTPS transcripts, and safe noncommercial File26 discovery explanations. Staging and production verification remain separate.
 
