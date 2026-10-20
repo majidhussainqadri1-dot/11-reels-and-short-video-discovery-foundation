@@ -1,9 +1,9 @@
-# Release Manifest — File 11 v1.2.0-rc13
+# Release Manifest — File 11 v1.2.0-rc14
 
 - Source directory: `11-reels-foundation`
 - Installable root: `reels-foundation-11`
-- Package: `reels-foundation-11-1.2.0-rc13.zip`
-- Plugin version: `1.2.0-rc13`
+- Package: `reels-foundation-11-1.2.0-rc14.zip`
+- Plugin version: `1.2.0-rc14`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
 - Future30 schema: `1.0.0`
@@ -21,5 +21,7 @@
 - Exact-head CI/ZIP/hash/source parity and staging/live approvals: separate acceptance gates
 - F11-FUT-014 canonical linked-version owner: `File 11`; legacy rc1–rc4 stored owner labels remain read-compatible only through current File 11 target revalidation
 - Required File 10: compatible canonical provider with authoritative duration/media/playback contracts
-- Exact source SHA / package SHA-256 / artifact digest: supplied only by the final exact-head rc6 workflow after the completed review register is committed
+- Exact source SHA / package SHA-256 / artifact digest: supplied only by the final exact-head rc14 workflow after the completed review register is committed
 - Status: repository candidate; staging/live/operational remain separate gates
+
+- RC14 query parity: private history, neighbor discovery, public author projection, public search, creator insights fail closed on SQL errors; no schema or canonical owner change.
