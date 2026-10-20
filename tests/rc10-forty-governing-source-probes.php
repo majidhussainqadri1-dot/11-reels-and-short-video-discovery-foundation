@@ -60,6 +60,11 @@ foreach($checks as $item){
     $tested++;
     echo "SCOPE $id " . (count(array_filter($errors,static function($e) use($id){return 0===strpos($e,$id.' ');})) ? "CHECK-NEEDED" : "SOURCE-CONTROL-PRESENT") . "\n";
 }
+// F30-AT-10 and CEN-SEARCH-001: SQL outage must never masquerade as a genuine zero-result feed.
+$feed_src = file_get_contents( $root.'/11-reels-foundation/includes/class-rsv-repository.php' );
+if ( false === $feed_src || false === strpos( $feed_src, "'rsv_feed_query_unavailable'" ) ||
+     false === strpos( $feed_src, "! is_array( $rows ) || '' !== (string) $wpdb->last_error" ) )
+    $errors[] = 'FR05/F30-AT-10 missing explicit SQL outage 503 gate';
 foreach($errors as $error)fwrite(STDERR,$error."\n");
 if($errors)exit(1);
 echo "$tested / 40 distinct governing-plan source probes PASS (not runtime acceptance)\n";
