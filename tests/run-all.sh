@@ -25,6 +25,7 @@ php "$ROOT/tests/rc8-governing-plan-guards.php"
 php "$ROOT/tests/rc9-language-quiz-behavior.php"
 php "$ROOT/tests/rc10-current-public-reference-guards.php"
 php "$ROOT/tests/rc10-forty-governing-source-probes.php"
+php "$ROOT/tests/file26-native-connector-contract.php"
 bash "$ROOT/tests/static-contracts.sh"
 A="$(mktemp -d)"; B="$(mktemp -d)"; trap 'rm -rf "$A" "$B"' EXIT
 bash "$ROOT/tools/build-package.sh" "$A/file11.zip" >/dev/null
