@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0-rc13 — 2026-10-20
+
+- Corrected F11-FR-005 / CEN-SEARCH-001: an unsuccessful Reel Feed database read must return a typed HTTP 503 rather than a fabricated successful empty feed. The REST and UI error routes already propagate that error.
+- Brought SQL outage tests into the integrated rc12 privacy/ownership suite and all 40 sequential source checks.
+- Corrected stale current release metadata while preserving chronological rc1–rc12 entries. Plugin 1.2.0-rc13, File11 contract 19; no schema change.
+- Production deployed version and live verification remain unverified.
+
+
 ## 1.2.0-rc12 — 2026-10-20
 
 - Unified PR #18 Study Collection revocation-safe reads, Unicode-safe keys, transactional audit/outbox and private-safe version history with PR #19 File10 Template/Media Recipe, File26 reason policy and HTTPS transcript protections.
