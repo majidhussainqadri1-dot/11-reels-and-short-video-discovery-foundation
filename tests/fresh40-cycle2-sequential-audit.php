@@ -108,6 +108,9 @@ for ( $round = 1; $round <= 40; ++$round ) {
         || false === strpos( $identity, '$canonical_eligible' )
         || false === strpos( $identity, "'unlisted' === " . '$visibility' ) )
         throw new RuntimeException( "Round $round: File00/10 current authority and public media gates regressed." );
+    $publication = file_get_contents( $source_root . '/includes/class-rsv-reels.php' );
+    if ( false === strpos( $publication, 'RSV_Top20::publication_gate( $reel )' ) )
+        throw new RuntimeException( "Round $round: native source/safety/caption publication gate regressed." );
     $file10 = file_get_contents( $source_root . '/includes/class-rsv-file10.php' );
     if ( ( false === strpos( $file10, 'esc_url_raw(' ) || false === strpos( $file10, "array( 'https' )" ) ) )
         throw new RuntimeException( "Round $round: File10 transcript HTTPS-only guard regressed." );
