@@ -1,4 +1,4 @@
-# File 11 Status — 1.2.0-rc17 Future30
+# File 11 Status — 1.2.0-rc18 Future30
 
 | Gate | Status |
 |---|---|
@@ -11,12 +11,12 @@
 | Third fresh 20-round corrective review | **Completed 20/20**; defect rounds `02, 03, 06, 17, 18`; findings `F11-D-932…937` all corrected |
 | Required post-final-code fresh reviews | Forty full-source automated rounds plus RC14 SQL regression suite required on exact final HEAD; never treat as manual semantic/staging review |
 | Canonical owner boundaries | Preserved; F11-FUT-014 linked Reel owner corrected to File 11; no foreign truth tables/raw media/AI engine/global search owner duplicated |
-| Repository source | `1.2.0-rc17`, File 11 contract `19` |
+| Repository source | `1.2.0-rc18`, File 11 contract `19` |
 | Known unresolved repository Blocker/Critical | No known uncorrected rc14 source SQL-read defect in five audited families; full exact-head CI and real staging/live verification are independent pending gates |
 | Deterministic ZIP/checksum | Requires final exact-head rc14 workflow; artifact checksum is not a deployed checksum |
 | Automated QA | Exact-head rc14 GitHub Actions verification governs; preliminary runs are not final |
-| New rc17 native publication safety check | Reviewed source/safety and accessible captions are now a direct fail-closed publish command gate; tested for absent/rejected safety provider, not merely plugin filter wiring |
-| New rc17 File00/10 cross-owner correction | Canonical File00 eligibility, age/guardian and retired-MFA; admin publisher impersonation and File10 ownership/unlisted leaks closed in repository source; behavioral CI and staging separate |
+| New rc18 native publication safety check | Reviewed source/safety and accessible captions are now a direct fail-closed publish command gate; tested for absent/rejected safety provider, not merely plugin filter wiring |
+| New rc18 File00/10 cross-owner correction | Canonical File00 eligibility, age/guardian and retired-MFA; admin publisher impersonation and File10 ownership/unlisted leaks closed in repository source; behavioral CI and staging separate |
 | Current rc14 SQL-read correction | Five previously false-empty SQL result families corrected with typed 503, REST/UI error propagation, provider degradation signals, and behavioral regressions |
 | Canonical package folder | Written File 11 plan specifies `reels-foundation-11`; the deterministic ZIP uses exactly this root. Source directory `11-reels-foundation` is not the installable ZIP root; no folder-name contradiction. Actual deployed identity/parity still unverified |
 | Site connector | No registered WPVibe WordPress site at verification time; deployed source/DB unavailable |
