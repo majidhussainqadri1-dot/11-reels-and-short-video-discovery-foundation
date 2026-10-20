@@ -125,6 +125,17 @@ final class RSV_Reels {
 		if ( 'public' === ( $reel['visibility'] ?? '' ) && 'public' !== ( $video['visibility'] ?? '' ) ) {
 			return RSV_Helpers::error( 'rsv_public_media_visibility_mismatch', __( 'Public Reels require publicly eligible File 10 media.', RSV_TEXT_DOMAIN ), 422 );
 		}
+		// Enforce the mandatory source, safety and accessible caption gate in the
+		// native publication command itself. Never depend solely on a WordPress
+		// filter being registered at the correct lifecycle stage.
+		if ( ! class_exists( 'RSV_Top20' ) || ! is_callable( array( 'RSV_Top20', 'publication_gate' ) ) ) {
+			return RSV_Helpers::error( 'rsv_publication_safety_unavailable', __( 'The required publication safety review is unavailable.', RSV_TEXT_DOMAIN ), 503 );
+		}
+		$safety_gate = RSV_Top20::publication_gate( $reel );
+		if ( is_wp_error( $safety_gate ) ) return $safety_gate;
+		if ( true !== $safety_gate ) {
+			return RSV_Helpers::error( 'rsv_publication_safety_unavailable', __( 'The required publication safety review is unavailable.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		if ( ! absint( $reel['cover_id'] ) ) {
 			return RSV_Helpers::error( 'rsv_cover_required', __( 'A cover image is required.', RSV_TEXT_DOMAIN ), 422 );
 		}
