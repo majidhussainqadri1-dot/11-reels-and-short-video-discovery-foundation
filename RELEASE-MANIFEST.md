@@ -1,13 +1,13 @@
-# Release Manifest — File 11 v1.2.0-rc9
+# Release Manifest — File 11 v1.2.0-rc10
 
 - Source directory: `11-reels-foundation`
 - Installable root: `reels-foundation-11`
-- Package: `reels-foundation-11-1.2.0-rc9.zip`
-- Plugin version: `1.2.0-rc9`
+- Package: `reels-foundation-11-1.2.0-rc10.zip`
+- Plugin version: `1.2.0-rc10`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
 - Future30 schema: `1.0.0`
-- File 11 contract: `15`
+- File 11 contract: `16`
 - File 11 event contract: `4`
 - Integration provider contract: `3`
 - Future30 contract: `1`
@@ -16,7 +16,8 @@
 - Prior rc6 correction: Knowledge Graph/Study Tools current-ref protection and citation safety
 - Prior rc7 correction: safe typed quiz grading with audit/outbox, current public Reel Series revalidation, grounded File 16 AI context provider/temporal validation, 40 sequential source audits
 - Prior rc8 correction: File00/11 cross-owner publishing control; File05 learning steps; File16 context minimization; File26 recommendation reason guards
-- New rc9 correction: canonical linked-language target checks; quiz projection allowlist; private quiz question write minimization; adversarial regression
+- Prior rc9 correction: canonical linked-language target checks; quiz projection allowlist; private quiz question write minimization; adversarial regression
+- New rc10 corrections: File05 public-read revalidation; File06 public evidence and card allowlists.
 - Final exact-HEAD CI/ZIP/hash/source parity and staging/live approvals: separate acceptance gates
 - F11-FUT-014 canonical linked-version owner: `File 11`; legacy rc1–rc4 stored owner labels remain read-compatible only through current File 11 target revalidation
 - Required File 10: compatible canonical provider with authoritative duration/media/playback contracts
