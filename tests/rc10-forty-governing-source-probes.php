@@ -6,7 +6,7 @@
 $root=dirname(__DIR__);
 $checks=[
   ["FR01 Reel creation bound to File10","11-reels-foundation/includes/class-rsv-reels.php",["function create(","validate_for_reel"]],
-  ["FR02 Authoritative duration","11-reels-foundation/includes/class-rsv-file10.php",["$duration >= 60","$duration <= 600"]],
+  ["FR02 Authoritative duration","11-reels-foundation/includes/class-rsv-file10.php",['$duration >= 60','$duration <= 600']],
   ["FR03 Educational taxonomy","11-reels-foundation/includes/class-rsv-reels.php",["topic"]],
   ["FR04 Publish and review state","11-reels-foundation/includes/class-rsv-reels.php",["function publish(","publication_gate"]],
   ["FR05 Public vertical feed","11-reels-foundation/includes/class-rsv-frontend.php",["function feed(","render_reel"]],
