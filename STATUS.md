@@ -17,7 +17,7 @@
 | Automated QA | Exact-head rc14 GitHub Actions verification governs; preliminary runs are not final |
 | New rc15 File00/10 cross-owner correction | Canonical File00 eligibility, age/guardian and retired-MFA; admin publisher impersonation and File10 ownership/unlisted leaks closed in repository source; behavioral CI and staging separate |
 | Current rc14 SQL-read correction | Five previously false-empty SQL result families corrected with typed 503, REST/UI error propagation, provider degradation signals, and behavioral regressions |
-| Known release blocker | Historical File11 plan package folder 11-reels-foundation conflicts with tested reels-foundation-11 top folder; requires exact deployed identity/Founder-approved parity decision |
+| Canonical package folder | Written File 11 plan specifies `reels-foundation-11`; the deterministic ZIP uses exactly this root. Source directory `11-reels-foundation` is not the installable ZIP root; no folder-name contradiction. Actual deployed identity/parity still unverified |
 | Site connector | No registered WPVibe WordPress site at verification time; deployed source/DB unavailable |
 | Hostinger staging | Pending external execution |
 | Founder staging acceptance | Pending |
