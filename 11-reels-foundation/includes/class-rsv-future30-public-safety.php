@@ -109,6 +109,7 @@ final class RSV_Future30_Public_Safety {
 			$p = (array) ( $row['payload'] ?? array() );
 			if ( 'F11-FUT-007' === $feature ) {
 				$row['payload'] = self::public_version_snapshot_payload( $p );
+				$row['title'] = 'Version ' . absint( $row['payload']['reel_version'] ?? 0 );
 			}
 			if ( 'F11-FUT-005' === $feature ) {
 				$owner = RSV_Helpers::text( $p['source_owner'] ?? 'File 06', 30 );
