@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0-rc17 — 2026-10-21
+
+- Eliminated a moderation-restore publication bypass: restoring a removed/restricted Reel now runs the same mandatory File10 public visibility, Source/Safety Card, caption/transcript and cover conditions required for an initial publish.
+- Introduced one shared native `publication_eligibility` validation function for initial publish and restore so future changes cannot silently diverge.
+- Added 17 isolated positive/negative restore scenarios and registered them in the complete test suite; enhanced all 40 repeated frozen-source verification rounds.
+- No schema changes; source QA and CI package are not deployed-state evidence.
+
+
 ## 1.2.0-rc16 — 2026-10-21
 
 - Integrated RC15 corrective PR #25 and separate File00 entitlement safety PR #26 without discarding either branch; prior isolated CI results did not establish combined build parity.
