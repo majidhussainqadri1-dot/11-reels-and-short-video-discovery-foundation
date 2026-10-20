@@ -74,7 +74,7 @@ final class RSV_File26_Connector {
             'excerpt' => wp_trim_words(wp_strip_all_tags((string) $dto['caption']), 40),
             'search_text' => wp_strip_all_tags((string) $dto['caption']),
             'canonical_url' => (string) $dto['url'],
-            'author_key' => (string) absint($row['owner_id']),
+            'author_key' => RSV_Helpers::opaque_user_ref( absint( $row['owner_id'] ), 'file26-public-reel-author' ),
             'topic_ids' => empty($dto['topic']) ? array() : array((string) $dto['topic']),
             'freshness_at' => (string) ($dto['published_at'] ?: $dto['updated_at']),
             'quality_score' => 0, 'authority_score' => 0, 'popularity_score' => 0,
