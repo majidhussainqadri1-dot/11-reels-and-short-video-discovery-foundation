@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.2.0-rc10 — 2026-10-20
+
+### Provider-current public read integrity
+- Fixed F11-FUT-002 public Learning Paths: verify every File 05 lesson/course source remains public/current on each read; suppress withdrawn paths and remove undeclared private payload and owner fields.
+- Fixed F11-FUT-023 File 26 aggregate search opportunities: never expose missing, zero, negative or below-five audience aggregates; reject stale declared File 26 sources and unknown personal fields; allow only governed public aggregate fields.
+- Added live-PHP behavior tests for revoked File 05 paths and File 26 k>=5 limits, as well as forty distinct governing-plan source probes.
+- Existing 40 sequential full-source static/55-ID scans remain, alongside all prior behavioral tests, syntax and deterministic release/package parity gates.
+- Reconciled newly added rc9 File26 proposed connector without activating it and removed raw WordPress author IDs from the public search connector; retained upstream regression.
+- New immutable candidate: plugin 1.2.0-rc10 / contract 16; database schema versions unchanged.
+- Package-root disagreement with early File 11 plan is a pending deployment-parity decision: do not silently rename an existing WordPress plugin.
+- Not staged or deployed; DB and runtime migration state are unverified.
+
+
 ## 1.2.0-rc9 — 2026-10-19
 
 ### Corrected File 11 Future30 read/write canonical source integrity

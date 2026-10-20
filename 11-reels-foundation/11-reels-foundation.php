@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Reels and Short Video Discovery
  * Description: Canonical educational Reels, Stories/Status, Highlights and attributed Response/Remix domain for the Sabri Social Homeopathy Platform. File 10 remains the sole raw-media owner.
- * Version: 1.2.0-rc9
+ * Version: 1.2.0-rc10
  * Requires at least: 6.7
  * Requires PHP: 8.1
  * Author: Dr. Allamah Majid Hussain Sabri
@@ -11,9 +11,9 @@
  */
 defined( 'ABSPATH' ) || exit;
 
-define( 'RSV_VERSION', '1.2.0-rc9' );
+define( 'RSV_VERSION', '1.2.0-rc10' );
 define( 'RSV_SCHEMA_VERSION', '1.2.0' );
-define( 'RSV_CONTRACT_VERSION', 15 );
+define( 'RSV_CONTRACT_VERSION', 16 );
 define( 'RSV_FILE', __FILE__ );
 define( 'RSV_DIR', plugin_dir_path( __FILE__ ) );
 define( 'RSV_URL', plugin_dir_url( __FILE__ ) );
@@ -65,6 +65,8 @@ $files = array(
 	'class-rsv-plugin.php',
 );
 foreach ( $files as $file ) require_once RSV_DIR . 'includes/' . $file;
+
+// Proposed File 26 owner adapter; status remains 'proposed' until separate acceptance.
 add_filter( 'sabri_file26_owner_connector_adapters', array( 'RSV_File26_Connector', 'collect' ), 10 );
 
 register_activation_hook( RSV_FILE, array( 'RSV_Plugin', 'activate' ) );

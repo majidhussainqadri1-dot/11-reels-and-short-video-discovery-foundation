@@ -4,7 +4,7 @@ Tags: reels, educational-video, learning, citations, accessibility, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0-rc9
+Stable tag: 1.2.0-rc10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,7 +14,7 @@ Canonical educational Reels plus the Founder-approved Future Reel Knowledge & Le
 
 File 11 owns the vertical educational Reel entity, 60–600 second eligibility, Reel-native discovery, moderation, private progress/history and Reel-domain Future30 orchestration. File 10 remains the sole raw-media/player/track/transcript owner; File 05 learning truth, File 06 knowledge/evidence, File 16 AI execution, File 00 identity and File 26 cross-platform discovery/graph remain authoritative.
 
-RC9 adds secure linked-language targets and tightly bounded quiz public/private fields. RC8 adds cross-owner publication protection, File 05 path-step source checks, File 16 AI DTO allowlists, and File 26 reason validation. RC7 adds corrected quiz grading, current-safe Reel Series, transactional attempt evidence and File 16 AI context provider validation. RC6 adds current reference validation on the direct Knowledge Graph and public Study Tools surfaces, rejects uncited legacy evidence and knowledge cards, and verifies new File 06 source references at write time. RC5 preserves all 30 Future30 capabilities and the complete third fresh 20-round hardening set. Generic public Future30 projections revalidate current external references at read time; Creator Research metrics require provider-carried minimum-sample proof; Future30 privacy erasure evidence uses opaque subject references rather than recreating erased WordPress user IDs. Linked translated Reel versions are canonically File 11-owned edges to current public File 11 Reels; legacy rc1–rc4 rows are read-compatible but are revalidated as File 11 targets before public projection. RC5 advances the immutable File 11 contract identity to 11 while retaining the existing database schemas.
+RC10 adds current File05 learning path and private-safe File26 public aggregate filtering. RC9 adds secure linked-language targets and tightly bounded quiz public/private fields. RC8 adds cross-owner publication protection, File 05 path-step source checks, File 16 AI DTO allowlists, and File 26 reason validation. RC7 adds corrected quiz grading, current-safe Reel Series, transactional attempt evidence and File 16 AI context provider validation. RC6 adds current reference validation on the direct Knowledge Graph and public Study Tools surfaces, rejects uncited legacy evidence and knowledge cards, and verifies new File 06 source references at write time. RC5 preserves all 30 Future30 capabilities and the complete third fresh 20-round hardening set. Generic public Future30 projections revalidate current external references at read time; Creator Research metrics require provider-carried minimum-sample proof; Future30 privacy erasure evidence uses opaque subject references rather than recreating erased WordPress user IDs. Linked translated Reel versions are canonically File 11-owned edges to current public File 11 Reels; legacy rc1–rc4 rows are read-compatible but are revalidated as File 11 targets before public projection. RC5 advances the immutable File 11 contract identity to 11 while retaining the existing database schemas.
 
 Public content remains browseable without login where eligible. Protected actions require current File 00 capability/state. External provider refs fail closed. Patient-case remix defaults to deny. AI execution is never performed by File 11, and no automated diagnosis/prescription/dose/emergency replacement is introduced.
 
@@ -43,34 +43,41 @@ No. Payment/donation status is not an allowed recommendation-priority reason.
 
 == Changelog ==
 
-= 1.2.0-rc9 =
+= 1.2.0-rc10 =
+* Public learning paths are filtered against current File05 lesson and course publication status.
+* File26 search opportunity aggregates require proven count at least five and current provider refs.
+* Add focused behavioral regressions and forty distinct source-contract probes.
+* Staging and live deployment require separate acceptance.
+
+
+= 1.2.0-rc10 =
 * Check actual language and different source when linking a translated Reel.
 * Allowlist public Micro-Quiz questions; never expose answers, hidden nested fields or private notes.
 * Restrict stored Micro-Quiz metadata to the declared schema.
 * Add new PHP behavioral regressions; deployment status remains pending.
 
 
-= 1.2.0-rc9 =
+= 1.2.0-rc10 =
 * Require manager privilege for cross-owner Reel publishing.
 * Reject invalid/withdrawn File 05 learning-path steps at write.
 * Minimize and allowlist File 16 grounded-context private fields.
 * Sanitize and bound File 26 recommendation reasons.
 
 
-= 1.2.0-rc9 =
+= 1.2.0-rc10 =
 * Correct typed quiz grading and private audit/outbox persistence.
 * Revalidate public Series Reels at every read; prevent withdrawn Reel exposure.
 * Validate File 16 AI context against current File 06 evidence and File 10 time bounds.
 * Test 40 sequential source-and-contract audit rounds.
 
 
-= 1.2.0-rc9 =
+= 1.2.0-rc10 =
 * Revalidate direct Knowledge Graph and Study Tools references, including withdrawn File 06 source evidence.
 * Require verified File 06 references on knowledge-card creation and graph evidence submission.
 * Add source-integrity regression contracts and advance File 11 contract to 12.
 
 
-= 1.2.0-rc9 =
+= 1.2.0-rc10 =
 * Corrected canonical ownership for F11-FUT-014 linked language Reel edges: new edges now target `File 11`, never a generic translation provider.
 * Preserved legacy rc1–rc4 language-edge compatibility by validating legacy target refs as current public File 11 Reels before public projection.
 * Retained all third fresh20 public-reference, Creator Research privacy-threshold and identifier-minimized erasure hardening.
