@@ -91,12 +91,26 @@ final class RSV_Future30_Public_Safety {
 		return $safe;
 	}
 
+	/** Public version history must never contain historical title/caption/PII. */
+	public static function public_version_snapshot_payload( $payload ) {
+		$payload = (array) $payload;
+		$hash = RSV_Helpers::text( $payload['snapshot_hash'] ?? '', 64 );
+		return array(
+			'reel_version' => absint( $payload['reel_version'] ?? 0 ),
+			'snapshot_hash' => preg_match( '/^[a-f0-9]{64}$/', $hash ) ? $hash : '',
+		);
+	}
+
 	private static function safe_objects( $feature, $objects, $reel ) {
 		$out = array();
 		foreach ( $objects as $row ) {
 			if ( ! is_array( $row ) ) continue;
 			unset( $row['owner_id'], $row['reel_id'], $row['id'] );
 			$p = (array) ( $row['payload'] ?? array() );
+			if ( 'F11-FUT-007' === $feature ) {
+				$row['payload'] = self::public_version_snapshot_payload( $p );
+				$row['title'] = 'Version ' . absint( $row['payload']['reel_version'] ?? 0 );
+			}
 			if ( 'F11-FUT-005' === $feature ) {
 				$owner = RSV_Helpers::text( $p['source_owner'] ?? 'File 06', 30 );
 				$refs = (array) ( $p['source_refs'] ?? array() );
