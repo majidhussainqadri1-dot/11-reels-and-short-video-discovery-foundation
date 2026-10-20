@@ -23,6 +23,7 @@ php "$ROOT/tests/fresh40-cycle2-ai-context.php"
 php "$ROOT/tests/fresh40-cycle2-sequential-audit.php"
 php "$ROOT/tests/rc8-governing-plan-guards.php"
 php "$ROOT/tests/rc9-language-quiz-behavior.php"
+php "$ROOT/tests/rc10-file05-file06-public-read.php"
 bash "$ROOT/tests/static-contracts.sh"
 A="$(mktemp -d)"; B="$(mktemp -d)"; trap 'rm -rf "$A" "$B"' EXIT
 bash "$ROOT/tools/build-package.sh" "$A/file11.zip" >/dev/null
@@ -32,4 +33,4 @@ unzip -t "$A/file11.zip" >/dev/null
 test "$(unzip -Z1 "$A/file11.zip" | cut -d/ -f1 | sort -u)" = "reels-foundation-11"
 rm -rf "$A/extract"; mkdir -p "$A/extract"; unzip -q "$A/file11.zip" -d "$A/extract"
 diff -ru "$P" "$A/extract/reels-foundation-11"
-echo "all File 11 Future30 1.2.0-rc9 automated checks PASS"
+echo "all File 11 Future30 1.2.0-rc10 automated checks PASS"
