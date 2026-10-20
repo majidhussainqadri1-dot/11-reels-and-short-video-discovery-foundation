@@ -14,4 +14,11 @@ if(array_slice($c[1],0,12)!==$expected){
     fwrite(STDERR,'FAIL: changelog RC history out of sync with readme'.PHP_EOL);
     exit(1);
 }
+$bootstrap=file_get_contents($root.'/11-reels-foundation/11-reels-foundation.php');
+if ( ! preg_match("/define\\( 'RSV_VERSION', '([^']+)' \\)/", $bootstrap, $match) ||
+     ! preg_match('/^Stable tag: (.+)$/m', $readme, $tag) ||
+     $tag[1] !== $match[1] ) {
+    fwrite(STDERR,'FAIL: WordPress stable tag and immutable runtime release identity mismatch'.PHP_EOL);
+    exit(1);
+}
 echo 'RC12 immutable chronological release history (12 RCs) PASS'.PHP_EOL;
