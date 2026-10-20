@@ -105,8 +105,8 @@ for ( $round = 1; $round <= 40; ++$round ) {
     $identity = file_get_contents( $source_root . '/includes/class-rsv-security.php' );
     if ( false === strpos( $identity, "function_exists( 'smc_membership_assertions' )" )
         || false === strpos( $identity, "'mfa_required'" )
-        || false === strpos( $identity, "$canonical_eligible" )
-        || false === strpos( $identity, "'unlisted' === $visibility" ) )
+        || false === strpos( $identity, '$canonical_eligible' )
+        || false === strpos( $identity, "'unlisted' === " . '$visibility' ) )
         throw new RuntimeException( "Round $round: File00/10 current authority and public media gates regressed." );
     $file10 = file_get_contents( $source_root . '/includes/class-rsv-file10.php' );
     if ( ( false === strpos( $file10, 'esc_url_raw(' ) || false === strpos( $file10, "array( 'https' )" ) ) )
