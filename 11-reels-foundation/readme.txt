@@ -4,7 +4,7 @@ Tags: reels, educational-video, learning, citations, accessibility, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0-rc16
+Stable tag: 1.2.0-rc17
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,12 @@ The Reel has one canonical source language plus at most nine linked language ver
 No. Payment/donation status is not an allowed recommendation-priority reason.
 
 == Changelog ==
+
+= 1.2.0-rc17 =
+* Require the same native File10 visibility, Source/Safety Card, caption/transcript and cover checks when a restricted/removed Reel is restored as when it is initially published.
+* 17 positive/negative moderation-restore test scenarios added and 40 existing source review rounds enhanced; historic releases remain intact.
+* Source candidate only; staging and live code, DB and migrations are not yet verified.
+
 
 = 1.2.0-rc16 =
 * Unified rc15 owner/visibility/publication-gate safeguards with PR26 File00 entitlement non-escalation.
