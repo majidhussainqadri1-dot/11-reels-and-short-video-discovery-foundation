@@ -108,7 +108,52 @@ trait RSV_Future30_User_Features_Trait {
 			array( 'payload' => array( 'collections' => array() ), 'version' => 0 ) );
 		return rest_ensure_response( self::current_study_collections( $stored ) );
 	}
-	public function collection_write( $request ) { RSV_Helpers::no_cache_private();$rate=RSV_Security::rate_limit('future30_collections',60,HOUR_IN_SECONDS);if(is_wp_error($rate))return $rate;$p=(array)$request->get_json_params();$current=self::state_get('F11-FUT-020','user','collections',array('payload'=>array('collections'=>array()),'version'=>0));$collections=(array)($current['payload']['collections']??array());$name=RSV_Helpers::text($p['name']??'',80);if(!$name)return RSV_Helpers::error('rsv_collection_name_required',__('Collection name is required.',RSV_TEXT_DOMAIN),422);$key=sanitize_key($p['key']??$name);$refs=array_values(array_unique(array_map('sanitize_text_field',(array)($p['reels']??($collections[$key]['reels']??array())))));if(count($refs)>500)return RSV_Helpers::error('rsv_collection_too_large',__('A study collection may contain at most 500 Reels.',RSV_TEXT_DOMAIN),422);foreach($refs as $ref)if(!self::canonical_ref_public_valid('File 11',$ref,'study-collection'))return RSV_Helpers::error('rsv_collection_reel_invalid',__('Every study-collection item must be a current public Reel.',RSV_TEXT_DOMAIN),422);$collections[$key]=array('name'=>$name,'reels'=>$refs,'private'=>true,'updated_at'=>RSV_Helpers::now());return self::state_put('F11-FUT-020','user','collections',array('collections'=>$collections)); }
+	/** Unicode-safe deterministic identifier for private named Study Collections. */
+	private static function collection_storage_key( $name, $proposed_key = '' ) {
+		$seed = is_scalar( $proposed_key ) && '' !== trim( (string) $proposed_key )
+			? (string) $proposed_key : (string) $name;
+		$key = sanitize_key( $seed );
+		return $key ? $key : 'study_' . substr( hash( 'sha256', (string) $name ), 0, 20 );
+	}
+	public function collection_write( $request ) {
+		RSV_Helpers::no_cache_private();
+		$rate = RSV_Security::rate_limit( 'future30_collections', 60, HOUR_IN_SECONDS );
+		if ( is_wp_error( $rate ) ) return $rate;
+		$p = (array) $request->get_json_params();
+		$name = isset( $p['name'] ) && is_scalar( $p['name'] ) ? RSV_Helpers::text( $p['name'], 80 ) : '';
+		if ( ! $name ) return RSV_Helpers::error( 'rsv_collection_name_required', __( 'Collection name is required.', RSV_TEXT_DOMAIN ), 422 );
+		$key = self::collection_storage_key( $name, $p['key'] ?? '' );
+		$user_id = get_current_user_id();
+		$result = RSV_DB::transaction( static function () use ( $p, $name, $key, $user_id ) {
+			$current = self::state_get( 'F11-FUT-020', 'user', 'collections',
+				array( 'payload' => array( 'collections' => array() ), 'version' => 0 ) );
+			$collections = (array) ( $current['payload']['collections'] ?? array() );
+			$refs = array_values( array_unique( array_map( 'sanitize_text_field',
+				(array) ( $p['reels'] ?? ( $collections[ $key ]['reels'] ?? array() ) ) ) ) );
+			if ( count( $refs ) > 500 )
+				return RSV_Helpers::error( 'rsv_collection_too_large', __( 'A study collection may contain at most 500 Reels.', RSV_TEXT_DOMAIN ), 422 );
+			foreach ( $refs as $ref ) {
+				if ( ! self::canonical_ref_public_valid( 'File 11', $ref, 'study-collection' ) )
+					return RSV_Helpers::error( 'rsv_collection_reel_invalid', __( 'Every study-collection item must be a current public Reel.', RSV_TEXT_DOMAIN ), 422 );
+			}
+			$collections[ $key ] = array(
+				'name' => $name, 'reels' => $refs, 'private' => true,
+				'updated_at' => RSV_Helpers::now(),
+			);
+			$saved = self::state_put( 'F11-FUT-020', 'user', 'collections',
+				array( 'collections' => $collections ) );
+			if ( is_wp_error( $saved ) ) return $saved;
+			$opaque = RSV_Helpers::opaque_user_ref( $user_id, 'future30-study-collection' );
+			if ( ! RSV_Helpers::audit( 'user', $user_id, 'study_collection_update', '', '', 'F11-FUT-020',
+				array( 'feature_id' => 'F11-FUT-020', 'collection_key_hash' => hash( 'sha256', $key ) ), $user_id )
+				|| ! RSV_Helpers::outbox( 'ReelStudyCollectionUpdated', 'user', $user_id,
+					array( 'feature_id' => 'F11-FUT-020', 'user_ref' => $opaque ) ) )
+				return RSV_Helpers::error( 'rsv_collection_evidence_failed',
+					__( 'Study Collection changes require complete audit and event evidence.', RSV_TEXT_DOMAIN ), 500 );
+			return $saved;
+		} );
+		return is_wp_error( $result ) ? $result : self::current_study_collections( $result );
+	}
 	public function notes( $request ) { RSV_Helpers::no_cache_private();$reel=self::reel($request['id']);if(is_wp_error($reel)||!RSV_Security::can_view_reel($reel))return RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404);return rest_ensure_response(self::state_get('F11-FUT-021',$reel['public_id'],'notes',array('payload'=>array('notes'=>array()),'version'=>0))); }
 	public function note_write( $request ) { RSV_Helpers::no_cache_private();$reel=self::reel($request['id']);if(is_wp_error($reel)||!RSV_Security::can_view_reel($reel))return RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404);$rate=RSV_Security::rate_limit('future30_notes',120,HOUR_IN_SECONDS);if(is_wp_error($rate))return $rate;$p=(array)$request->get_json_params();$idem=$request->get_header('Idempotency-Key');$scope='future30_note_'.$reel['public_id'];$begin=RSV_Security::idempotency_begin($scope,$idem,$p);if(is_wp_error($begin))return $begin;if(!empty($begin['replay']))return rest_ensure_response($begin['response']);$time=self::validate_time_range($reel,$p['second']??0,0);if(is_wp_error($time)){RSV_Security::idempotency_fail($scope,$idem);return $time;}$text=RSV_Helpers::textarea($p['text']??'',4000);if(!$text){RSV_Security::idempotency_fail($scope,$idem);return RSV_Helpers::error('rsv_note_text_required',__('Note text is required.',RSV_TEXT_DOMAIN),422);}$current=self::state_get('F11-FUT-021',$reel['public_id'],'notes',array('payload'=>array('notes'=>array()),'version'=>0));$notes=(array)($current['payload']['notes']??array());$notes[]=array('second'=>$time['start'],'text'=>$text,'created_at'=>RSV_Helpers::now());$notes=array_slice($notes,-200);return self::idempotent_finish_result($scope,$idem,static function() use($reel,$notes){return self::state_put('F11-FUT-021',$reel['public_id'],'notes',array('notes'=>$notes,'private'=>true));},array('entity_type'=>'reel','entity_id'=>absint($reel['id']),'action'=>'private_note_update','reason'=>'F11-FUT-021','event'=>'ReelPrivateNoteUpdated','event_data'=>array('reel_public_id'=>$reel['public_id'],'feature_id'=>'F11-FUT-021'))); }
 
