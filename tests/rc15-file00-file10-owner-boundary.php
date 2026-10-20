@@ -115,5 +115,18 @@ $GLOBALS['rsv_is_admin']=false;
 $result=RSV_Reels::publish(3,1);
 $check(is_wp_error($result) && $result->get_error_code()==='rsv_public_media_visibility_mismatch',
     'Unlisted File10 video was allowed to be published as public Reel');
+$GLOBALS['rsv_media']['visibility']='public';
+$result=RSV_Reels::publish(3,1);
+$check(is_wp_error($result) && $result->get_error_code()==='rsv_publication_safety_unavailable',
+    'Missing mandatory publication safety provider was not fail-closed');
+final class RSV_Top20 {
+    public static $allowed=false;
+    public static function publication_gate( $reel ) {
+        return self::$allowed ? true : new WP_Error('rsv_source_safety_required','Missing reviewed source card');
+    }
+}
+$result=RSV_Reels::publish(3,1);
+$check(is_wp_error($result) && $result->get_error_code()==='rsv_source_safety_required',
+    'Unreviewed source/safety/caption claim passed native publish');
 if($failures){fwrite(STDERR,"FAIL FILE11 CROSS OWNER\n- ".implode("\n- ",$failures)."\n");exit(1);}
 echo "FILE11 FILE00/FILE10 CROSS OWNER: $assertions behavioral assertions PASS\n";
