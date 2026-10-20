@@ -223,8 +223,11 @@ final class RSV_Repository {
 			),
 			ARRAY_A
 		);
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_history_query_unavailable', __( 'Private Reel history is temporarily unavailable. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		$out = array();
-		foreach ( (array) $rows as $row ) {
+		foreach ( $rows as $row ) {
 			$progress_dto = array(
 				'position_seconds' => absint( $row['position_seconds'] ),
 				'completed'        => (bool) $row['completed'],
@@ -253,14 +256,20 @@ final class RSV_Repository {
 		global $wpdb;
 		$table     = RSV_Helpers::table( 'reels' );
 		$published = $reel['published_at'] ?: $reel['updated_at'];
-		$previous_rows = (array) $wpdb->get_results(
+		$previous_rows = $wpdb->get_results(
 			$wpdb->prepare( "SELECT * FROM $table WHERE status='published' AND visibility='public' AND (published_at<%s OR (published_at=%s AND id<%d)) ORDER BY published_at DESC,id DESC LIMIT 50", $published, $published, $reel['id'] ),
 			ARRAY_A
 		);
-		$next_rows = (array) $wpdb->get_results(
+		if ( ! is_array( $previous_rows ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_neighbors_query_unavailable', __( 'Reel navigation is temporarily unavailable. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
+		$next_rows = $wpdb->get_results(
 			$wpdb->prepare( "SELECT * FROM $table WHERE status='published' AND visibility='public' AND (published_at>%s OR (published_at=%s AND id>%d)) ORDER BY published_at ASC,id ASC LIMIT 50", $published, $published, $reel['id'] ),
 			ARRAY_A
 		);
+		if ( ! is_array( $next_rows ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_neighbors_query_unavailable', __( 'Reel navigation is temporarily unavailable. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		$previous = self::first_viewable( $previous_rows );
 		$next     = self::first_viewable( $next_rows );
 		return array(
@@ -283,13 +292,16 @@ final class RSV_Repository {
 		global $wpdb;
 		$table = RSV_Helpers::table( 'reels' );
 		$limit = min( 50, max( 1, absint( $limit ) ) );
-		$rows  = (array) $wpdb->get_results(
+		$rows  = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT * FROM $table WHERE owner_id=%d AND status=%s AND visibility=%s ORDER BY published_at DESC,id DESC LIMIT %d",
 				absint( $author_id ), 'published', 'public', min( 150, $limit * 3 )
 			),
 			ARRAY_A
 		);
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_author_query_unavailable', __( 'Public Reels for this publisher are temporarily unavailable. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		$out = array();
 		foreach ( $rows as $row ) {
 			if ( RSV_Security::can_view_reel( $row, 0 ) ) {
@@ -323,10 +335,13 @@ final class RSV_Repository {
 			$args[] = $topic;
 		}
 		$args[] = min( 120, $limit * 4 );
-		$rows   = (array) $wpdb->get_results(
+		$rows   = $wpdb->get_results(
 			$wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY rank_score DESC,published_at DESC,id DESC LIMIT %d", $args ),
 			ARRAY_A
 		);
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_search_query_unavailable', __( 'Public Reel search is temporarily unavailable. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		$out = array();
 		foreach ( $rows as $row ) {
 			if ( RSV_Security::can_view_reel( $row, 0 ) ) {
