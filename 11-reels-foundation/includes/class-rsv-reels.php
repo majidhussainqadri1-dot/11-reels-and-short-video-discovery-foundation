@@ -119,6 +119,12 @@ final class RSV_Reels {
 		if ( is_wp_error( $video ) || 'published' !== ( $video['status'] ?? '' ) ) {
 			return is_wp_error( $video ) ? $video : RSV_Helpers::error( 'rsv_video_not_published', __( 'File 10 video must be published first.', RSV_TEXT_DOMAIN ), 422 );
 		}
+		// File 11 must not publicly publish a Reel whose authoritative File 10
+		// asset is still unlisted/private; a later visibility change also
+		// fails closed through RSV_Security::can_view_reel().
+		if ( 'public' === ( $reel['visibility'] ?? '' ) && 'public' !== ( $video['visibility'] ?? '' ) ) {
+			return RSV_Helpers::error( 'rsv_public_media_visibility_mismatch', __( 'Public Reels require publicly eligible File 10 media.', RSV_TEXT_DOMAIN ), 422 );
+		}
 		if ( ! absint( $reel['cover_id'] ) ) {
 			return RSV_Helpers::error( 'rsv_cover_required', __( 'A cover image is required.', RSV_TEXT_DOMAIN ), 422 );
 		}
