@@ -1,13 +1,13 @@
-# Release Manifest — File 11 v1.2.0-rc11
+# Release Manifest — File 11 v1.2.0-rc12
 
 - Source directory: `11-reels-foundation`
 - Installable root: `reels-foundation-11`
-- Package: `reels-foundation-11-1.2.0-rc11.zip`
-- Plugin version: `1.2.0-rc11`
+- Package: `reels-foundation-11-1.2.0-rc12.zip`
+- Plugin version: `1.2.0-rc12`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
 - Future30 schema: `1.0.0`
-- File 11 contract: `17`
+- File 11 contract: `18`
 - File 11 event contract: `4`
 - Integration provider contract: `3`
 - Future30 contract: `1`
@@ -18,7 +18,8 @@
 - Prior rc8 correction: File00/11 cross-owner publishing control; File05 learning steps; File16 context minimization; File26 recommendation reason guards
 - Prior rc9 correction: canonical linked-language target checks; quiz projection allowlist; private quiz question write minimization; adversarial regression
 - Prior rc10 corrections: read-time File05 path revalidation and File26 k>=5 privacy floor, with behavioral regression
-- New rc11 corrections: revoked Study Collection read filtering, public version-history caption/label minimization, Unicode-safe collection IDs, transactional Audit/Outbox
+- Prior rc11 corrections: revoked Study Collection read filtering, public version-history caption/label minimization, Unicode-safe collection IDs, transactional Audit/Outbox
+- New rc12 correction: public Reel Feed SQL outage is explicit typed 503; behaviorally rejects deceptive empty lists on failure
 - Exact-head CI/ZIP/hash/source parity and staging/live approvals: separate acceptance gates
 - F11-FUT-014 canonical linked-version owner: `File 11`; legacy rc1–rc4 stored owner labels remain read-compatible only through current File 11 target revalidation
 - Required File 10: compatible canonical provider with authoritative duration/media/playback contracts
