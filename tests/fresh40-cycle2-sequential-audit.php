@@ -105,6 +105,13 @@ for ( $round = 1; $round <= 40; ++$round ) {
     $file10 = file_get_contents( $source_root . '/includes/class-rsv-file10.php' );
     if ( ( false === strpos( $file10, 'esc_url_raw(' ) || false === strpos( $file10, "array( 'https' )" ) ) )
         throw new RuntimeException( "Round $round: File10 transcript HTTPS-only guard regressed." );
+    $collectionSource = file_get_contents( $source_root . '/includes/trait-rsv-future30-user-features.php' );
+    if ( false === strpos( $collectionSource, 'current_study_collections' ) ||
+         false === strpos( $collectionSource, 'collection_storage_key' ) ||
+         false === strpos( $collectionSource, 'ReelStudyCollectionUpdated' ) ||
+         false === strpos( $publicSource, 'public_version_snapshot_payload' ) ||
+         false === strpos( $storageSource, 'public_version_snapshot_payload' ) )
+        throw new RuntimeException( "Round $round: rc12 collections or public-version-history safety regressed." );
     list( $scope, $path, $marker ) = $checks[ $round - 1 ];
     $contents = file_get_contents( $root . '/' . $path );
     if ( false === $contents || false === strpos( $contents, $marker ) )
