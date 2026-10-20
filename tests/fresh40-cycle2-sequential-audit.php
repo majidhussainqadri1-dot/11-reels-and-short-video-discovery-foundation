@@ -108,6 +108,15 @@ for ( $round = 1; $round <= 40; ++$round ) {
         || false === strpos( $identity, '$canonical_eligible' )
         || false === strpos( $identity, "'unlisted' === " . '$visibility' ) )
         throw new RuntimeException( "Round $round: File00/10 current authority and public media gates regressed." );
+    $privacy_export = file_get_contents( $source_root . '/includes/class-rsv-privacy.php' );
+    foreach ( array(
+        'rsv_privacy_history_export_unavailable',
+        'rsv_privacy_reports_export_unavailable',
+        'rsv_privacy_owned_export_unavailable'
+    ) as $required_export_fail_closed ) {
+        if ( false === strpos( $privacy_export, $required_export_fail_closed ) )
+            throw new RuntimeException( "Round $round: incomplete personal-data export could be incorrectly certified." );
+    }
     $publication = file_get_contents( $source_root . '/includes/class-rsv-reels.php' );
     // A successful first publish and a moderator restore must share the same gate.
     if ( false === strpos( $publication, 'private static function publication_eligibility( $reel, $video )' ) ||
