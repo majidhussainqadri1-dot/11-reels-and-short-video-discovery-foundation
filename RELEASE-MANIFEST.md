@@ -1,13 +1,13 @@
-# Release Manifest — File 11 v1.2.0-rc12
+# Release Manifest — File 11 v1.2.0-rc13
 
 - Source directory: `11-reels-foundation`
 - Installable root: `reels-foundation-11`
-- Package: `reels-foundation-11-1.2.0-rc11.zip`
-- Plugin version: `1.2.0-rc11`
+- Package: `reels-foundation-11-1.2.0-rc13.zip`
+- Plugin version: `1.2.0-rc13`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
 - Future30 schema: `1.0.0`
-- File 11 contract: `16`
+- File 11 contract: `19`
 - File 11 event contract: `4`
 - Integration provider contract: `3`
 - Future30 contract: `1`

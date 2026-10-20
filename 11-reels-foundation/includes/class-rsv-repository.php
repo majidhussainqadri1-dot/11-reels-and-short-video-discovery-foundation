@@ -133,7 +133,11 @@ final class RSV_Repository {
 		$scan_limit = min( 200, max( $limit + 1, $limit * 4 ) );
 		$params[]   = $scan_limit;
 		$sql        = $wpdb->prepare( "SELECT * FROM $table WHERE $where ORDER BY $order LIMIT %d", $params );
-		$rows       = (array) $wpdb->get_results( $sql, ARRAY_A );
+		$rows = $wpdb->get_results( $sql, ARRAY_A );
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_feed_query_unavailable',
+				__( 'The Reel feed is temporarily unavailable. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		$items         = array();
 		$last_scanned  = null;
 		$last_returned = null;

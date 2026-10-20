@@ -112,6 +112,16 @@ for ( $round = 1; $round <= 40; ++$round ) {
          false === strpos( $publicSource, 'public_version_snapshot_payload' ) ||
          false === strpos( $storageSource, 'public_version_snapshot_payload' ) )
         throw new RuntimeException( "Round $round: rc12 collections or public-version-history safety regressed." );
+    // A failed File11 SQL feed must be a typed outage, not a fabricated zero-result screen.
+    $feedRepo = file_get_contents( $source_root . '/includes/class-rsv-repository.php' );
+    $feedRest = file_get_contents( $source_root . '/includes/class-rsv-rest.php' );
+    $feedUi = file_get_contents( $source_root . '/includes/class-rsv-frontend.php' );
+    if ( false === strpos( $feedRepo, 'rsv_feed_query_unavailable' ) ||
+         false === strpos( $feedRepo, '! is_array( $rows )' ) ||
+         false === strpos( $feedRepo, '$wpdb->last_error' ) ||
+         false === strpos( $feedRest, 'if ( is_wp_error( $data ) ) return $data;' ) ||
+         false === strpos( $feedUi, 'if ( is_wp_error( $data ) )' ) )
+        throw new RuntimeException( "Round $round: File11 feed SQL-failure reporting or caller error propagation regressed." );
     list( $scope, $path, $marker ) = $checks[ $round - 1 ];
     $contents = file_get_contents( $root . '/' . $path );
     if ( false === $contents || false === strpos( $contents, $marker ) )
