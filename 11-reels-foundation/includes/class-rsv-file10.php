@@ -96,7 +96,8 @@ final class RSV_File10 {
 			if ( is_string( $result ) ) $url = $result;
 		}
 		$url = apply_filters( 'rsv_file10_transcript_url', $url, absint( $video_id ), $reel, RSV_CONTRACT_VERSION );
-		return is_string( $url ) ? esc_url_raw( $url, array( 'http', 'https' ) ) : '';
+		// File 10 transcripts must not downgrade educational source links to insecure HTTP.
+		return is_string( $url ) ? esc_url_raw( $url, array( 'https' ) ) : '';
 	}
 
 	public static function interaction_aggregate( $video_id ) {
