@@ -4,7 +4,7 @@ Tags: reels, educational-video, learning, citations, accessibility, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0-rc10
+Stable tag: 1.2.0-rc11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,40 +43,46 @@ No. Payment/donation status is not an allowed recommendation-priority reason.
 
 == Changelog ==
 
-= 1.2.0-rc10 =
+= 1.2.0-rc11 =
+* Protect File10 Reel Template sections, verify media recipes, and minimize public template fields.
+* Allow only noncommercial File26 explanatory ranking reasons.
+* Require HTTPS-only File10 transcript links; see CV-263.
+
+
+= 1.2.0-rc11 =
 * Reject revoked File 05 learning path references on public read.
 * Minimize File 06 evidence/knowledge-card public payloads, including historical records.
 * Add behavioral regressions for both cross-file boundaries.
 
 
-= 1.2.0-rc10 =
+= 1.2.0-rc11 =
 * Check actual language and different source when linking a translated Reel.
 * Allowlist public Micro-Quiz questions; never expose answers, hidden nested fields or private notes.
 * Restrict stored Micro-Quiz metadata to the declared schema.
 * Add new PHP behavioral regressions; deployment status remains pending.
 
 
-= 1.2.0-rc10 =
+= 1.2.0-rc11 =
 * Require manager privilege for cross-owner Reel publishing.
 * Reject invalid/withdrawn File 05 learning-path steps at write.
 * Minimize and allowlist File 16 grounded-context private fields.
 * Sanitize and bound File 26 recommendation reasons.
 
 
-= 1.2.0-rc10 =
+= 1.2.0-rc11 =
 * Correct typed quiz grading and private audit/outbox persistence.
 * Revalidate public Series Reels at every read; prevent withdrawn Reel exposure.
 * Validate File 16 AI context against current File 06 evidence and File 10 time bounds.
 * Test 40 sequential source-and-contract audit rounds.
 
 
-= 1.2.0-rc10 =
+= 1.2.0-rc11 =
 * Revalidate direct Knowledge Graph and Study Tools references, including withdrawn File 06 source evidence.
 * Require verified File 06 references on knowledge-card creation and graph evidence submission.
 * Add source-integrity regression contracts and advance File 11 contract to 12.
 
 
-= 1.2.0-rc10 =
+= 1.2.0-rc11 =
 * Corrected canonical ownership for F11-FUT-014 linked language Reel edges: new edges now target `File 11`, never a generic translation provider.
 * Preserved legacy rc1–rc4 language-edge compatibility by validating legacy target refs as current public File 11 Reels before public projection.
 * Retained all third fresh20 public-reference, Creator Research privacy-threshold and identifier-minimized erasure hardening.
