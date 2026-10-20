@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0-rc11 — 2026-10-20
+
+- File10 template fields limited to a safe public schema; optional File10 media recipes validated at write and revocation checked on read.
+- File26 recommendation explanation policies reject unapproved payment/donation and malformed reason codes.
+- File10 transcript hyperlinks require TLS/HTTPS under CV-263.
+- Behavioral PHP regressions and forty repeated source/contract checks. Database schemas unchanged; deployed state, staging and Live still unverified.
+
+
 ## 1.2.0-rc10 — 2026-10-20
 
 - File 05 learning-path read now revalidates all canonical course and step references, hiding withdrawn paths and unrelated private fields.
