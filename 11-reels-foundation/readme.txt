@@ -4,7 +4,7 @@ Tags: reels, educational-video, learning, citations, accessibility, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0-rc17
+Stable tag: 1.2.0-rc18
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,12 @@ The Reel has one canonical source language plus at most nine linked language ver
 No. Payment/donation status is not an allowed recommendation-priority reason.
 
 == Changelog ==
+
+= 1.2.0-rc18 =
+* Fixed WordPress privacy export of Reel watch history, reports and authored Reels: source SQL failures now fail closed with an explicit error, not a fatal or falsely complete result.
+* Fixed privacy erasure: database outage during owned-Reel retention lookup now blocks completion and triggers rollback, preserving evidence.
+* Added 12 export and five erase SQL-failure tests, and updated all 40 frozen-source review rounds. No schema or cross-owner changes; staging/live verification remains separate.
+
 
 = 1.2.0-rc17 =
 * Require the same native File10 visibility, Source/Safety Card, caption/transcript and cover checks when a restricted/removed Reel is restored as when it is initially published.
