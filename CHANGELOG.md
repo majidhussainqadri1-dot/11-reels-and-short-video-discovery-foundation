@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.0-rc16 — 2026-10-21
+
+- Integrated RC15 corrective PR #25 and separate File00 entitlement safety PR #26 without discarding either branch; prior isolated CI results did not establish combined build parity.
+- Current File00 `publishing` assertions now remain in the same eligibility/security snapshot. A second provider call no longer re-grants rights removed by security containment.
+- File00 `can_open_composer` and `can_direct_publish` must be true for their respective Reel commands, regardless of WordPress administrator native capabilities.
+- Removed WordPress manage_options bypass of private/member/entitled views and cross-owner publication; explicit File11 editorial delegation is required.
+- Preserved canonical single-free-tier File00 `base_services.education` Reel entitlement, and rejected any policy filter attempt to grant missing eligibility.
+- Added 40 distinct behavioral cases on publishing, subject/guardian/MFA, owner, entitlements and File10 public/unlisted media; inherited forty frozen-source sweeps retained.
+- No database schema change; release remains a source candidate, not production accepted or deployed.
+
+
 ## 1.2.0-rc15 — 2026-10-20
 
 - Corrected canonical File00 membership subject, eligibility, guardian and age assertions including current File00 safety modifiers; previously active users could be misclassified when eligible=false or age unknown.
