@@ -4,7 +4,7 @@ Tags: reels, educational-video, learning, citations, accessibility, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0-rc14
+Stable tag: 1.2.0-rc15
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,10 @@ The Reel has one canonical source language plus at most nine linked language ver
 No. Payment/donation status is not an allowed recommendation-priority reason.
 
 == Changelog ==
+
+= 1.2.0-rc15 =
+File 00 current claims, age, guardian and retired-MFA policy; removal of WordPress admin publisher identity bypass; File 10 media owner/public-unlisted separation. Source candidate only, not deployed.
+
 
 = 1.2.0-rc14 =
 * Fix silent SQL read failures in history, Reel navigation, author timelines, public search and creator insights. Return typed 503 where appropriate; REST/UI show an honest temporary unavailable state.
