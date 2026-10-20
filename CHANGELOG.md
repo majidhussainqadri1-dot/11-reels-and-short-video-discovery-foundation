@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0-rc18 — 2026-10-21
+
+- Corrected personal-data exporter to surface SQL failures from the private Reel history, reports, and authored Reel collections as WordPress privacy exporter errors; no incomplete or silently successful export.
+- Corrected erasure transaction to fail closed and roll back when the retained-owned-Reels count cannot be read or validated.
+- Added 12 isolated export cases and 5 erasure/rollback cases, plus new fail-closed markers in all 40 existing source review rounds.
+- Release is a source candidate. Hostinger live plugin and schema/migration parity remain unverified.
+
+
 ## 1.2.0-rc17 — 2026-10-21
 
 - Eliminated a moderation-restore publication bypass: restoring a removed/restricted Reel now runs the same mandatory File10 public visibility, Source/Safety Card, caption/transcript and cover conditions required for an initial publish.
