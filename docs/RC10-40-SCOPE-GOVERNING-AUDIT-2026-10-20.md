@@ -62,10 +62,18 @@
 - **RC10-D-01 (F11-FUT-002)**: `path_list()` previously returned persisted learning paths after merely removing `owner_id`, without checking that each File05 lesson/course reference was still public and valid. It could also return other ungoverned payload keys. **Corrected**: provider-current source verification of every step/course, fail-closed per path, public DTO allowlist, 100-step and 100-course ceilings. Behavior tested against live, revoked, malformed, empty and oversized fixtures.
 - **RC10-D-02 (F11-FUT-023)**: the Search Opportunity provider consumer used `if($count && $count<5)` so `count=0`, missing count or null could still surface a topic, with null reported count; it also forwarded an optional source ref without current File26 source verification. **Corrected**: reject absent/non-numeric/negative/under-five aggregate values; allow only current File26 references and a restricted set of public aggregate fields. Behavior tested for 5/pass, 0/1/4/-5/null/missing/fail, withdrawn/fail, unknown private keys removed.
 
+- **RC10-D-03 (File11→File26 proposed adapter, not deployed)**: Source base branch received a proposed public search connector which sent raw numeric WordPress `owner_id` as `author_key` to File 26. This violates the plan's typed/public identity and minimization boundary. Replaced with `RSV_Helpers::opaque_user_ref(..., 'file26-public-reel-author')`, and added a source regression. The owner adapter remains **proposed, not active** and requires File26 acceptance, deletion propagation and staging.
+
+## Branch conflict and corrective resolution
+
+- The parent rc9 branch advanced from initial `270d89f8...` to `b4a73807...` with five commits adding a proposed File26 native connector.
+- A draft PR initially showed `mergeable_state=dirty`. Upstream connector code and tests have been preserved; boot wiring and test wiring merged, the connector public author key hardened. A proper two-parent merge from the new rc9 HEAD is required before the PR can be called mergeable.
+- Final exact merged HEAD and CI evidence must be read after that merge; no unverified mergeability claim is permitted.
+
 ## Reportable quantities
 
-- New distinct application-code defect families found: **2**.
-- Source fixes made: **2** (pending final exact-HEAD QA until run completed).
+- New distinct source-code defect families found and corrected: **3** (two active read-time paths, one proposed File26 adapter hardening).
+- Source fixes made: **3** (pending final exact-HEAD QA until run completed).
 - New dedicated behavioral test: `tests/rc10-current-public-reference-guards.php`.
 - New forty-scope source test: `tests/rc10-forty-governing-source-probes.php`.
 - Plan-vs-build release discrepancy: **1 OPEN** — original File 11 plan table 2 says installed ZIP folder `11-reels-foundation`; current tested repo builder and WordPress internal assumptions use `reels-foundation-11`. Cannot change until the exact deployed install folder, updates and Founder-approved migration/compatibility requirement are established. It is not evidence the currently deployed site has a defect.
