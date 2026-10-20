@@ -130,6 +130,46 @@ final class RSV_Future30_Public_Safety {
 		return array();
 	}
 
+	/** Return only the File 11 template/reason policy fields allowed by File 10 and File 26 contracts. */
+	public static function public_template_or_reason_payload( $feature, $payload ) {
+		$p = is_array( $payload ) ? $payload : array();
+		if ( 'F11-FUT-010' === $feature ) {
+			$sections = array();
+			foreach ( array_slice( (array) ( $p['sections'] ?? array() ), 0, 12 ) as $item ) {
+				if ( is_scalar( $item ) ) {
+					$sections[] = array( 'text'=>RSV_Helpers::textarea( $item, 800 ) );
+				} elseif ( is_array( $item ) ) {
+					$sections[] = array(
+						'title'=>RSV_Helpers::text( is_scalar( $item['title'] ?? null ) ? $item['title'] : '', 160 ),
+						'text'=>RSV_Helpers::textarea( is_scalar( $item['text'] ?? null ) ? $item['text'] : '', 800 ),
+						'duration_seconds'=>min( 600, absint( $item['duration_seconds'] ?? 0 ) ),
+					);
+				}
+			}
+			return array(
+				'template_type'=>substr( sanitize_key( $p['template_type'] ?? 'clinical-pearl' ), 0, 40 ),
+				'sections'=>$sections,
+				'max_seconds'=>min( 600, max( 60, absint( $p['max_seconds'] ?? 180 ) ) ),
+				'file10_media_recipe_ref'=>RSV_Helpers::text( is_scalar( $p['file10_media_recipe_ref'] ?? null ) ? $p['file10_media_recipe_ref'] : '', 255 ),
+			);
+		}
+		if ( 'F11-FUT-024' === $feature ) {
+			$allowed = array( 'topic-interest', 'followed-doctor', 'recent-learning', 'diversity', 'latest', 'source-quality', 'educational-quality', 'freshness' );
+			$reasons = array();
+			foreach ( array_slice( (array) ( $p['allowed_reasons'] ?? $allowed ), 0, 20 ) as $reason ) {
+				if ( ! is_scalar( $reason ) ) continue;
+				$reason = sanitize_key( $reason );
+				if ( in_array( $reason, $allowed, true ) && ! in_array( $reason, $reasons, true ) ) $reasons[] = $reason;
+			}
+			return array(
+				'allowed_reasons'=>$reasons,
+				'commercial_reason'=>false,
+				'donor_reason'=>false,
+			);
+		}
+		return array();
+	}
+
 	private static function safe_objects( $feature, $objects, $reel ) {
 		$out = array();
 		foreach ( $objects as $row ) {
@@ -152,6 +192,9 @@ final class RSV_Future30_Public_Safety {
 			}
 			if ( in_array( $feature, array( 'F11-FUT-005', 'F11-FUT-018' ), true ) ) {
 				$row['payload'] = self::public_sourced_payload( $feature, $p );
+			}
+			if ( in_array( $feature, array( 'F11-FUT-010', 'F11-FUT-024' ), true ) ) {
+				$row['payload'] = self::public_template_or_reason_payload( $feature, $p );
 			}
 			if ( 'F11-FUT-019' === $feature ) {
 				$row['payload'] = array(
