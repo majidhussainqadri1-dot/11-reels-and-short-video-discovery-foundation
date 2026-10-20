@@ -5,6 +5,7 @@
 - Corrected canonical File00 membership subject, eligibility, guardian and age assertions including current File00 safety modifiers; previously active users could be misclassified when eligible=false or age unknown.
 - Removed administrator role substitution for canonical Founder/verified doctor Reel submission and publication, removed stale mandatory MFA re-enforcement when File00 policy retired MFA, and retained policy-required step-up when current File00 requires it.
 - Restricted File10 media linkage to the actual media owner even for a WordPress administrator; public Reels cannot publish unlisted File10 media and read-time visibility changes remove public eligibility.
+- Made File 11's reviewed source/safety/caption publication gate mandatory in the native publish command; absent or malformed provider fails closed rather than depending solely on filter registration.
 - Added runtime-shaped File00/10 adversarial regression and stronger 40-source review guards. Source CI success is not staging/live proof.
 - Corrected Release Manifest/status/history version metadata and clarified that the File11 plan specifies canonical ZIP root `reels-foundation-11`.
 
