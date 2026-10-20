@@ -29,6 +29,7 @@ php "$ROOT/tests/file26-native-connector-contract.php"
 php "$ROOT/tests/rc11-revocation-and-version-privacy.php"
 php "$ROOT/tests/rc11-study-collection-audit-utf8.php"
 php "$ROOT/tests/rc11-release-history-contract.php"
+php "$ROOT/tests/rc12-feed-sql-failure-behavior.php"
 bash "$ROOT/tests/static-contracts.sh"
 A="$(mktemp -d)"; B="$(mktemp -d)"; trap 'rm -rf "$A" "$B"' EXIT
 bash "$ROOT/tools/build-package.sh" "$A/file11.zip" >/dev/null
