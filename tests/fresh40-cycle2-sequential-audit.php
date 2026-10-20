@@ -112,7 +112,8 @@ for ( $round = 1; $round <= 40; ++$round ) {
     foreach ( array(
         'rsv_privacy_history_export_unavailable',
         'rsv_privacy_reports_export_unavailable',
-        'rsv_privacy_owned_export_unavailable'
+        'rsv_privacy_owned_export_unavailable',
+        'rsv_privacy_owned_count_unavailable'
     ) as $required_export_fail_closed ) {
         if ( false === strpos( $privacy_export, $required_export_fail_closed ) )
             throw new RuntimeException( "Round $round: incomplete personal-data export could be incorrectly certified." );
