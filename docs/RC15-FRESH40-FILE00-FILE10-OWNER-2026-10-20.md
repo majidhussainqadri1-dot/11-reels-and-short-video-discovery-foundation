@@ -5,7 +5,7 @@
 **Current corrective branch:** `audit/file11-40-crossfile-owner-security-20261020`.
 **Evidence hierarchy:** File11 v1.1 approved plan and August 12 Future30 amendment; central plan harmonization in appended governing supplement; File00 and File10 current source contracts; File05/06/16/19/20/21/24/25/26 explicit canonical ownership boundaries. This is source evidence, not proof of staging.
 
-## Confirmed new defects (six behavioral/code, two document/evidence)
+## Confirmed new defects (seven behavioral/code, two document/evidence)
 | ID | Severity | Root cause | Correction | Direct evidence |
 |---|---|---|---|---|
 | F11-RC15-01 | High | File11 mapped approved but **ineligible** File00 membership as active, ignoring `eligible`, subject binding, and owner security modifiers. | Consume `smc_membership_assertions` first, current `smc_assertions_v1` security modifications, matching subject/version and both approval/eligibility. Fail closed on provider exception. | `class-rsv-security.php`, `tests/rc15-file00-file10-owner-boundary.php` |
@@ -14,6 +14,7 @@
 | F11-RC15-04 | High/authorization | `manage_options` was treated as verified Founder/doctor in submission/publication identity. WordPress admin is not File00 canonical identity. | Require File00 current Founder or professionally verified doctor for create/publish; admin can only perform separately allowed operational actions. | Positive Founder and negative admin tests |
 | F11-RC15-05 | High/ownership | File10 `validate_for_reel` let arbitrary WP admin link another creator's media. | Enforce actual File10 media owner equality, fail closed absent a verified delegation contract. | Media ownership negative/positive tests |
 | F11-RC15-06 | High/privacy | A public Reel could link an unlisted File10 asset and leak its existence through public feed and publication events. | Deny public Reel publication if source visibility is not public; recheck on each public read; unlisted Reel direct links remain distinct. | Read-time and publication behavioral tests |
+| F11-RC15-09 | High/safety | Source/safety/caption publication checks depended on lifecycle registration of the `rsv_authorize` filter. The native `publish` command lacked a direct mandatory gate if filters were absent. | `RSV_Reels::publish` now requires available `RSV_Top20::publication_gate` and an explicit `true`; absent/rejected/malformed review fails closed. | Publish tests for missing and rejected provider, plus 40-round source marker. |
 | F11-RC15-07 | Documentation | `README.md` reported contract 16, while code/release manifest declare contract 19. | Current README synchronized to contract 19; historical versions preserved. | `tests/rc14-current-metadata-parity.php` (historical filename retained, verifies rc15). |
 | F11-RC15-08 | Documentation | STATUS claimed package root `reels-foundation-11` contradicts plan although the approved File11 plan explicitly names that exact installable root. | Removed false blocker; clearly distinguished source directory `11-reels-foundation` from ZIP root `reels-foundation-11`. | Written plan p.5 / status / deterministic builder. |
 
@@ -31,7 +32,7 @@ The existing `tests/fresh40-cycle2-sequential-audit.php` performs **40 sequentia
 | 31–35 | Autoplay off, reduced motion, keyboard, wellbeing, captions | code tests (real-browser staging still missing) |
 | 36–40 | RTL CSS, patient-case policy, safe mode, moderation, complete CI wiring | code tests; real-user acceptance still missing |
 
-Extra tests retained: RC14 SQL failure truth for five read families, RC13 feed outage, source-safe study collections and linked-language refs, deterministic dual build, ZIP integrity/extraction, PHP lint, JS checks, source/package parity. Re-run after every source correction at exact final commit.
+New: native publication Source/Safety Card and captions gate tested even with unregistered filter. Extra tests retained: RC14 SQL failure truth for five read families, RC13 feed outage, source-safe study collections and linked-language refs, deterministic dual build, ZIP integrity/extraction, PHP lint, JS checks, source/package parity. Re-run after every source correction at exact final commit.
 
 ## Unresolved external gates — do not call live fixed
 - WPVibe site not connected; deployed code, active version, DB tables/schema and migration status **unverified**.
