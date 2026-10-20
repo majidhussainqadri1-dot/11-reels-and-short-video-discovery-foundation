@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0-rc12 — 2026-10-20
+
+### Explicit public feed database-outage reporting
+- Fixed F11-FR-005 / F30-AT-10 / CEN-SEARCH-001: native public Reel Feed no longer treats a null/failed SQL read as a successful empty feed; returns a typed HTTP 503 with no fabricated zero-result claim.
+- Added adversarial PHP behavior fixtures for missing SQL result, SQL error and genuinely empty successful SQL query, and linked the outage guard to forty governing-plan source probes.
+- Retained all prior 40 static/55-ID scans and rc5–rc11 behavior regressions. Runtime 1.2.0-rc12, File11 contract 18; DB schemas and canonical owners unchanged.
+- Repository green CI is not staging, deployed parity, founder or live acceptance.
+
+
 ## 1.2.0-rc11 — 2026-10-20
 
 ### Privacy-safe historical Reels and private study mutations

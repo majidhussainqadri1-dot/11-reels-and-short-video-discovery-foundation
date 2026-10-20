@@ -1,12 +1,16 @@
 # File 11 — Reels and Short Video Discovery
 
-**Current repository candidate:** `1.2.0-rc11`  
+**Current repository candidate:** `1.2.0-rc12`  
 **Future30 amendment:** `SSH-F11-FUTURE-REEL-KNOWLEDGE-INTELLIGENCE-30-2026`  
 **Canonical package root:** `reels-foundation-11`
 
 File 11 owns the vertical educational Reel entity, the authoritative 60–600-second Reel eligibility rule through File 10, Reel-native discovery, moderation, private history/progress and the approved Reel-domain Future30 orchestration layer. It does not duplicate File 10 raw media, File 05 learning truth, File 06 canonical knowledge, File 16 AI execution, File 00 identity, File 19 delivery, File 20 shell, File 24 assurance, File 25 visual system or File 26 cross-platform discovery/graph ownership.
 
-## Current rc11 safeguards
+## Current rc12 safeguards
+
+On Reel Feed SQL outage, the native query returns a typed 503 rather than an apparently valid empty list. A distinct behavioral test distinguishes database failure from genuinely zero matching Reels. Earlier rc11 privacy repairs and forty automated source/plan checks remain present. These are repository QA only, not live deployment evidence.
+
+## Previous rc11 safeguards
 
 Public Reel version history is minimized to SHA256/number, saved private Study Collections are rechecked against live public-eligibility on every read, and collection writes are transactionally audited with outbox evidence. Unicode/Urdu collection keys are deterministic and nonempty. 40 automated full-source sweeps and 40 governing-plan static checks remain **source QA**, not 40 independent manual semantic reviews nor staging/live acceptance.
 
