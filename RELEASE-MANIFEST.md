@@ -1,9 +1,9 @@
-# Release Manifest — File 11 v1.2.0-rc10
+# Release Manifest — File 11 v1.2.0-rc11
 
 - Source directory: `11-reels-foundation`
 - Installable root: `reels-foundation-11`
-- Package: `reels-foundation-11-1.2.0-rc10.zip`
-- Plugin version: `1.2.0-rc10`
+- Package: `reels-foundation-11-1.2.0-rc11.zip`
+- Plugin version: `1.2.0-rc11`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
 - Future30 schema: `1.0.0`
@@ -18,6 +18,7 @@
 - Prior rc8 correction: File00/11 cross-owner publishing control; File05 learning steps; File16 context minimization; File26 recommendation reason guards
 - Prior rc9 correction: canonical linked-language target checks; quiz projection allowlist; private quiz question write minimization; adversarial regression
 - New rc10 corrections: File05 public-read revalidation; File06 public evidence and card allowlists.
+- New rc11 correction: safe File10 templates and media recipe provider checks, bounded File26 explanation reasons and HTTPS-only File10 transcript URLs.
 - Final exact-HEAD CI/ZIP/hash/source parity and staging/live approvals: separate acceptance gates
 - F11-FUT-014 canonical linked-version owner: `File 11`; legacy rc1–rc4 stored owner labels remain read-compatible only through current File 11 target revalidation
 - Required File 10: compatible canonical provider with authoritative duration/media/playback contracts
