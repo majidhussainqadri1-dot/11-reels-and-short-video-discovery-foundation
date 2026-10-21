@@ -57,8 +57,9 @@ $probe('11 empty index list blocks activation',static function($db){$db->indexes
 if(!is_wp_error($missing)||$missing->get_error_code()!=='rsv_schema_definition_invalid')$failed[]='12 invalid schema DDL must fail';
 ++$cases;$empty=RSV_DB::assert_statements_applied(array('CREATE TABLE wp_empty (PRIMARY KEY (id));'));
 if(!is_wp_error($empty)||$empty->get_error_code()!=='rsv_schema_definition_invalid')$failed[]='13 DDL without columns must fail';
-++$cases;$allowed=RSV_DB::assert_statements_applied(array($ddl,$ddl));
-if(!is_wp_error($allowed)&&true!==$allowed)$failed[]='14 repeated DDL must remain deterministic';
+++$cases;$GLOBALS['wpdb']->indexes=array(array('Key_name'=>'PRIMARY','Non_unique'=>0),array('Key_name'=>'public_id','Non_unique'=>0));
+$allowed=RSV_DB::assert_statements_applied(array($ddl,$ddl));
+if(true!==$allowed)$failed[]='14 repeated DDL must remain deterministic';
 
 foreach(array(
  '11-reels-foundation/includes/class-rsv-db.php',
