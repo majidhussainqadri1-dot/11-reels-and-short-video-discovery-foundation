@@ -268,16 +268,23 @@ final class RSV_DB {
 					return RSV_Helpers::error( 'rsv_schema_definition_invalid', __( 'A Reel index declaration is invalid.', RSV_TEXT_DOMAIN ), 503 );
 				}
 				$names = array();
+				$prefixes = array();
 				foreach ( explode( ',', $body ) as $column_spec ) {
-					$column = strtolower( trim( preg_replace( '/\\(\\d+\\)$/', '', trim( $column_spec ) ), ' `' ) );
-					if ( ! preg_match( '/^[a-z][a-z0-9_]*$/', $column ) ) {
+					$spec = trim( $column_spec );
+					if ( ! preg_match( '/^`?([a-z][a-z0-9_]*)`?(?:\\((\\d+)\\))?$/i', $spec, $column_match ) ) {
 						return RSV_Helpers::error( 'rsv_schema_definition_invalid', __( 'A Reel index column is invalid.', RSV_TEXT_DOMAIN ), 503 );
 					}
-					$names[] = $column;
+					$names[] = strtolower( $column_match[1] );
+					$prefix = isset( $column_match[2] ) ? (int) $column_match[2] : null;
+					if ( null !== $prefix && $prefix < 1 ) {
+						return RSV_Helpers::error( 'rsv_schema_definition_invalid', __( 'A Reel index prefix is invalid.', RSV_TEXT_DOMAIN ), 503 );
+					}
+					$prefixes[] = $prefix;
 				}
 				$declared_indexes[$key] = array(
 					'unique' => $is_primary || 0 === stripos( $header, 'UNIQUE' ),
 					'columns' => $names,
+					'prefixes' => $prefixes,
 				);
 			}
 			if ( ! isset( $declared_indexes['primary'] ) ) {
@@ -302,14 +309,20 @@ final class RSV_DB {
 				}
 				$present[$key]['unique'] = 0 === (int) $index_row['Non_unique'];
 				$present[$key]['columns'][$seq] = strtolower( (string) $index_row['Column_name'] );
+				// MySQL SHOW INDEX Sub_part records prefix length. Matching only
+				// Column_name lets a partial or oversized index pass migration.
+				$present[$key]['prefixes'][$seq] = isset( $index_row['Sub_part'] )
+					? (int) $index_row['Sub_part'] : null;
 			}
 			foreach ( $declared_indexes as $index => $expected ) {
 				if ( ! isset( $present[$index] ) || $present[$index]['unique'] !== $expected['unique'] ) {
 					return RSV_Helpers::error( 'rsv_schema_incomplete', __( 'The Reel database migration is incomplete. Features are temporarily unavailable.', RSV_TEXT_DOMAIN ), 503 );
 				}
 				ksort( $present[$index]['columns'] );
+				ksort( $present[$index]['prefixes'] );
 				if ( array_keys( $present[$index]['columns'] ) !== range( 1, count( $expected['columns'] ) )
-					|| array_values( $present[$index]['columns'] ) !== $expected['columns'] ) {
+					|| array_values( $present[$index]['columns'] ) !== $expected['columns']
+					|| array_values( $present[$index]['prefixes'] ) !== $expected['prefixes'] ) {
 					return RSV_Helpers::error( 'rsv_schema_incomplete', __( 'The Reel database migration is incomplete. Features are temporarily unavailable.', RSV_TEXT_DOMAIN ), 503 );
 				}
 			}
