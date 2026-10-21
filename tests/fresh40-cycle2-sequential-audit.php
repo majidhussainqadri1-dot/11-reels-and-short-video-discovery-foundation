@@ -118,6 +118,14 @@ for ( $round = 1; $round <= 40; ++$round ) {
         if ( false === strpos( $privacy_export, $required_export_fail_closed ) )
             throw new RuntimeException( "Round $round: incomplete personal-data export could be incorrectly certified." );
     }
+    $rest_publication = file_get_contents( $source_root . '/includes/class-rsv-rest.php' );
+    $feed_publication = file_get_contents( $source_root . '/includes/class-rsv-repository.php' );
+    if ( false === strpos( $rest_publication, '$playback = RSV_File10::playback( $reel[\'video_id\'] );' )
+        || false === strpos( $rest_publication, 'if ( is_wp_error( $playback ) ) return $playback;' )
+        || false === strpos( $rest_publication, "'rsv_playback_malformed'" )
+        || false === strpos( $feed_publication, "'rsv_feed_media_unavailable'" )
+        || false === strpos( $feed_publication, '! RSV_File10::ready()' ) )
+        throw new RuntimeException( "Round $round: File10 playback/empty-feed outage truth regressed." );
     $publication = file_get_contents( $source_root . '/includes/class-rsv-reels.php' );
     // A successful first publish and a moderator restore must share the same gate.
     if ( false === strpos( $publication, 'private static function publication_eligibility( $reel, $video )' ) ||

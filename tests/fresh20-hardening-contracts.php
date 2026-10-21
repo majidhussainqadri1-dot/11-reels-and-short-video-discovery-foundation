@@ -7,7 +7,7 @@ $f = array(
     'future'    => $read( $root . '/includes/class-rsv-future30.php' ),
 );
 $must = array(
-    array( 'bootstrap', 'Version: 1.2.0-rc18' ),
+    array( 'bootstrap', 'Version: 1.2.0-rc19' ),
     array( 'bootstrap', "define( 'RSV_CONTRACT_VERSION', 19 )" ),
     array( 'bootstrap', 'class-rsv-fresh20-hardening.php' ),
     array( 'hardening', 'rsv_series_invalid' ), array( 'hardening', 'rsv_learning_step_invalid' ),

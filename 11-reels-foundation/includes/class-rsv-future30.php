@@ -122,13 +122,19 @@ final class RSV_Future30 {
 			KEY user_updated (user_id,updated_at,id)
 		) $c;";
 		foreach ( $sql as $statement ) dbDelta( $statement );
+		$verified = RSV_DB::assert_statements_applied( $sql );
+		if ( is_wp_error( $verified ) ) return $verified;
 		update_option( 'rsv_future30_schema_version', self::SCHEMA_VERSION, false );
 		update_option( 'rsv_future30_contract_version', self::CONTRACT_VERSION, false );
 		update_option( 'rsv_future30_plan_revision', self::PLAN_REVISION, false );
+		return true;
 	}
 
 	public function register() {
-		if ( (string) get_option( 'rsv_future30_schema_version' ) !== self::SCHEMA_VERSION ) self::install();
+		if ( (string) get_option( 'rsv_future30_schema_version' ) !== self::SCHEMA_VERSION ) {
+			$installed = self::install();
+			if ( is_wp_error( $installed ) ) return $installed;
+		}
 		add_action( 'rest_api_init', array( $this, 'routes' ) );
 		add_filter( 'rsv_provider_manifest', array( __CLASS__, 'provider_manifest' ), 55 );
 		add_filter( 'rsv_current_plan_requirements', array( __CLASS__, 'requirements' ) );

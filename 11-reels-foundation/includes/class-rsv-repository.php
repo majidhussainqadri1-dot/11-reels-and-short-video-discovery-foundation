@@ -89,6 +89,12 @@ final class RSV_Repository {
 	 * @return array<string,mixed>|WP_Error
 	 */
 	public static function feed( $args = array() ) {
+		// File 10 supplies authoritative Reel playback eligibility. A missing
+		// media provider is an outage, not evidence that the library is empty.
+		if ( ! RSV_File10::ready() ) {
+			return RSV_Helpers::error( 'rsv_feed_media_unavailable',
+				__( 'The Reel media service is temporarily unavailable. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		global $wpdb;
 		$table  = RSV_Helpers::table( 'reels' );
 		$limit  = min( 50, max( 1, absint( $args['limit'] ?? 12 ) ) );
