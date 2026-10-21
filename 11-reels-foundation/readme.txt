@@ -4,7 +4,7 @@ Tags: reels, educational-video, learning, citations, accessibility, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0-rc20
+Stable tag: 1.2.0-rc21
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,12 @@ The Reel has one canonical source language plus at most nine linked language ver
 No. Payment/donation status is not an allowed recommendation-priority reason.
 
 == Changelog ==
+
+= 1.2.0-rc21 =
+* Corrected MySQL post-dbDelta migration parity: index prefix Sub_part is verified alongside complete composite index columns and ordering.
+* Extended 40 distinct schema mutation cases to 48, preserving all previous release safety and governance regressions.
+* No changed database schema version, migration or owner. Staging/live deployed database remains unverified.
+
 
 = 1.2.0-rc20 =
 * Verify File11, Top20 and Future30 DDL postconditions before marking migration successful; require each column, all unique/nonunique indexes and correct composite-index column order.

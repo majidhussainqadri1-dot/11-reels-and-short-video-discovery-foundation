@@ -1,4 +1,4 @@
-# File 11 Status — 1.2.0-rc20 Future30
+# File 11 Status — 1.2.0-rc21 Future30
 
 | Gate | Status |
 |---|---|
@@ -11,7 +11,7 @@
 | Third fresh 20-round corrective review | **Completed 20/20**; defect rounds `02, 03, 06, 17, 18`; findings `F11-D-932…937` all corrected |
 | Required post-final-code fresh reviews | Forty full-source automated rounds plus RC14 SQL regression suite required on exact final HEAD; never treat as manual semantic/staging review |
 | Canonical owner boundaries | Preserved; F11-FUT-014 linked Reel owner corrected to File 11; no foreign truth tables/raw media/AI engine/global search owner duplicated |
-| Repository source | `1.2.0-rc20`, File 11 contract `19` |
+| Repository source | `1.2.0-rc21`, File 11 contract `19` |
 | Known unresolved repository Blocker/Critical | No known uncorrected rc14 source SQL-read defect in five audited families; full exact-head CI and real staging/live verification are independent pending gates |
 | Deterministic ZIP/checksum | Requires final exact-head rc14 workflow; artifact checksum is not a deployed checksum |
 | Automated QA | Exact-head rc14 GitHub Actions verification governs; preliminary runs are not final |
@@ -29,3 +29,5 @@
 
 | New RC20 owner schema verification | All File11/Top20/Future30 required table columns, PRIMARY/UNIQUE and complete secondary/composite index structures verified before migration markers; incomplete SQL yields fail-closed state | Source implemented; CI active, staging/live DB unverified |
 | RC20 observable schema failures | Admin notification hooked before guarded schema early-return; stale warning cleared only after successful verification, broken schema does not start REST features | Source implemented; isolated behavioral tests, live acceptance pending |
+
+| RC21 index prefix parity | Verify MySQL SHOW INDEX Sub_part against all DDL prefix declarations; 48 isolated schema mutation cases and 40 source sweeps | Repository correction completed, live DB not verified |

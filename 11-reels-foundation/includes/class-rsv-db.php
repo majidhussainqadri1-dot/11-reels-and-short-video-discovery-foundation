@@ -270,17 +270,16 @@ final class RSV_DB {
 				$names = array();
 				$prefixes = array();
 				foreach ( explode( ',', $body ) as $column_spec ) {
-					$prefix_length = null;
-					if ( preg_match( '/\\((\\d+)\\)$/', trim( $column_spec ), $prefix_match ) ) {
-						$prefix_length = (int) $prefix_match[1];
-						if ( $prefix_length < 1 ) return RSV_Helpers::error( 'rsv_schema_definition_invalid', __( 'A Reel index prefix is invalid.', RSV_TEXT_DOMAIN ), 503 );
-					}
-					$column = strtolower( trim( preg_replace( '/\\(\\d+\\)$/', '', trim( $column_spec ) ), ' `' ) );
-					if ( ! preg_match( '/^[a-z][a-z0-9_]*$/', $column ) ) {
+					$spec = trim( $column_spec );
+					if ( ! preg_match( '/^`?([a-z][a-z0-9_]*)`?(?:\\((\\d+)\\))?$/i', $spec, $column_match ) ) {
 						return RSV_Helpers::error( 'rsv_schema_definition_invalid', __( 'A Reel index column is invalid.', RSV_TEXT_DOMAIN ), 503 );
 					}
-					$names[] = $column;
-					$prefixes[] = $prefix_length;
+					$names[] = strtolower( $column_match[1] );
+					$prefix = isset( $column_match[2] ) ? (int) $column_match[2] : null;
+					if ( null !== $prefix && $prefix < 1 ) {
+						return RSV_Helpers::error( 'rsv_schema_definition_invalid', __( 'A Reel index prefix is invalid.', RSV_TEXT_DOMAIN ), 503 );
+					}
+					$prefixes[] = $prefix;
 				}
 				$declared_indexes[$key] = array(
 					'unique' => $is_primary || 0 === stripos( $header, 'UNIQUE' ),
@@ -310,7 +309,10 @@ final class RSV_DB {
 				}
 				$present[$key]['unique'] = 0 === (int) $index_row['Non_unique'];
 				$present[$key]['columns'][$seq] = strtolower( (string) $index_row['Column_name'] );
-				$present[$key]['prefixes'][$seq] = isset( $index_row['Sub_part'] ) && '' !== (string) $index_row['Sub_part'] ? (int) $index_row['Sub_part'] : null;
+				// MySQL SHOW INDEX Sub_part records prefix length. Matching only
+				// Column_name lets a partial or oversized index pass migration.
+				$present[$key]['prefixes'][$seq] = isset( $index_row['Sub_part'] )
+					? (int) $index_row['Sub_part'] : null;
 			}
 			foreach ( $declared_indexes as $index => $expected ) {
 				if ( ! isset( $present[$index] ) || $present[$index]['unique'] !== $expected['unique'] ) {
