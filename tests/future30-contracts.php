@@ -10,7 +10,7 @@ $f = array(
  'uninstall'=>$read($root.'/uninstall.php'),
 );
 $must = array(
- ['bootstrap','Version: 1.2.0-rc18'], ['bootstrap',"define( 'RSV_CONTRACT_VERSION', 19 )"], ['bootstrap',"'class-rsv-future30.php'"], ['bootstrap',"'class-rsv-fresh20-hardening.php'"], ['bootstrap',"'class-rsv-fresh-review-hardening.php'"], ['bootstrap',"'class-rsv-third-review-hardening.php'"],
+ ['bootstrap','Version: 1.2.0-rc19'], ['bootstrap',"define( 'RSV_CONTRACT_VERSION', 19 )"], ['bootstrap',"'class-rsv-future30.php'"], ['bootstrap',"'class-rsv-fresh20-hardening.php'"], ['bootstrap',"'class-rsv-fresh-review-hardening.php'"], ['bootstrap',"'class-rsv-third-review-hardening.php'"],
  ['future',"const SCHEMA_VERSION = '1.0.0'"], ['future',"const PLAN_REVISION = '2026-08-12'"],
  ['future','Educational Reel Series / Playlists'], ['future','Structured Learning Paths'], ['future','Source-at-Time Citation Cards'],
  ['future','Correction & Supersession System'], ['future','Advanced Remix Studio'], ['future','Remix Permission Matrix'],
