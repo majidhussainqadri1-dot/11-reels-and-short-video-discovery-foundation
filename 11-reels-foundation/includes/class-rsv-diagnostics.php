@@ -81,8 +81,12 @@ final class RSV_Diagnostics {
 	public static function repair() {
 		if ( ! current_user_can( 'manage_options' ) && ! RSV_Security::can( RSV_Contracts::CAP_MANAGE ) ) return RSV_Helpers::error( 'rsv_forbidden', __( 'You cannot repair File 11.', RSV_TEXT_DOMAIN ), 403 );
 		$before = self::summary();
-		RSV_DB::install();
-		if ( class_exists( 'RSV_Top20' ) ) RSV_Top20::install();
+		$installed = RSV_DB::install();
+		if ( is_wp_error( $installed ) ) return $installed;
+		if ( class_exists( 'RSV_Top20' ) ) {
+			$installed = RSV_Top20::install();
+			if ( is_wp_error( $installed ) ) return $installed;
+		}
 		RSV_Jobs::schedule();
 		$reconciled = RSV_Migration::reconcile( 200 );
 		if ( is_wp_error( $reconciled ) ) return $reconciled;
