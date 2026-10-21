@@ -87,6 +87,10 @@ final class RSV_Diagnostics {
 			$installed = RSV_Top20::install();
 			if ( is_wp_error( $installed ) ) return $installed;
 		}
+		if ( class_exists( 'RSV_Future30' ) ) {
+			$installed = RSV_Future30::install();
+			if ( is_wp_error( $installed ) ) return $installed;
+		}
 		RSV_Jobs::schedule();
 		$reconciled = RSV_Migration::reconcile( 200 );
 		if ( is_wp_error( $reconciled ) ) return $reconciled;
