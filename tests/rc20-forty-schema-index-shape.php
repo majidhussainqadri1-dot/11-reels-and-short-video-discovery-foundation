@@ -38,7 +38,7 @@ $make=static function(){
         array('Key_name'=>'owner_status','Non_unique'=>1,'Seq_in_index'=>2,'Column_name'=>'status'),
         array('Key_name'=>'owner_status','Non_unique'=>1,'Seq_in_index'=>3,'Column_name'=>'created_at'),
         array('Key_name'=>'target_ref','Non_unique'=>1,'Seq_in_index'=>1,'Column_name'=>'owner_id'),
-        array('Key_name'=>'target_ref','Non_unique'=>1,'Seq_in_index'=>2,'Column_name'=>'ref_code'),
+        array('Key_name'=>'target_ref','Non_unique'=>1,'Seq_in_index'=>2,'Column_name'=>'ref_code','Sub_part'=>120),
         array('Key_name'=>'target_ref','Non_unique'=>1,'Seq_in_index'=>3,'Column_name'=>'status')
     );
     return $db;
