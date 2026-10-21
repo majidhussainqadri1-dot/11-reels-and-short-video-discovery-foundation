@@ -8,7 +8,7 @@ File 11 owns the vertical educational Reel entity, the authoritative 60–600-se
 
 ## Current rc21 MySQL index-prefix migration parity
 
-The DDL postcondition verifier now checks MySQL SHOW INDEX `Sub_part` for every index-column, comparing any declared prefix such as `target_ref(120)` to the installed prefix. This closes a false-success migration-parity hole left after RC20's column-order checks. The prior 40 independent schema mutation scenarios now include eight more prefix-boundary scenarios (48 total), alongside 40 source rounds and all prior tests. A passing GitHub suite proves repository candidate behavior only; installed Hostinger schema/versions and migration state remain unknown.
+The DDL postcondition verifier now checks MySQL SHOW INDEX `Sub_part` for every index-column, comparing any declared prefix such as `target_ref(120)` to the installed prefix. This closes a false-success migration-parity hole left after RC20's column-order checks. The prior 40 independent schema mutation scenarios now include eight more prefix-boundary scenarios (48 total), plus six independently developed RC20 prefix fixtures preserved from the concurrent branch, alongside 40 source rounds and all prior tests. A passing GitHub suite proves repository candidate behavior only; installed Hostinger schema/versions and migration state remain unknown.
 
 ## Prior rc20 complete schema verification and safe admin diagnosis
 

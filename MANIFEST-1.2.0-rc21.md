@@ -7,3 +7,5 @@ Schema unchanged: File11 1.2.0, Top20 1.1.0, Future30 1.0.0. Canonical installab
 Corrected root cause: all DDL index prefix lengths are compared against SHOW INDEX Sub_part during migration postcondition checks; no erroneous completion for missing or mismatched prefixes. Automated tests: 48 distinct schema mutation fixtures; 40 source reviews; 40 central source probes; full PHP8.1/8.3/8.4 regression; double deterministic ZIP and source parity. Earlier releases preserved.
 
 Deployed Version / Live DB Version / Migration State: UNVERIFIED. Staging and Live Verification: NOT PERFORMED. This source candidate is not an approved production release.
+
+Concurrent RC20 SHA `97e3cdbacec93a090f04f726a6c81a5b25388d70` independently corrected the same prefix defect and added six isolated tests. RC21 incorporates the additional tests and ancestry with no duplicate defect count; final exact-HEAD CI must run after merge reconciliation.

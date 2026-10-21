@@ -4,6 +4,7 @@
 
 - Fixed incomplete schema postconditions: Index prefix length (MySQL SHOW INDEX Sub_part) now must match the exact declared DDL prefix. Previously the verifier could mark a partially wrong prefix index as fully migrated.
 - Expanded the 40 distinct RC20 DDL/column/index mutation cases to 48 including shorter, longer, missing and unexpected prefix lengths. Kept every RC20 and earlier check and added a Sub_part guard to every sequential source sweep.
+- Reconciled same-day parallel RC20 Sub_part patch as an additional merge parent and retained six independent prefix tests from that branch; still one distinct source defect.
 - Preserved File11 1.2.0, Top20 1.1.0 and Future30 1.0.0 schemas; no DB changes or live/staging deploy performed.
 
 
