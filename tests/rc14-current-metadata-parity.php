@@ -1,33 +1,33 @@
 <?php
-/** Historical rc19 metadata record is preserved; current exact candidate is rc19. */
+/** Current exact-source release identity and artifact parity test (historical filename retained). */
 $root = dirname( __DIR__ );
 $expect = array(
     'README.md' => array(
-        '**Current repository candidate:** `1.2.0-rc19`',
-        'bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc19.zip',
+        '**Current repository candidate:** `1.2.0-rc20`',
+        'bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc20.zip',
     ),
     'STATUS.md' => array(
-        '# File 11 Status — 1.2.0-rc19 Future30',
-        '| Repository source | `1.2.0-rc19`, File 11 contract `19` |',
+        '# File 11 Status — 1.2.0-rc20 Future30',
+        '| Repository source | `1.2.0-rc20`, File 11 contract `19` |',
     ),
     'RELEASE-MANIFEST.md' => array(
-        '# Release Manifest — File 11 v1.2.0-rc19',
-        '- Plugin version: `1.2.0-rc19`',
-        '- Package: `reels-foundation-11-1.2.0-rc19.zip`',
+        '# Release Manifest — File 11 v1.2.0-rc20',
+        '- Plugin version: `1.2.0-rc20`',
+        '- Package: `reels-foundation-11-1.2.0-rc20.zip`',
         '- File 11 contract: `19`',
     ),
     '11-reels-foundation/11-reels-foundation.php' => array(
-        'Version: 1.2.0-rc19',
-        "define( 'RSV_VERSION', '1.2.0-rc19' )",
+        'Version: 1.2.0-rc20',
+        "define( 'RSV_VERSION', '1.2.0-rc20' )",
         "define( 'RSV_CONTRACT_VERSION', 19 )",
     ),
     '11-reels-foundation/readme.txt' => array(
-        'Stable tag: 1.2.0-rc19',
+        'Stable tag: 1.2.0-rc20',
         '= 1.2.0-rc13 =',
     ),
     '.github/workflows/file11-release.yml' => array(
-        'reels-foundation-11-1.2.0-rc19.zip',
-        'file11-reels-1.2.0-rc19',
+        'reels-foundation-11-1.2.0-rc20.zip',
+        'file11-reels-1.2.0-rc20',
     ),
 );
 $assertions = 0;
@@ -37,9 +37,9 @@ foreach ( $expect as $path => $markers ) {
     foreach ( $markers as $needle ) {
         ++$assertions;
         if ( false === strpos( $content, $needle ) ) {
-            fwrite( STDERR, "CURRENT RC19 RELEASE METADATA MISMATCH: $path missing $needle\n" );
+            fwrite( STDERR, "CURRENT RC20 RELEASE METADATA MISMATCH: $path missing $needle\n" );
             exit( 1 );
         }
     }
 }
-echo "RC19 exact-source version/contract/package/doc parity ($assertions checks) PASS\n";
+echo "RC20 exact-source version/contract/package/doc parity ($assertions checks) PASS\n";
