@@ -159,12 +159,16 @@ final class RSV_Top20 {
 			PRIMARY KEY (id), UNIQUE KEY viewer_signal_day (reel_id,viewer_hash,signal_key,day_key), KEY created_at (created_at)
 		) $c;";
 		foreach ( $sql as $statement ) dbDelta( $statement );
+		$verified = RSV_DB::assert_statements_applied( $sql );
+		if ( is_wp_error( $verified ) ) return $verified;
 		update_option( 'rsv_top20_schema_version', self::SCHEMA_VERSION, false );
+		return true;
 	}
 
 	public static function maybe_install() {
 		if ( (string) get_option( 'rsv_top20_schema_version' ) !== self::SCHEMA_VERSION ) {
-			self::install();
+			$installed = self::install();
+			if ( is_wp_error( $installed ) ) return $installed;
 			update_option( 'rsv_top20_rewrite_flush', 1, false );
 		}
 		if ( get_option( 'rsv_top20_rewrite_flush' ) ) {
