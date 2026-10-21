@@ -1,12 +1,16 @@
 # File 11 — Reels and Short Video Discovery
 
-**Current repository candidate:** `1.2.0-rc20`  
+**Current repository candidate:** `1.2.0-rc21`  
 **Future30 amendment:** `SSH-F11-FUTURE-REEL-KNOWLEDGE-INTELLIGENCE-30-2026`  
 **Canonical package root:** `reels-foundation-11`
 
 File 11 owns the vertical educational Reel entity, the authoritative 60–600-second Reel eligibility rule through File 10, Reel-native discovery, moderation, private history/progress and the approved Reel-domain Future30 orchestration layer. It does not duplicate File 10 raw media, File 05 learning truth, File 06 canonical knowledge, File 16 AI execution, File 00 identity, File 19 delivery, File 20 shell, File 24 assurance, File 25 visual system or File 26 cross-platform discovery/graph ownership.
 
-## Current rc20 complete schema verification and safe admin diagnosis
+## Current rc21 MySQL index-prefix migration parity
+
+The DDL postcondition verifier now checks MySQL SHOW INDEX `Sub_part` for every index-column, comparing any declared prefix such as `target_ref(120)` to the installed prefix. This closes a false-success migration-parity hole left after RC20's column-order checks. The prior 40 independent schema mutation scenarios now include eight more prefix-boundary scenarios (48 total), alongside 40 source rounds and all prior tests. A passing GitHub suite proves repository candidate behavior only; installed Hostinger schema/versions and migration state remain unknown.
+
+## Prior rc20 complete schema verification and safe admin diagnosis
 
 RC20 incorporates the separate draft PR31 migration postconditions **without losing RC19 File10 outage fixes**. `RSV_DB::assert_statements_applied()` verifies required File11/Top20/Future30 columns, PRIMARY and UNIQUE indexes, all secondary indexes and the exact ordered columns in each composite index before advancing schema options. A partial migration stops plugin activation or runtime registration, with an admin-visible error even when registration returns early. `tests/rc20-forty-schema-index-shape.php` has 40 independent DDL/index mutation cases, `tests/rc19-schema-failclosed-migration.php` retains PR31 tests, and `tests/rc20-schema-admin-notice.php` adds nine guarded runtime/admin behavior checks. These are isolated QA fixtures, not proofs of installed Hostinger database integrity. No database schema version change or live deployment is asserted.
 
@@ -93,7 +97,7 @@ The 2026-08-12 Founder-approved amendment retains all `F11-FUT-001` through `F11
 
 ```bash
 bash tests/run-all.sh
-bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc20.zip
+bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc21.zip
 ```
 
 The exact-head rc15 release workflow must pass PHP 8.1/8.3/8.4 suites, JavaScript syntax, inherited corrective regressions, current-plan/Future30 and all three fresh20 contract suites, deterministic double build, checksum, ZIP integrity and exact runtime source/package parity.

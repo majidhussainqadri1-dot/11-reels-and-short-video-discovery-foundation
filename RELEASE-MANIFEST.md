@@ -1,9 +1,9 @@
-# Release Manifest — File 11 v1.2.0-rc20
+# Release Manifest — File 11 v1.2.0-rc21
 
 - Source directory: `11-reels-foundation`
 - Installable root: `reels-foundation-11`
-- Package: `reels-foundation-11-1.2.0-rc20.zip`
-- Plugin version: `1.2.0-rc20`
+- Package: `reels-foundation-11-1.2.0-rc21.zip`
+- Plugin version: `1.2.0-rc21`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
 - Future30 schema: `1.0.0`
@@ -28,3 +28,5 @@
 - RC14 query parity: private history, neighbor discovery, public author projection, public search, creator insights fail closed on SQL errors; no schema or canonical owner change.
 
 - RC20 confirms structural postconditions of File11/Top20/Future30 tables, secondary/composite index column order and all unique indexes after dbDelta, prior to schema option advancement. Missing/incorrect schema blocks activation and guarded runtime; admin failure notice remains visible. CI includes isolated 40-case index/DDL regression; actual deployed DB unverified.
+
+- RC21 source: checks actual MySQL index prefix length (SHOW INDEX Sub_part) against each declared DDL index column prefix. 48 distinct schema mutation scenarios, unchanged File11/Top20/Future30 schema versions. Production deployment and DB parity UNVERIFIED.
