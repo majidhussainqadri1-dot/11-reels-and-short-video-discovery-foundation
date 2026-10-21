@@ -100,6 +100,8 @@ final class RSV_Plugin {
 	}
 
 	public function register() {
+		// Register diagnostics before any early return on partial migrations.
+		add_action( 'admin_notices', array( $this, 'notices' ) );
 		if ( (string) get_option( 'rsv_schema_version' ) !== RSV_SCHEMA_VERSION ) {
 			$installed = RSV_DB::install();
 			if ( is_wp_error( $installed ) ) {
@@ -121,6 +123,8 @@ final class RSV_Plugin {
 				return;
 			}
 		}
+		// A successful owner schema verification clears obsolete warning state.
+		delete_transient( 'rsv_schema_repair_error' );
 		if ( (string) get_option( 'rsv_version' ) !== RSV_VERSION || (string) get_option( 'rsv_governing_plan_revision' ) !== RSV_Current_Plan::REVISION ) {
 			self::roles();
 			$pages = self::pages();
@@ -142,11 +146,16 @@ final class RSV_Plugin {
 		( new RSV_Top20() )->register();
 		( new RSV_Current_Plan() )->register();
 		( new RSV_Future30() )->register();
-		add_action( 'admin_notices', array( $this, 'notices' ) );
 	}
 
 	public function notices() {
 		if ( ! current_user_can( 'manage_options' ) ) return;
+		$schema_failure = get_transient( 'rsv_schema_repair_error' );
+		if ( $schema_failure ) {
+			echo '<div class="notice notice-error"><p>' . esc_html( (string) $schema_failure ) . '</p></div>';
+			// Diagnostics queries themselves require the schema; stop here.
+			return;
+		}
 		if ( get_transient( 'rsv_activation_notice' ) ) {
 			delete_transient( 'rsv_activation_notice' );
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'File 11 Reels activated. Complete staging acceptance before production use.', RSV_TEXT_DOMAIN ) . '</p></div>';
