@@ -4,7 +4,7 @@ Tags: reels, educational-video, learning, citations, accessibility, privacy
 Requires at least: 6.7
 Tested up to: 7.0
 Requires PHP: 8.1
-Stable tag: 1.2.0-rc19
+Stable tag: 1.2.0-rc20
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,6 +42,13 @@ The Reel has one canonical source language plus at most nine linked language ver
 No. Payment/donation status is not an allowed recommendation-priority reason.
 
 == Changelog ==
+
+= 1.2.0-rc20 =
+* Verify File11, Top20 and Future30 DDL postconditions before marking migration successful; require each column, all unique/nonunique indexes and correct composite-index column order.
+* Fail closed when required database migration cannot complete; make the error visible in WordPress admin before guarded registration exits.
+* Preserve File10 RC19 media-provider error behavior, RC18 privacy, RC17 restoration and earlier guards; add forty distinct schema mutation scenarios, schema postcondition and admin failure regression.
+* Source candidate only. Live deployed code, database and migration parity remain unverified.
+
 
 = 1.2.0-rc19 =
 * Return File10 playback provider errors directly from public Reel detail REST endpoint instead of falsely succeeding with nested WP_Error.
