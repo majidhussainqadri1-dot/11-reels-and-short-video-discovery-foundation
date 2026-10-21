@@ -84,6 +84,14 @@ $tests=array(
     array('38 missing primary DDL definition','rsv_schema_definition_invalid',static function($db,&$statements){$statements[0] = str_replace('PRIMARY KEY (id),','KEY id (id),',$statements[0]);}),
     array('39 duplicate declared index names','rsv_schema_definition_invalid',static function($db,&$statements){$statements[0] = str_replace('KEY owner_status (owner_id,status,created_at),','KEY owner_status (owner_id,status,created_at), KEY owner_status (status,created_at),',$statements[0]);}),
     array('40 malformed prefix index column','rsv_schema_definition_invalid',static function($db,&$statements){$statements[0] = str_replace('ref_code(120)','ref_code(abc)',$statements[0]);}),
+    array('41 missing required prefix length','rsv_schema_incomplete',static function($db,&$statements){unset($db->indexes[6]['Sub_part']);}),
+    array('42 shortened installed prefix','rsv_schema_incomplete',static function($db,&$statements){$db->indexes[6]['Sub_part']=60;}),
+    array('43 overly long installed prefix','rsv_schema_incomplete',static function($db,&$statements){$db->indexes[6]['Sub_part']=255;}),
+    array('44 numeric-string matching prefix','ready',static function($db,&$statements){$db->indexes[6]['Sub_part']='120';}),
+    array('45 unexpected prefix on primary','rsv_schema_incomplete',static function($db,&$statements){$db->indexes[0]['Sub_part']=1;}),
+    array('46 unexpected prefix on secondary','rsv_schema_incomplete',static function($db,&$statements){$db->indexes[2]['Sub_part']=20;}),
+    array('47 changed required prefix DDL','rsv_schema_incomplete',static function($db,&$statements){$statements[0]=str_replace('ref_code(120)','ref_code(80)',$statements[0]);}),
+    array('48 non-prefixed DDL against matching full index','ready',static function($db,&$statements){$statements[0]=str_replace('ref_code(120)','ref_code',$statements[0]);unset($db->indexes[6]['Sub_part']);}),
 );
 $fail=array();
 foreach($tests as $test){
@@ -96,6 +104,6 @@ foreach($tests as $test){
     $code=is_wp_error($response)?$response->get_error_code():'ready';
     if($code!==$test[1]) $fail[]=$test[0].": expected ".$test[1].", got ".$code;
 }
-if(count($tests)!==40)$fail[]='The required forty distinct scenarios were not defined.';
+if(count($tests)!==48)$fail[]='The required forty distinct scenarios were not defined.';
 if($fail){fwrite(STDERR,"RC20 INDEX SCHEMA FAILURES:\n".implode("\n",$fail)."\n");exit(1);}
-echo "RC20 40/40 distinct Table/Column/Index/DDL postcondition cases PASS (isolated fixtures)\n";
+echo "RC21 48/48 distinct Table/Column/Index/Prefix/DDL postcondition cases PASS (isolated fixtures)\n";
