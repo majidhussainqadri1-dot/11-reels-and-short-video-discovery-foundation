@@ -70,8 +70,15 @@ final class RSV_REST {
 	public function get( $request ) {
 		$reel = $this->reel_from_request( $request );
 		if ( ! RSV_Security::can_view_reel( $reel ) ) return RSV_Helpers::error( 'rsv_not_found', __( 'Reel not found.', RSV_TEXT_DOMAIN ), 404 );
+		// File 10 is the playback source of truth. A provider refusal/outage is
+		// an HTTP error, never a successful Reel DTO containing a WP_Error.
+		$playback = RSV_File10::playback( $reel['video_id'] );
+		if ( is_wp_error( $playback ) ) return $playback;
+		if ( ! is_array( $playback ) ) {
+			return RSV_Helpers::error( 'rsv_playback_malformed', __( 'Playback is temporarily unavailable.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		$dto = RSV_Repository::public_dto( $reel );
-		$dto['playback'] = RSV_File10::playback( $reel['video_id'] );
+		$dto['playback'] = $playback;
 		return rest_ensure_response( $dto );
 	}
 
