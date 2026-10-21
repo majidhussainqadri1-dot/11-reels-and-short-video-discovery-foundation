@@ -18,9 +18,21 @@ final class RSV_Plugin {
 				array( 'response' => 400, 'back_link' => true )
 			);
 		}
-		RSV_DB::install();
-		RSV_Top20::install();
-		RSV_Future30::install();
+		$installed = RSV_DB::install();
+		if ( is_wp_error( $installed ) ) {
+			deactivate_plugins( plugin_basename( RSV_FILE ) );
+			wp_die( esc_html( $installed->get_error_message() ), esc_html__( 'File 11 database migration incomplete', RSV_TEXT_DOMAIN ), array( 'response' => 503, 'back_link' => true ) );
+		}
+		$installed = RSV_Top20::install();
+		if ( is_wp_error( $installed ) ) {
+			deactivate_plugins( plugin_basename( RSV_FILE ) );
+			wp_die( esc_html( $installed->get_error_message() ), esc_html__( 'File 11 database migration incomplete', RSV_TEXT_DOMAIN ), array( 'response' => 503, 'back_link' => true ) );
+		}
+		$installed = RSV_Future30::install();
+		if ( is_wp_error( $installed ) ) {
+			deactivate_plugins( plugin_basename( RSV_FILE ) );
+			wp_die( esc_html( $installed->get_error_message() ), esc_html__( 'File 11 database migration incomplete', RSV_TEXT_DOMAIN ), array( 'response' => 503, 'back_link' => true ) );
+		}
 		self::roles();
 		$pages = self::pages();
 		if ( is_wp_error( $pages ) ) {
@@ -88,9 +100,27 @@ final class RSV_Plugin {
 	}
 
 	public function register() {
-		if ( (string) get_option( 'rsv_schema_version' ) !== RSV_SCHEMA_VERSION ) RSV_DB::install();
-		if ( (string) get_option( 'rsv_top20_schema_version' ) !== RSV_Top20::SCHEMA_VERSION ) RSV_Top20::install();
-		if ( (string) get_option( 'rsv_future30_schema_version' ) !== RSV_Future30::SCHEMA_VERSION ) RSV_Future30::install();
+		if ( (string) get_option( 'rsv_schema_version' ) !== RSV_SCHEMA_VERSION ) {
+			$installed = RSV_DB::install();
+			if ( is_wp_error( $installed ) ) {
+				set_transient( 'rsv_schema_repair_error', $installed->get_error_message(), 300 );
+				return;
+			}
+		}
+		if ( (string) get_option( 'rsv_top20_schema_version' ) !== RSV_Top20::SCHEMA_VERSION ) {
+			$installed = RSV_Top20::install();
+			if ( is_wp_error( $installed ) ) {
+				set_transient( 'rsv_schema_repair_error', $installed->get_error_message(), 300 );
+				return;
+			}
+		}
+		if ( (string) get_option( 'rsv_future30_schema_version' ) !== RSV_Future30::SCHEMA_VERSION ) {
+			$installed = RSV_Future30::install();
+			if ( is_wp_error( $installed ) ) {
+				set_transient( 'rsv_schema_repair_error', $installed->get_error_message(), 300 );
+				return;
+			}
+		}
 		if ( (string) get_option( 'rsv_version' ) !== RSV_VERSION || (string) get_option( 'rsv_governing_plan_revision' ) !== RSV_Current_Plan::REVISION ) {
 			self::roles();
 			$pages = self::pages();
