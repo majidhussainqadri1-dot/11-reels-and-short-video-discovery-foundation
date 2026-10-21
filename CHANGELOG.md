@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0-rc20 — 2026-10-21
+
+- Reconciled separate draft PR #31 migration postcondition checks with RC19's File10 playback/feed outage safeguards; no direct main or production change.
+- Fixed unverified `dbDelta` postconditions for File11, Top20 and Future30. The schema version is no longer advanced unless all required tables, columns, PRIMARY and UNIQUE indexes, and secondary/composite index column order are present.
+- Fixed silent administrative failure: the schema migration error notice now registers before an early fail-closed return; diagnostic SQL is not invoked against incomplete tables and stale schema notices clear on successful verification.
+- Added 40 distinct schema/DDL/index mutation cases, the inherited PR31 migration tests, and nine WordPress-shaped failure/diagnostic checks, alongside existing 40 frozen-source rounds and 40 canonical contract probes.
+- Schema constants remain unchanged. GitHub candidate is not deployed/staging/live acceptance.
+
+
 ## 1.2.0-rc19 — 2026-10-21
 
 - Fixed REST Reel detail endpoint returning a successful DTO with a nested File10 `WP_Error` on playback failure; now returns the upstream typed error and denies malformed provider responses.
