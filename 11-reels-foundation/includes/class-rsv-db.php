@@ -183,8 +183,10 @@ final class RSV_DB {
 		foreach ( $sql as $statement ) {
 			dbDelta( $statement );
 		}
-
+		$verified = self::assert_statements_applied( $sql );
+		if ( is_wp_error( $verified ) ) return $verified;
 		update_option( 'rsv_schema_version', RSV_SCHEMA_VERSION, false );
+		return true;
 	}
 
 	public static function transaction( $callback ) {
@@ -213,6 +215,117 @@ final class RSV_DB {
 			}
 			return RSV_Helpers::error( 'rsv_transaction_failed', __( 'The operation could not be completed safely.', RSV_TEXT_DOMAIN ), 500 );
 		}
+	}
+
+
+	/** @return true|WP_Error */
+	public static function assert_statements_applied( $statements ) {
+		global $wpdb;
+		if ( ! is_object( $wpdb ) || ! method_exists( $wpdb, 'get_col' ) || ! method_exists( $wpdb, 'get_results' ) ) {
+			return RSV_Helpers::error( 'rsv_schema_verification_unavailable', __( 'Reel schema verification is unavailable.', RSV_TEXT_DOMAIN ), 503 );
+		}
+		foreach ( $statements as $statement ) {
+			if ( ! preg_match( '/\\bCREATE\\s+TABLE\\s+([A-Za-z0-9_]+)\\s*\\(/i', $statement, $table_match ) ) {
+				return RSV_Helpers::error( 'rsv_schema_definition_invalid', __( 'The Reel schema definition is invalid.', RSV_TEXT_DOMAIN ), 503 );
+			}
+			$table = $table_match[1];
+			preg_match_all( '/^\\s*([a-z][a-z0-9_]*)\\s+(?:bigint|varchar|longtext|text|tinyint|smallint|int|char|datetime|date|decimal)\\b/mi', $statement, $column_matches );
+			if ( empty( $column_matches[1] ) ) {
+				return RSV_Helpers::error( 'rsv_schema_definition_invalid', __( 'The Reel schema definition has no columns.', RSV_TEXT_DOMAIN ), 503 );
+			}
+			$columns = $wpdb->get_col( "SHOW COLUMNS FROM $table", 0 );
+			if ( ! is_array( $columns ) || '' !== (string) ( $wpdb->last_error ?? '' ) ) {
+				return RSV_Helpers::error( 'rsv_schema_incomplete', __( 'The Reel database migration is incomplete. Features are temporarily unavailable.', RSV_TEXT_DOMAIN ), 503 );
+			}
+			foreach ( $column_matches[1] as $expected ) {
+				if ( ! in_array( $expected, $columns, true ) ) {
+					return RSV_Helpers::error( 'rsv_schema_incomplete', __( 'The Reel database migration is incomplete. Features are temporarily unavailable.', RSV_TEXT_DOMAIN ), 503 );
+				}
+			}
+			// Checking PRIMARY/UNIQUE index names alone is insufficient: a
+			// failed dbDelta can leave missing or reordered secondary indexes
+			// while recording a successful schema version.
+			$declared_indexes = array();
+			preg_match_all( '/\\b(PRIMARY\\s+KEY|UNIQUE\\s+KEY\\s+[A-Za-z0-9_]+|KEY\\s+[A-Za-z0-9_]+)\\s*\\(/i',
+				$statement, $index_headers, PREG_OFFSET_CAPTURE );
+			foreach ( $index_headers[0] as $position => $header_match ) {
+				$header = trim( $index_headers[1][$position][0] );
+				$offset = $header_match[1] + strlen( $header_match[0] );
+				$depth = 1;
+				$body = '';
+				for ( $i = $offset, $length = strlen( $statement ); $i < $length && $depth > 0; ++$i ) {
+					if ( '(' === $statement[$i] ) ++$depth;
+					if ( ')' === $statement[$i] ) --$depth;
+					if ( $depth > 0 ) $body .= $statement[$i];
+				}
+				if ( 0 !== $depth ) {
+					return RSV_Helpers::error( 'rsv_schema_definition_invalid', __( 'A Reel index declaration is invalid.', RSV_TEXT_DOMAIN ), 503 );
+				}
+				$is_primary = 0 === strcasecmp( preg_replace( '/\\s+/', ' ', $header ), 'PRIMARY KEY' );
+				preg_match( '/KEY\\s+([A-Za-z0-9_]+)$/i', $header, $named_index );
+				$key = strtolower( $is_primary ? 'PRIMARY' : ( $named_index[1] ?? '' ) );
+				if ( '' === $key || isset( $declared_indexes[$key] ) ) {
+					return RSV_Helpers::error( 'rsv_schema_definition_invalid', __( 'A Reel index declaration is invalid.', RSV_TEXT_DOMAIN ), 503 );
+				}
+				$names = array();
+				$prefixes = array();
+				foreach ( explode( ',', $body ) as $column_spec ) {
+					$prefix_length = null;
+					if ( preg_match( '/\\((\\d+)\\)$/', trim( $column_spec ), $prefix_match ) ) {
+						$prefix_length = (int) $prefix_match[1];
+						if ( $prefix_length < 1 ) return RSV_Helpers::error( 'rsv_schema_definition_invalid', __( 'A Reel index prefix is invalid.', RSV_TEXT_DOMAIN ), 503 );
+					}
+					$column = strtolower( trim( preg_replace( '/\\(\\d+\\)$/', '', trim( $column_spec ) ), ' `' ) );
+					if ( ! preg_match( '/^[a-z][a-z0-9_]*$/', $column ) ) {
+						return RSV_Helpers::error( 'rsv_schema_definition_invalid', __( 'A Reel index column is invalid.', RSV_TEXT_DOMAIN ), 503 );
+					}
+					$names[] = $column;
+					$prefixes[] = $prefix_length;
+				}
+				$declared_indexes[$key] = array(
+					'unique' => $is_primary || 0 === stripos( $header, 'UNIQUE' ),
+					'columns' => $names,
+					'prefixes' => $prefixes,
+				);
+			}
+			if ( ! isset( $declared_indexes['primary'] ) ) {
+				return RSV_Helpers::error( 'rsv_schema_definition_invalid', __( 'Reel primary index declaration missing.', RSV_TEXT_DOMAIN ), 503 );
+			}
+			$index_rows = $wpdb->get_results( "SHOW INDEX FROM $table", ARRAY_A );
+			if ( ! is_array( $index_rows ) || '' !== (string) ( $wpdb->last_error ?? '' ) ) {
+				return RSV_Helpers::error( 'rsv_schema_incomplete', __( 'The Reel database migration is incomplete. Features are temporarily unavailable.', RSV_TEXT_DOMAIN ), 503 );
+			}
+			$present = array();
+			foreach ( $index_rows as $index_row ) {
+				if ( ! is_array( $index_row ) || ! isset( $index_row['Key_name'], $index_row['Non_unique'], $index_row['Column_name'], $index_row['Seq_in_index'] ) ) {
+					return RSV_Helpers::error( 'rsv_schema_incomplete', __( 'The Reel database migration is incomplete. Features are temporarily unavailable.', RSV_TEXT_DOMAIN ), 503 );
+				}
+				$key = strtolower( (string) $index_row['Key_name'] );
+				$seq = (int) $index_row['Seq_in_index'];
+				if ( $seq < 1 || isset( $present[$key]['columns'][$seq] ) ) {
+					return RSV_Helpers::error( 'rsv_schema_incomplete', __( 'The Reel database migration is incomplete. Features are temporarily unavailable.', RSV_TEXT_DOMAIN ), 503 );
+				}
+				if ( isset( $present[$key] ) && $present[$key]['unique'] !== ( 0 === (int) $index_row['Non_unique'] ) ) {
+					return RSV_Helpers::error( 'rsv_schema_incomplete', __( 'The Reel database migration is incomplete. Features are temporarily unavailable.', RSV_TEXT_DOMAIN ), 503 );
+				}
+				$present[$key]['unique'] = 0 === (int) $index_row['Non_unique'];
+				$present[$key]['columns'][$seq] = strtolower( (string) $index_row['Column_name'] );
+				$present[$key]['prefixes'][$seq] = isset( $index_row['Sub_part'] ) && '' !== (string) $index_row['Sub_part'] ? (int) $index_row['Sub_part'] : null;
+			}
+			foreach ( $declared_indexes as $index => $expected ) {
+				if ( ! isset( $present[$index] ) || $present[$index]['unique'] !== $expected['unique'] ) {
+					return RSV_Helpers::error( 'rsv_schema_incomplete', __( 'The Reel database migration is incomplete. Features are temporarily unavailable.', RSV_TEXT_DOMAIN ), 503 );
+				}
+				ksort( $present[$index]['columns'] );
+				ksort( $present[$index]['prefixes'] );
+				if ( array_keys( $present[$index]['columns'] ) !== range( 1, count( $expected['columns'] ) )
+					|| array_values( $present[$index]['columns'] ) !== $expected['columns']
+					|| array_values( $present[$index]['prefixes'] ) !== $expected['prefixes'] ) {
+					return RSV_Helpers::error( 'rsv_schema_incomplete', __( 'The Reel database migration is incomplete. Features are temporarily unavailable.', RSV_TEXT_DOMAIN ), 503 );
+				}
+			}
+		}
+		return true;
 	}
 
 	public static function table_exists( $logical_name ) {

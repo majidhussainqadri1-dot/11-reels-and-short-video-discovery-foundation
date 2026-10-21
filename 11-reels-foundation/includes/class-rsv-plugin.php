@@ -18,9 +18,21 @@ final class RSV_Plugin {
 				array( 'response' => 400, 'back_link' => true )
 			);
 		}
-		RSV_DB::install();
-		RSV_Top20::install();
-		RSV_Future30::install();
+		$installed = RSV_DB::install();
+		if ( is_wp_error( $installed ) ) {
+			deactivate_plugins( plugin_basename( RSV_FILE ) );
+			wp_die( esc_html( $installed->get_error_message() ), esc_html__( 'File 11 database migration incomplete', RSV_TEXT_DOMAIN ), array( 'response' => 503, 'back_link' => true ) );
+		}
+		$installed = RSV_Top20::install();
+		if ( is_wp_error( $installed ) ) {
+			deactivate_plugins( plugin_basename( RSV_FILE ) );
+			wp_die( esc_html( $installed->get_error_message() ), esc_html__( 'File 11 database migration incomplete', RSV_TEXT_DOMAIN ), array( 'response' => 503, 'back_link' => true ) );
+		}
+		$installed = RSV_Future30::install();
+		if ( is_wp_error( $installed ) ) {
+			deactivate_plugins( plugin_basename( RSV_FILE ) );
+			wp_die( esc_html( $installed->get_error_message() ), esc_html__( 'File 11 database migration incomplete', RSV_TEXT_DOMAIN ), array( 'response' => 503, 'back_link' => true ) );
+		}
 		self::roles();
 		$pages = self::pages();
 		if ( is_wp_error( $pages ) ) {
@@ -88,9 +100,31 @@ final class RSV_Plugin {
 	}
 
 	public function register() {
-		if ( (string) get_option( 'rsv_schema_version' ) !== RSV_SCHEMA_VERSION ) RSV_DB::install();
-		if ( (string) get_option( 'rsv_top20_schema_version' ) !== RSV_Top20::SCHEMA_VERSION ) RSV_Top20::install();
-		if ( (string) get_option( 'rsv_future30_schema_version' ) !== RSV_Future30::SCHEMA_VERSION ) RSV_Future30::install();
+		// Register diagnostics before any early return on partial migrations.
+		add_action( 'admin_notices', array( $this, 'notices' ) );
+		if ( (string) get_option( 'rsv_schema_version' ) !== RSV_SCHEMA_VERSION ) {
+			$installed = RSV_DB::install();
+			if ( is_wp_error( $installed ) ) {
+				set_transient( 'rsv_schema_repair_error', $installed->get_error_message(), 300 );
+				return;
+			}
+		}
+		if ( (string) get_option( 'rsv_top20_schema_version' ) !== RSV_Top20::SCHEMA_VERSION ) {
+			$installed = RSV_Top20::install();
+			if ( is_wp_error( $installed ) ) {
+				set_transient( 'rsv_schema_repair_error', $installed->get_error_message(), 300 );
+				return;
+			}
+		}
+		if ( (string) get_option( 'rsv_future30_schema_version' ) !== RSV_Future30::SCHEMA_VERSION ) {
+			$installed = RSV_Future30::install();
+			if ( is_wp_error( $installed ) ) {
+				set_transient( 'rsv_schema_repair_error', $installed->get_error_message(), 300 );
+				return;
+			}
+		}
+		// A successful owner schema verification clears obsolete warning state.
+		delete_transient( 'rsv_schema_repair_error' );
 		if ( (string) get_option( 'rsv_version' ) !== RSV_VERSION || (string) get_option( 'rsv_governing_plan_revision' ) !== RSV_Current_Plan::REVISION ) {
 			self::roles();
 			$pages = self::pages();
@@ -112,11 +146,16 @@ final class RSV_Plugin {
 		( new RSV_Top20() )->register();
 		( new RSV_Current_Plan() )->register();
 		( new RSV_Future30() )->register();
-		add_action( 'admin_notices', array( $this, 'notices' ) );
 	}
 
 	public function notices() {
 		if ( ! current_user_can( 'manage_options' ) ) return;
+		$schema_failure = get_transient( 'rsv_schema_repair_error' );
+		if ( $schema_failure ) {
+			echo '<div class="notice notice-error"><p>' . esc_html( (string) $schema_failure ) . '</p></div>';
+			// Diagnostics queries themselves require the schema; stop here.
+			return;
+		}
 		if ( get_transient( 'rsv_activation_notice' ) ) {
 			delete_transient( 'rsv_activation_notice' );
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'File 11 Reels activated. Complete staging acceptance before production use.', RSV_TEXT_DOMAIN ) . '</p></div>';

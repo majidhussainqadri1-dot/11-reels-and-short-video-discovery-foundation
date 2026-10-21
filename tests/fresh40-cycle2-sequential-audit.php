@@ -108,6 +108,20 @@ for ( $round = 1; $round <= 40; ++$round ) {
         || false === strpos( $identity, '$canonical_eligible' )
         || false === strpos( $identity, "'unlisted' === " . '$visibility' ) )
         throw new RuntimeException( "Round $round: File00/10 current authority and public media gates regressed." );
+    $schema_src = file_get_contents( $source_root . '/includes/class-rsv-db.php' );
+    $plugin_src = file_get_contents( $source_root . '/includes/class-rsv-plugin.php' );
+    foreach ( array(
+        'assert_statements_applied( $sql )',
+        'Seq_in_index',
+        'Column_name',
+        'rsv_schema_incomplete'
+    ) as $schema_guard ) {
+        if ( false === strpos( $schema_src, $schema_guard ) )
+            throw new RuntimeException( "Round $round: missing File11 schema migration verification guard." );
+    }
+    if ( false === strpos( $plugin_src, "rsv_schema_repair_error" )
+        || false === strpos( $plugin_src, "add_action( 'admin_notices', array( " ) )
+        throw new RuntimeException( "Round $round: schema migration error visibility guard regressed." );
     $privacy_export = file_get_contents( $source_root . '/includes/class-rsv-privacy.php' );
     foreach ( array(
         'rsv_privacy_history_export_unavailable',
