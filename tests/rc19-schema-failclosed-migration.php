@@ -11,8 +11,8 @@ final class RC19_Schema_DB {
     public $last_error='';
     public $columns=array('id','public_id','updated_at');
     public $indexes=array(
-        array('Key_name'=>'PRIMARY','Non_unique'=>0),
-        array('Key_name'=>'public_id','Non_unique'=>0)
+        array('Key_name'=>'PRIMARY','Non_unique'=>0,'Column_name'=>'id','Seq_in_index'=>1),
+        array('Key_name'=>'public_id','Non_unique'=>0,'Column_name'=>'public_id','Seq_in_index'=>1)
     );
     public $columns_result=true;
     public $indexes_result=true;
@@ -33,7 +33,7 @@ $cases=0;$failed=array();
 $probe=static function($label,$setup,$expected)use(&$cases,&$failed,$ddl){
   $db=$GLOBALS['wpdb'];
   $db->last_error='';$db->columns=array('id','public_id','updated_at');
-  $db->indexes=array(array('Key_name'=>'PRIMARY','Non_unique'=>0),array('Key_name'=>'public_id','Non_unique'=>0));
+  $db->indexes=array(array('Key_name'=>'PRIMARY','Non_unique'=>0,'Column_name'=>'id','Seq_in_index'=>1),array('Key_name'=>'public_id','Non_unique'=>0,'Column_name'=>'public_id','Seq_in_index'=>1));
   $db->columns_result=true;$db->indexes_result=true;
   $setup($db);
   ++$cases;
@@ -45,8 +45,8 @@ $probe('01 ready structure succeeds',static function($db){},'ready');
 $probe('02 missing table fails',static function($db){$db->columns_result=false;},'rsv_schema_incomplete');
 $probe('03 missing required id column',static function($db){$db->columns=array('public_id','updated_at');},'rsv_schema_incomplete');
 $probe('04 missing required timestamp column',static function($db){$db->columns=array('id','public_id');},'rsv_schema_incomplete');
-$probe('05 missing unique index',static function($db){$db->indexes=array(array('Key_name'=>'PRIMARY','Non_unique'=>0));},'rsv_schema_incomplete');
-$probe('06 missing primary index',static function($db){$db->indexes=array(array('Key_name'=>'public_id','Non_unique'=>0));},'rsv_schema_incomplete');
+$probe('05 missing unique index',static function($db){$db->indexes=array(array('Key_name'=>'PRIMARY','Non_unique'=>0,'Column_name'=>'id','Seq_in_index'=>1));},'rsv_schema_incomplete');
+$probe('06 missing primary index',static function($db){$db->indexes=array(array('Key_name'=>'public_id','Non_unique'=>0,'Column_name'=>'public_id','Seq_in_index'=>1));},'rsv_schema_incomplete');
 $probe('07 nonunique index cannot masquerade as unique',static function($db){$db->indexes[1]['Non_unique']=1;},'rsv_schema_incomplete');
 $probe('08 column query SQL error blocks activation',static function($db){$db->last_error='SQL unavailable';},'rsv_schema_incomplete');
 $probe('09 index query unavailability blocks activation',static function($db){$db->indexes_result=false;},'rsv_schema_incomplete');
@@ -57,7 +57,7 @@ $probe('11 empty index list blocks activation',static function($db){$db->indexes
 if(!is_wp_error($missing)||$missing->get_error_code()!=='rsv_schema_definition_invalid')$failed[]='12 invalid schema DDL must fail';
 ++$cases;$empty=RSV_DB::assert_statements_applied(array('CREATE TABLE wp_empty (PRIMARY KEY (id));'));
 if(!is_wp_error($empty)||$empty->get_error_code()!=='rsv_schema_definition_invalid')$failed[]='13 DDL without columns must fail';
-++$cases;$GLOBALS['wpdb']->indexes=array(array('Key_name'=>'PRIMARY','Non_unique'=>0),array('Key_name'=>'public_id','Non_unique'=>0));
+++$cases;$GLOBALS['wpdb']->indexes=array(array('Key_name'=>'PRIMARY','Non_unique'=>0,'Column_name'=>'id','Seq_in_index'=>1),array('Key_name'=>'public_id','Non_unique'=>0,'Column_name'=>'public_id','Seq_in_index'=>1));
 $allowed=RSV_DB::assert_statements_applied(array($ddl,$ddl));
 if(true!==$allowed)$failed[]='14 repeated DDL must remain deterministic';
 
