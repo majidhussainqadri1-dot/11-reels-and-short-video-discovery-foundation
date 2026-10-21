@@ -73,6 +73,11 @@ foreach(array(
 ++$cases;$src=file_get_contents(dirname(__DIR__).'/11-reels-foundation/includes/class-rsv-plugin.php');
 if(!is_string($src)||!str_contains($src,'rsv_schema_repair_error')||!str_contains($src,'File 11 database migration incomplete'))$failed[]='18 activation/runtime fail-closed guard missing';
 
+++$cases;$repair_source=file_get_contents(dirname(__DIR__).'/11-reels-foundation/includes/class-rsv-diagnostics.php');
+if(!is_string($repair_source)
+   || !str_contains($repair_source,'RSV_Future30::install()')
+   || !str_contains($repair_source,'if ( is_wp_error( $installed ) ) return $installed;'))$failed[]='19 System Repair must fail closed when Future30 schema cannot be verified';
+
 echo 'RC19 schema verification: '.($cases-count($failed)).'/'.$cases.' checks passed'."\n";
 foreach($failed as $error)fwrite(STDERR,'FAIL '.$error."\n");
 exit($failed===array()?0:1);
