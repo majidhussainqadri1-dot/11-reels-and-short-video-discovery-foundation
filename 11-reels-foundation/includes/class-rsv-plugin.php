@@ -18,12 +18,20 @@ final class RSV_Plugin {
 				array( 'response' => 400, 'back_link' => true )
 			);
 		}
-		foreach ( array( array( 'RSV_DB', 'install' ), array( 'RSV_Top20', 'install' ), array( 'RSV_Future30', 'install' ) ) as $installer ) {
-			$installed = call_user_func( $installer );
-			if ( is_wp_error( $installed ) ) {
-				deactivate_plugins( plugin_basename( RSV_FILE ) );
-				wp_die( esc_html( $installed->get_error_message() ), esc_html__( 'File 11 database migration incomplete', RSV_TEXT_DOMAIN ), array( 'response' => 503, 'back_link' => true ) );
-			}
+		$installed = RSV_DB::install();
+		if ( is_wp_error( $installed ) ) {
+			deactivate_plugins( plugin_basename( RSV_FILE ) );
+			wp_die( esc_html( $installed->get_error_message() ), esc_html__( 'File 11 database migration incomplete', RSV_TEXT_DOMAIN ), array( 'response' => 503, 'back_link' => true ) );
+		}
+		$installed = RSV_Top20::install();
+		if ( is_wp_error( $installed ) ) {
+			deactivate_plugins( plugin_basename( RSV_FILE ) );
+			wp_die( esc_html( $installed->get_error_message() ), esc_html__( 'File 11 database migration incomplete', RSV_TEXT_DOMAIN ), array( 'response' => 503, 'back_link' => true ) );
+		}
+		$installed = RSV_Future30::install();
+		if ( is_wp_error( $installed ) ) {
+			deactivate_plugins( plugin_basename( RSV_FILE ) );
+			wp_die( esc_html( $installed->get_error_message() ), esc_html__( 'File 11 database migration incomplete', RSV_TEXT_DOMAIN ), array( 'response' => 503, 'back_link' => true ) );
 		}
 		self::roles();
 		$pages = self::pages();
@@ -92,14 +100,22 @@ final class RSV_Plugin {
 	}
 
 	public function register() {
-		$schema_installers = array(
-			'rsv_schema_version' => array( RSV_SCHEMA_VERSION, array( 'RSV_DB', 'install' ) ),
-			'rsv_top20_schema_version' => array( RSV_Top20::SCHEMA_VERSION, array( 'RSV_Top20', 'install' ) ),
-			'rsv_future30_schema_version' => array( RSV_Future30::SCHEMA_VERSION, array( 'RSV_Future30', 'install' ) ),
-		);
-		foreach ( $schema_installers as $option => $installer ) {
-			if ( (string) get_option( $option ) === (string) $installer[0] ) continue;
-			$installed = call_user_func( $installer[1] );
+		if ( (string) get_option( 'rsv_schema_version' ) !== RSV_SCHEMA_VERSION ) {
+			$installed = RSV_DB::install();
+			if ( is_wp_error( $installed ) ) {
+				set_transient( 'rsv_schema_repair_error', $installed->get_error_message(), 300 );
+				return;
+			}
+		}
+		if ( (string) get_option( 'rsv_top20_schema_version' ) !== RSV_Top20::SCHEMA_VERSION ) {
+			$installed = RSV_Top20::install();
+			if ( is_wp_error( $installed ) ) {
+				set_transient( 'rsv_schema_repair_error', $installed->get_error_message(), 300 );
+				return;
+			}
+		}
+		if ( (string) get_option( 'rsv_future30_schema_version' ) !== RSV_Future30::SCHEMA_VERSION ) {
+			$installed = RSV_Future30::install();
 			if ( is_wp_error( $installed ) ) {
 				set_transient( 'rsv_schema_repair_error', $installed->get_error_message(), 300 );
 				return;
