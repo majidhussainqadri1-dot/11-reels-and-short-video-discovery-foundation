@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0-rc19 — 2026-10-21
+
+- Fixed REST Reel detail endpoint returning a successful DTO with a nested File10 `WP_Error` on playback failure; now returns the upstream typed error and denies malformed provider responses.
+- Fixed public Reel feed returning a false empty success during complete File10 media-owner outage; responds with typed HTTP 503, while healthy zero-result feeds remain successful.
+- Added twelve isolated File10 detail positive/negative media/ownership/privacy cases; extended feed SQL outage regressions to include File10 media readiness and all forty source review sweeps to check both invariants.
+- File11 schema and contract unchanged. Source, package, CI and live/deployed truth remain separately attested.
+
+
 ## 1.2.0-rc18 — 2026-10-21
 
 - Corrected personal-data exporter to surface SQL failures from the private Reel history, reports, and authored Reel collections as WordPress privacy exporter errors; no incomplete or silently successful export.

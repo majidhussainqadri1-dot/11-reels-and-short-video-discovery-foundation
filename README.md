@@ -1,12 +1,16 @@
 # File 11 — Reels and Short Video Discovery
 
-**Current repository candidate:** `1.2.0-rc18`  
+**Current repository candidate:** `1.2.0-rc19`  
 **Future30 amendment:** `SSH-F11-FUTURE-REEL-KNOWLEDGE-INTELLIGENCE-30-2026`  
 **Canonical package root:** `reels-foundation-11`
 
 File 11 owns the vertical educational Reel entity, the authoritative 60–600-second Reel eligibility rule through File 10, Reel-native discovery, moderation, private history/progress and the approved Reel-domain Future30 orchestration layer. It does not duplicate File 10 raw media, File 05 learning truth, File 06 canonical knowledge, File 16 AI execution, File 00 identity, File 19 delivery, File 20 shell, File 24 assurance, File 25 visual system or File 26 cross-platform discovery/graph ownership.
 
-## Current rc18 WordPress privacy-request safeguards
+## Current rc19 truthful File10 outage boundary
+
+The public Reel detail REST API now propagates File10 playback `WP_Error` directly instead of returning a false-success DTO. Unexpected nonarray playback is a typed 503. The native Reel feed returns a separate `rsv_feed_media_unavailable` HTTP 503 when canonical File10 is down, versus a normal empty `items` result when File10 and SQL are healthy. Twelve isolated detail cases and feed outage/recovery regression test the difference; the existing forty sequential source sweeps are strengthened accordingly. See `docs/RC19-FRESH40-FILE10-OUTAGE-CROSSFILE-2026-10-21.md`. Production parity remains unverified.
+
+## Prior rc18 WordPress privacy-request safeguards
 
 The `RSV_Privacy::export` workflow now checks all three DB read families (watch history, reports/appeals and authored Reels) for SQL errors and returns a WordPress-compatible `WP_Error` instead of silently finalizing an incomplete personal-data archive. `RSV_Privacy::erase` checks current owned Reel counts and transactionally rolls back rather than certifying deletion on DB unavailability. `tests/rc18-privacy-export-query-failure.php` (12 cases) and `tests/rc18-privacy-erase-query-failure.php` (5 cases) run within the complete CI suite. Each of the forty frozen-source review sweeps also verifies these read/erase fail-closed guards. No production or staging verification is implied.
 
@@ -85,7 +89,7 @@ The 2026-08-12 Founder-approved amendment retains all `F11-FUT-001` through `F11
 
 ```bash
 bash tests/run-all.sh
-bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc18.zip
+bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc19.zip
 ```
 
 The exact-head rc15 release workflow must pass PHP 8.1/8.3/8.4 suites, JavaScript syntax, inherited corrective regressions, current-plan/Future30 and all three fresh20 contract suites, deterministic double build, checksum, ZIP integrity and exact runtime source/package parity.
