@@ -114,6 +114,7 @@ for ( $round = 1; $round <= 40; ++$round ) {
         'assert_statements_applied( $sql )',
         'Seq_in_index',
         'Column_name',
+        'Sub_part',
         'rsv_schema_incomplete'
     ) as $schema_guard ) {
         if ( false === strpos( $schema_src, $schema_guard ) )
