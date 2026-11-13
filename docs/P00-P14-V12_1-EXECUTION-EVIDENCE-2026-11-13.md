@@ -6,7 +6,7 @@
 - Repository `main` HEAD: `c2df8e72bad76dc1a7fb83cbe039541f7aa1fd8b` (README-only).
 - Parent RC21: `1df22845452419b3e67686d41b4ea178bfd9f484` (Draft PR #35).
 - Corrected documentation: `9af8a4c30d4ebf6f1cf949c7ec710392365455ff` (Draft PR #36).
-- This isolated privacy candidate source: `12012db108b9b1b83b749e63743cbe496987bd6a` (source tests passed; future commits require fresh CI).
+- Source correction branch: `fix/file11-rc21-future30-privacy-sql-20261113` (Draft PR #37 stacked on PR #36). Do not infer its latest HEAD from this frozen document; query GitHub and exact-HEAD CI at approval time.
 - Source plugin version: `1.2.0-rc21`; schema declarations: File11 `1.2.0`, Top20 `1.1.0`, Future30 `1.0.0`. **All are repository declarations, not deployed state.**
 - Actual active plugin/version, deployed artifact/hash, live database tables/rows/indexes/versions, `wp_options` migration markers, logs, configuration, companion versions: **UNVERIFIED**.
 - WPVibe: no connected site; connection attempt to `www.sabrihomeopathy.com` received HTTP 530. Jetpack site-scoped MCP remains disconnected. HTTP 530 is connection symptom only; no root cause established.
@@ -21,7 +21,7 @@ R0 = requirement exists in plan. R1 = source/contract route exists. R2 = the **s
 |---|---|---|
 | P00 | Source frozen at preceding RC21+docs SHA; main README-only. WordPress direct connection failed HTTP 530. | SOURCE DONE / LIVE BLOCKED |
 | P01 | 55 canonical IDs entered in this matrix; each actual R3+ test remains unverified. | SOURCE-MATRIX DONE / R3+ BLOCKED |
-| P02 | 2 confirmed Future30 privacy SQL-false-completion defects patched; 21 isolated tests passed on source commit 12012db. | SCOPED SOURCE FIX; INDEPENDENT REVIEW PENDING |
+| P02 | 3 confirmed source defects (2 privacy + 1 supersession SQL false-empty); 23 privacy and 14 supersession isolated scenarios added; final exact-head CI required. | SCOPED SOURCE FIX; INDEPENDENT REVIEW PENDING |
 | P03 | 15 fundamental FR journeys are source-present; real File10/File00 and browsers unavailable. | BLOCKED R3 |
 | P04 | 10 NFR gates have source components; 1 new privacy regression suite and existing schemas use synthetic fixtures. | BLOCKED R3 |
 | P05 | 30 Future30 IDs and native features present in candidate source; native browser acceptance not run. | SOURCE ONLY |
@@ -30,7 +30,7 @@ R0 = requirement exists in plan. R1 = source/contract route exists. R2 = the **s
 | P08 | No live/staging credentials or verified companion builds; cannot establish provider version parity. | BLOCKED |
 | P09 | MySQL/MariaDB fresh/upgrade/migration/restore not verified; 48+6 synthetic fixtures green. | BLOCKED |
 | P10 | No actual browser/clinical/privacy/performance E2E test run. | BLOCKED |
-| P11 | Exact-head source CI on 12012db success, package source parity succeeds; this is a draft descendant of PR36. | SOURCE GREEN / REVIEW REQUIRED |
+| P11 | Initial 12012db source CI passed; later tests/fixes require green CI at their own exact final HEAD. Draft PR37 targets PR36, not main. | SOURCE GREEN / REVIEW REQUIRED |
 | P12 | No staging evidence/Founder signoff. | BLOCKED |
 | P13 | No production rollout or live re-test; do not deploy without parity. | BLOCKED |
 | P14 | 7/30-day monitoring only after real production release. | NOT STARTED |
@@ -56,7 +56,7 @@ Every row has at least R0; R1 means an existing partial implementation/contract 
 | F11-FR-014 | Creator insights | `class-rsv-reels.php` | Not specifically demonstrated in this register | Creator-only aggregate metrics, minimum sample suppression |
 | F11-FR-015 | Anti-abuse | `class-rsv-security.php` | Not specifically demonstrated in this register | Rate limit, idempotency, throttling fail closed |
 | F11-NFR-001 | Object/field authorization | `class-rsv-security.php` | Not specifically demonstrated in this register | Role x object/field IDOR against actual File00 |
-| F11-NFR-002 | Privacy lifecycle | `class-rsv-privacy.php; class-rsv-future30-privacy-integrity.php` | tests/rc18-privacy-export-query-failure.php; tests/rc18-privacy-erase-query-failure.php; tests/rc21-future30-privacy-sql-failclosed.php | Real WP privacy export/erase, revoked consent, legal hold and cache purge |
+| F11-NFR-002 | Privacy lifecycle | `class-rsv-privacy.php; class-rsv-future30-privacy-integrity.php` | tests/rc18-privacy-export-query-failure.php; tests/rc18-privacy-erase-query-failure.php; tests/rc21-future30-privacy-sql-failclosed.php (23 isolated assertions) | Real WP privacy export/erase, revoked consent, legal hold and cache purge |
 | F11-NFR-003 | Reliability | `class-rsv-jobs.php; class-rsv-db.php` | Not specifically demonstrated in this register | Retries, crash recovery, missing provider and no fabricated success |
 | F11-NFR-004 | Performance | `class-rsv-repository.php; assets/js/rsv.js` | Not specifically demonstrated in this register | Staging API p95, LCP/INP/CLS p75 field evidence |
 | F11-NFR-005 | Accessibility | `class-rsv-frontend.php; assets/css/rsv.css` | Not specifically demonstrated in this register | WCAG 2.2 AA, keyboard, 400% zoom, 200% text, captions |
@@ -70,7 +70,7 @@ Every row has at least R0; R1 means an existing partial implementation/contract 
 | F11-FUT-003 | Related Knowledge Button | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Current authoritative knowledge-owner link with actionable route |
 | F11-FUT-004 | Source-at-Time Citation Cards | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Evidence and time bound, source opens correctly |
 | F11-FUT-005 | Evidence Layer | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | File06 evidence truth and withdrawn flag |
-| F11-FUT-006 | Correction & Supersession System | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Versioned lineage, stale previous citation |
+| F11-FUT-006 | Correction & Supersession System | `class-rsv-future30.php; class-rsv-future30-public-safety.php` | tests/rc21-supersession-sql-failclosed.php (14 isolated scenarios) | Versioned lineage, stale previous citation |
 | F11-FUT-007 | Versioned Reel | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Reel version/history and private metadata nonleak |
 | F11-FUT-008 | Advanced Remix Studio | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | File10 approved derivative, consent/rights and no patient-case default |
 | F11-FUT-009 | Remix Permission Matrix | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Denied permissions cannot be forged by client |
@@ -126,8 +126,9 @@ Every row has at least R0; R1 means an existing partial implementation/contract 
 ## New defects and source correction status
 | Defect | Root cause in exact repository candidate | Source correction | Regression evidence | Staging / Live |
 |---|---|---|---|---|
-| F11-D-20261113-01 | Future30 private-state export used unguarded `get_results`, allowing SQL failure to be confused with an empty/incomplete export | Override WP privacy exporter with typed 503 on bad SQL results/`last_error` | `tests/rc21-future30-privacy-sql-failclosed.php` (subset of 21 isolated cases) | Not verified |
-| F11-D-20261113-02 | Future30 private erase coerced failed `get_col` to empty and failed `get_var` to zero | Verify both read families; rollback and report incomplete | Same 21 isolated cases | Not verified |
+| F11-D-20261113-01 | Future30 private-state export used unguarded `get_results`, allowing SQL failure to be confused with an empty/incomplete export | Override WP privacy exporter with typed 503 on bad SQL results/`last_error` | `tests/rc21-future30-privacy-sql-failclosed.php` (subset of 23 isolated assertions) | Not verified |
+| F11-D-20261113-02 | Future30 private erase coerced failed `get_col` to empty and failed `get_var` to zero | Verify both read families; rollback and report incomplete | Same 23 isolated assertions | Not verified |
+| F11-D-20261113-03 | Supersession history/cycle guard cast failed `get_col` into an empty active-target list; failed target/source lookup could look absent | Fail closed on SQL/invalid rows and propagate typed errors through cycle and ambiguity checks | `tests/rc21-supersession-sql-failclosed.php` (14 synthetic scenarios) | Not verified |
 
 Existing historic RC21 `Sub_part` index prefix defect is already one prior defect, **not re-counted as new**. Existing 1 documentation consistency defect / 6 locations was corrected in predecessor PR36 and must remain separate from these two privacy defects.
 
