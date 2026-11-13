@@ -59,8 +59,13 @@ trait RSV_Future30_Experience_Trait {
 		$erasers['rsv-future30'] = array( 'eraser_friendly_name'=>__('Reel study collections, notes and preferences',RSV_TEXT_DOMAIN), 'callback'=>array(__CLASS__,'privacy_erase') );
 		return $erasers;
 	}
+	/** Use the same fail-closed privacy handlers for direct callers and WP hooks. */
 	public static function privacy_export( $email, $page = 1 ) {
-		$user=get_user_by('email',$email);if(!$user)return array('data'=>array(),'done'=>true);global $wpdb;$table=RSV_Helpers::table('future_user_state');$limit=100;$offset=(max(1,absint($page))-1)*$limit;$rows=$wpdb->get_results($wpdb->prepare("SELECT feature_id,object_ref,state_key,payload_json,updated_at FROM $table WHERE user_id=%d ORDER BY id ASC LIMIT %d OFFSET %d",$user->ID,$limit,$offset),ARRAY_A);$data=array();foreach($rows as $i=>$row)$data[]=array('group_id'=>'rsv-future30','group_label'=>__('Reel learning and preferences',RSV_TEXT_DOMAIN),'item_id'=>'rsv-f30-'.$page.'-'.$i,'data'=>array(array('name'=>__('Feature',RSV_TEXT_DOMAIN),'value'=>$row['feature_id']),array('name'=>__('Reference',RSV_TEXT_DOMAIN),'value'=>$row['object_ref']),array('name'=>__('State',RSV_TEXT_DOMAIN),'value'=>$row['state_key']),array('name'=>__('Data',RSV_TEXT_DOMAIN),'value'=>$row['payload_json']),array('name'=>__('Updated',RSV_TEXT_DOMAIN),'value'=>$row['updated_at'])));return array('data'=>$data,'done'=>count($rows)<$limit);}
+		return RSV_Future30_Privacy_Integrity::export( $email, $page );
+	}
+
 	public static function privacy_erase( $email, $page = 1 ) {
-		$user=get_user_by('email',$email);if(!$user)return array('items_removed'=>false,'items_retained'=>false,'messages'=>array(),'done'=>true);global $wpdb;$table=RSV_Helpers::table('future_user_state');$ids=$wpdb->get_col($wpdb->prepare("SELECT id FROM $table WHERE user_id=%d ORDER BY id ASC LIMIT 100",$user->ID));if(!$ids)return array('items_removed'=>false,'items_retained'=>false,'messages'=>array(),'done'=>true);$removed=0;foreach($ids as $id)if(1===$wpdb->delete($table,array('id'=>absint($id),'user_id'=>$user->ID),array('%d','%d')))$removed++;return array('items_removed'=>$removed>0,'items_retained'=>false,'messages'=>array(),'done'=>count($ids)<100);}
+		return RSV_Future30_Privacy_Integrity::erase( $email, $page );
+	}
+
 }
