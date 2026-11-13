@@ -157,6 +157,11 @@ foreach(array('0'=>true,'2'=>false) as $value=>$expectedDone) {
         && in_array('COMMIT',$GLOBALS['wpdb']->tx,true),
         "Verified count $value must remain correctly paginated");
 }
+$legacy = file_get_contents(dirname(__DIR__) . '/11-reels-foundation/includes/trait-rsv-future30-experience.php');
+$assert(strpos($legacy, 'return RSV_Future30_Privacy_Integrity::export( $email, $page );') !== false,
+    'Direct Future30 privacy export must delegate to the fail-closed handler');
+$assert(strpos($legacy, 'return RSV_Future30_Privacy_Integrity::erase( $email, $page );') !== false,
+    'Direct Future30 privacy erasure must delegate to the transactional handler');
 if ($failed) {
     fwrite(STDERR, "Future30 privacy SQL fail-closed regressions:\n" . implode("\n", $failed) . "\n");
     exit(1);
