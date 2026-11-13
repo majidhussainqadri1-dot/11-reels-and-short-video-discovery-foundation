@@ -3,6 +3,7 @@
  * WordPress-shaped isolated behavior; not an installed WordPress test. */
 require __DIR__ . '/bootstrap.php';
 if (!defined('ARRAY_A')) define('ARRAY_A','ARRAY_A');
+if (!defined('HOUR_IN_SECONDS')) define('HOUR_IN_SECONDS',3600);
 function add_action(...$a){return true;}
 function add_filter(...$a){return true;}
 function is_user_logged_in(){return true;}
