@@ -61,10 +61,16 @@ final class RSV_Future30_Public_Safety {
 	private static function active_supersession_targets( $source_id ) {
 		global $wpdb;
 		$table = RSV_Helpers::table( 'future_edges' );
-		$rows = $wpdb->get_col( $wpdb->prepare( "SELECT target_ref FROM $table WHERE feature_id=%s AND source_reel_id=%d AND edge_type=%s AND status=%s ORDER BY id ASC LIMIT 5", 'F11-FUT-006', absint( $source_id ), 'supersedes', 'active' ) );
+		$rows = $wpdb->get_col( $wpdb->prepare( "SELECT target_ref FROM $table WHERE feature_id=%s AND source_reel_id=%d AND edge_type=%s AND status=%s ORDER BY id ASC LIMIT 2", 'F11-FUT-006', absint( $source_id ), 'supersedes', 'active' ) );
 		// A failed lineage lookup is not proof that no active correction exists.
 		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
 			return RSV_Helpers::error( 'rsv_supersession_lookup_unavailable', __( 'Reel correction history cannot be verified right now. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
+		// There can be exactly one authoritative active replacement edge.
+		// LIMIT 2 is sufficient to expose duplicate and conflicting lineage;
+		// silently following the first edge can hide a cycle through another.
+		if ( count( $rows ) > 1 ) {
+			return RSV_Helpers::error( 'rsv_supersession_ambiguous', __( 'This Reel has multiple active correction links. Resolve its lineage before publishing.', RSV_TEXT_DOMAIN ), 409 );
 		}
 		$refs = array();
 		foreach ( $rows as $row ) {
