@@ -21,16 +21,16 @@ R0 = requirement exists in plan. R1 = source/contract route exists. R2 = the **s
 |---|---|---|
 | P00 | Source frozen at preceding RC21+docs SHA; main README-only. WordPress direct connection failed HTTP 530. | SOURCE DONE / LIVE BLOCKED |
 | P01 | 55 canonical IDs entered in this matrix; each actual R3+ test remains unverified. | SOURCE-MATRIX DONE / R3+ BLOCKED |
-| P02 | 3 confirmed source defects (2 privacy + 1 supersession SQL false-empty); 23 privacy and 14 supersession isolated scenarios added; final exact-head CI required. | SCOPED SOURCE FIX; INDEPENDENT REVIEW PENDING |
+| P02 | 4 confirmed source defects (2 privacy, 1 supersession, 1 private-state SQL failed-read write); 23 privacy + 14 supersession + 10 private-state isolated/static scenarios added; final exact-head CI required. | SCOPED SOURCE FIX; INDEPENDENT REVIEW PENDING |
 | P03 | 15 fundamental FR journeys are source-present; real File10/File00 and browsers unavailable. | BLOCKED R3 |
-| P04 | 10 NFR gates have source components; 1 new privacy regression suite and existing schemas use synthetic fixtures. | BLOCKED R3 |
+| P04 | 10 NFR gates have source components; 3 new focused SQL-failure regression suites and inherited schema fixtures use synthetic data; actual staging gate remains unverified. | BLOCKED R3 |
 | P05 | 30 Future30 IDs and native features present in candidate source; native browser acceptance not run. | SOURCE ONLY |
 | P06 | Federated provider contracts are present; actual File05/06/10/16/26 providers not connected for test. | BLOCKED |
 | P07 | UI code present, but full native Future30 interfaces/RTL/mobile WCAG audits not established. | BLOCKED |
 | P08 | No live/staging credentials or verified companion builds; cannot establish provider version parity. | BLOCKED |
 | P09 | MySQL/MariaDB fresh/upgrade/migration/restore not verified; 48+6 synthetic fixtures green. | BLOCKED |
-| P10 | No actual browser/clinical/privacy/performance E2E test run. | BLOCKED |
-| P11 | Initial 12012db source CI passed; later tests/fixes require green CI at their own exact final HEAD. Draft PR37 targets PR36, not main. | SOURCE GREEN / REVIEW REQUIRED |
+| P10 | No actual browser/clinical/privacy/performance E2E test run. The new 47 isolated/static assertions cannot replace real WordPress tests. | BLOCKED |
+| P11 | Passing PHP 8.1/8.3/8.4 source CI is confirmed on preceding code versions. Require a newly successful exact-final-HEAD CI for any further PR revision; Draft PR37 targets PR36, not main. | SOURCE GREEN / REVIEW REQUIRED |
 | P12 | No staging evidence/Founder signoff. | BLOCKED |
 | P13 | No production rollout or live re-test; do not deploy without parity. | BLOCKED |
 | P14 | 7/30-day monitoring only after real production release. | NOT STARTED |
@@ -56,7 +56,7 @@ Every row has at least R0; R1 means an existing partial implementation/contract 
 | F11-FR-014 | Creator insights | `class-rsv-reels.php` | Not specifically demonstrated in this register | Creator-only aggregate metrics, minimum sample suppression |
 | F11-FR-015 | Anti-abuse | `class-rsv-security.php` | Not specifically demonstrated in this register | Rate limit, idempotency, throttling fail closed |
 | F11-NFR-001 | Object/field authorization | `class-rsv-security.php` | Not specifically demonstrated in this register | Role x object/field IDOR against actual File00 |
-| F11-NFR-002 | Privacy lifecycle | `class-rsv-privacy.php; class-rsv-future30-privacy-integrity.php` | tests/rc18-privacy-export-query-failure.php; tests/rc18-privacy-erase-query-failure.php; tests/rc21-future30-privacy-sql-failclosed.php (23 isolated assertions) | Real WP privacy export/erase, revoked consent, legal hold and cache purge |
+| F11-NFR-002 | Privacy lifecycle | `class-rsv-privacy.php; class-rsv-future30-privacy-integrity.php` | tests/rc18-privacy-export-query-failure.php; tests/rc18-privacy-erase-query-failure.php; tests/rc21-future30-privacy-sql-failclosed.php (23) plus tests/rc21-private-write-readfail.php (10) | Real WP privacy export/erase, revoked consent, legal hold and cache purge |
 | F11-NFR-003 | Reliability | `class-rsv-jobs.php; class-rsv-db.php` | Not specifically demonstrated in this register | Retries, crash recovery, missing provider and no fabricated success |
 | F11-NFR-004 | Performance | `class-rsv-repository.php; assets/js/rsv.js` | Not specifically demonstrated in this register | Staging API p95, LCP/INP/CLS p75 field evidence |
 | F11-NFR-005 | Accessibility | `class-rsv-frontend.php; assets/css/rsv.css` | Not specifically demonstrated in this register | WCAG 2.2 AA, keyboard, 400% zoom, 200% text, captions |
@@ -84,16 +84,16 @@ Every row has at least R0; R1 means an existing partial implementation/contract 
 | F11-FUT-017 | Smart Chapters / Key Moments | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Valid timestamps bounded by actual video duration |
 | F11-FUT-018 | Reel Knowledge Card | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | File06 cited and current evidence |
 | F11-FUT-019 | Micro-Quiz after Reel | `class-rsv-future30.php; trait-rsv-future30-*.php` | tests/rc9-language-quiz-behavior.php | Private answer key and audited idempotent attempts |
-| F11-FUT-020 | Save to Study Collection | `class-rsv-future30.php; trait-rsv-future30-*.php` | tests/rc11-study-collection-revocation.php; tests/rc11-study-collection-audit-utf8.php | Private owner-only valid current Reel references |
-| F11-FUT-021 | Reel → Personal Notes | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Private timestamp notes, secure clear/export |
+| F11-FUT-020 | Save to Study Collection | `class-rsv-future30.php; class-rsv-fresh20-hardening.php` | tests/rc11-study-collection-revocation.php; tests/rc11-study-collection-audit-utf8.php; tests/rc21-private-write-readfail.php | Private owner-only valid current Reel references |
+| F11-FUT-021 | Reel → Personal Notes | `class-rsv-future30.php; class-rsv-fresh20-hardening.php` | tests/rc21-private-write-readfail.php | Private timestamp notes, secure clear/export |
 | F11-FUT-022 | Ask AI About This Reel | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Grounded context only; File16 execution; no patient data |
 | F11-FUT-023 | Creator Search Opportunity Intelligence | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | File26 current privacy-safe aggregate |
 | F11-FUT-024 | Expanded Why This Reel | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Explainability, mute and no donor weighting |
-| F11-FUT-025 | Feed Control Center | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Real owner controls, persisted reset and mute |
+| F11-FUT-025 | Feed Control Center | `class-rsv-future30.php; class-rsv-fresh20-hardening.php` | tests/rc21-private-write-readfail.php | Real owner controls, persisted reset and mute |
 | F11-FUT-026 | Knowledge Diversity Slider | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | 0–100 preference, safety overrides |
 | F11-FUT-027 | Creator Research Dashboard | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Samples ≥5 and privacy-safe metrics, true UI |
 | F11-FUT-028 | Pre-Publish Clinical Safety Scanner | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Fail closed with provider missing/reject; human review |
-| F11-FUT-029 | Accessibility Plus Mode | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Language, transcript-only, reduced motion and audio description |
+| F11-FUT-029 | Accessibility Plus Mode | `class-rsv-future30.php; class-rsv-fresh20-hardening.php` | tests/rc21-private-write-readfail.php | Language, transcript-only, reduced motion and audio description |
 | F11-FUT-030 | Reel Knowledge Graph | `class-rsv-future30.php; trait-rsv-future30-*.php` | Not specifically demonstrated in this register | Current File06/File26 edges; no stale or private leakage |
 
 ## 25 full acceptance scenarios — not run on staging/live
@@ -129,6 +129,7 @@ Every row has at least R0; R1 means an existing partial implementation/contract 
 | F11-D-20261113-01 | Future30 private-state export used unguarded `get_results`, allowing SQL failure to be confused with an empty/incomplete export | Override WP privacy exporter with typed 503 on bad SQL results/`last_error` | `tests/rc21-future30-privacy-sql-failclosed.php` (subset of 23 isolated assertions) | Not verified |
 | F11-D-20261113-02 | Future30 private erase coerced failed `get_col` to empty and failed `get_var` to zero | Verify both read families; rollback and report incomplete | Same 23 isolated assertions | Not verified |
 | F11-D-20261113-03 | Supersession history/cycle guard cast failed `get_col` into an empty active-target list; failed target/source lookup could look absent | Fail closed on SQL/invalid rows and propagate typed errors through cycle and ambiguity checks | `tests/rc21-supersession-sql-failclosed.php` (14 synthetic scenarios) | Not verified |
+| F11-D-20261113-04 | Active Future30 private-state writes treated failed `get_row` as missing row, leading to unverified collection/note/preference INSERT/UPDATE | Five read points guarded before writes, including secondary history preference row; SQL failure produces WP_Error and transaction rollback | `tests/rc21-private-write-readfail.php` (6 behavioral, 4 static scenarios) | Not verified |
 
 Existing historic RC21 `Sub_part` index prefix defect is already one prior defect, **not re-counted as new**. Existing 1 documentation consistency defect / 6 locations was corrected in predecessor PR36 and must remain separate from these two privacy defects.
 
