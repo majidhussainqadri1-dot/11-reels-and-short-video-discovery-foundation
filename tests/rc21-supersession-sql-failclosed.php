@@ -82,6 +82,9 @@ $checks=array(
     array('12 cycle via target','cycle',array(),'rsv_supersession_cycle'),
     array('13 unknown destination remains possible','unknown',array(),null),
     array('14 irrelevant GET untouched','get',array(),null),
+    array('15 multiple conflicting source corrections','dual_source',array(),'rsv_supersession_ambiguous'),
+    array('16 multiple conflicting target corrections','dual_target',array(),'rsv_supersession_ambiguous'),
+    array('17 duplicate active source corrections','dupe_source',array(),'rsv_supersession_ambiguous'),
 );
 $errors=array();$n=0;
 foreach($checks as $case){
@@ -99,6 +102,9 @@ foreach($checks as $case){
     if($c==='same')$db->edges[10]=array(TARGET);
     if($c==='other')$db->edges[10]=array(ALTERNATIVE);
     if($c==='cycle')$db->edges[99]=array(SOURCE);
+    if($c==='dual_source')$db->edges[10]=array(TARGET,ALTERNATIVE);
+    if($c==='dual_target')$db->edges[99]=array(ALTERNATIVE,SOURCE);
+    if($c==='dupe_source')$db->edges[10]=array(TARGET,TARGET);
     $request=new RC21_Lineage_Request($replacement, $c==='get'?'GET':'POST');
     $result=RSV_Future30_Public_Safety::pre_dispatch(null,null,$request);
     $errorCode=is_wp_error($result)?$result->get_error_code():null;
