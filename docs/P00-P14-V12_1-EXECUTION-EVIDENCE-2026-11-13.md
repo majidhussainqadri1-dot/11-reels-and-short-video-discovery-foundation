@@ -21,7 +21,7 @@ R0 = requirement exists in plan. R1 = source/contract route exists. R2 = the **s
 |---|---|---|
 | P00 | Source frozen at preceding RC21+docs SHA; main README-only. WordPress direct connection failed HTTP 530. | SOURCE DONE / LIVE BLOCKED |
 | P01 | 55 canonical IDs entered in this matrix; each actual R3+ test remains unverified. | SOURCE-MATRIX DONE / R3+ BLOCKED |
-| P02 | 4 confirmed source defects (2 privacy, 1 supersession, 1 private-state SQL failed-read write); 23 privacy + 14 supersession + 10 private-state isolated/static scenarios added; final exact-head CI required. | SCOPED SOURCE FIX; INDEPENDENT REVIEW PENDING |
+| P02 | 5 confirmed source defects (2 privacy, 2 correction-lineage, 1 private-state SQL failed-read write); 23 privacy + 17 supersession + 10 private-state isolated/static scenarios added; exact-HEAD CI passed at `264e2409e7a2ca39916e83cc82bc3d01b9149dcf`; subsequent commits require fresh CI. | SCOPED SOURCE FIX; INDEPENDENT REVIEW PENDING |
 | P03 | 15 fundamental FR journeys are source-present; real File10/File00 and browsers unavailable. | BLOCKED R3 |
 | P04 | 10 NFR gates have source components; 3 new focused SQL-failure regression suites and inherited schema fixtures use synthetic data; actual staging gate remains unverified. | BLOCKED R3 |
 | P05 | 30 Future30 IDs and native features present in candidate source; native browser acceptance not run. | SOURCE ONLY |
@@ -128,10 +128,11 @@ Every row has at least R0; R1 means an existing partial implementation/contract 
 |---|---|---|---|---|
 | F11-D-20261113-01 | Future30 private-state export used unguarded `get_results`, allowing SQL failure to be confused with an empty/incomplete export | Override WP privacy exporter with typed 503 on bad SQL results/`last_error` | `tests/rc21-future30-privacy-sql-failclosed.php` (subset of 23 isolated assertions) | Not verified |
 | F11-D-20261113-02 | Future30 private erase coerced failed `get_col` to empty and failed `get_var` to zero | Verify both read families; rollback and report incomplete | Same 23 isolated assertions | Not verified |
-| F11-D-20261113-03 | Supersession history/cycle guard cast failed `get_col` into an empty active-target list; failed target/source lookup could look absent | Fail closed on SQL/invalid rows and propagate typed errors through cycle and ambiguity checks | `tests/rc21-supersession-sql-failclosed.php` (14 synthetic scenarios) | Not verified |
+| F11-D-20261113-03 | Supersession history/cycle guard cast failed `get_col` into an empty active-target list; failed target/source lookup could look absent | Fail closed on SQL/invalid rows and propagate typed errors through cycle and ambiguity checks | `tests/rc21-supersession-sql-failclosed.php` (17 synthetic scenarios covering 2 lineage defects) | Not verified |
 | F11-D-20261113-04 | Active Future30 private-state writes treated failed `get_row` as missing row, leading to unverified collection/note/preference INSERT/UPDATE | Five read points guarded before writes, including secondary history preference row; SQL failure produces WP_Error and transaction rollback | `tests/rc21-private-write-readfail.php` (6 behavioral, 4 static scenarios) | Not verified |
+| F11-D-20261113-05 | The correction-lineage pre-dispatch guard followed the first active `supersedes` target and could accept a request even when an earlier Reel already had duplicate/conflicting active replacements (a second branch could hide a cycle) | The authoritative active-link query now checks up to 2 rows and denies any duplicate or branched active lineage with typed HTTP 409 before mutation | Three additional negative cases in `tests/rc21-supersession-sql-failclosed.php` (17/17 total) | Not verified |
 
-Existing historic RC21 `Sub_part` index prefix defect is already one prior defect, **not re-counted as new**. Existing 1 documentation consistency defect / 6 locations was corrected in predecessor PR36 and must remain separate from these two privacy defects.
+Existing historic RC21 `Sub_part` index-prefix defect is one prior issue and is **not re-counted**. The separate documentation-consistency issue (6 locations) was corrected in predecessor PR #36; it is not counted among these 5 new source defects.
 
 ## Mandatory production gate
 `Freeze deployed state → compare exact source/DB/options → real staging integration → backup/restore/rollback → fix confirmed blockers → fresh exact-HEAD CI → Founder approval → signed package → controlled deployment → live retest → checksum/schema parity`.
