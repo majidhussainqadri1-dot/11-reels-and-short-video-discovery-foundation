@@ -19,6 +19,10 @@ final class RSV_Future30_Public_Safety {
 		if ( ! preg_match( '#^/rsv/v1/reels/(reel_[a-f0-9-]{36})/future30/(F11-FUT-[0-9]{3})$#', $route, $m ) ) return $result;
 		if ( 'F11-FUT-006' !== $m[2] ) return $result;
 		$source = RSV_Repository::find( $m[1], true );
+		global $wpdb;
+		if ( '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_supersession_source_unavailable', __( 'The source Reel cannot be verified right now.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		if ( ! $source || ! RSV_Security::can( RSV_Contracts::CAP_PUBLISH, $source, 'future30_supersession' ) ) return $result;
 		$params = (array) $request->get_json_params();
 		$replacement_ref = RSV_Helpers::text( $params['replacement_reel_ref'] ?? '', 255 );
