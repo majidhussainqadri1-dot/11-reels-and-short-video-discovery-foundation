@@ -44,6 +44,7 @@ final class RC21_SQL_Error_Store {
         $this->last_error=$this->failed?'SQL SELECT refused':'';
         return null;
     }
+    public function get_var($sql){$this->last_error='';return '0';}
     public function insert(...$args){$this->writes++;return 1;}
     public function update(...$args){$this->writes++;return 1;}
 }
