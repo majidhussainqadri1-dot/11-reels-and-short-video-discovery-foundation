@@ -23,10 +23,16 @@ final class RSV_Future30_Public_Safety {
 		$params = (array) $request->get_json_params();
 		$replacement_ref = RSV_Helpers::text( $params['replacement_reel_ref'] ?? '', 255 );
 		if ( ! $replacement_ref ) return $result;
-		if ( hash_equals( (string) $source['public_id'], $replacement_ref ) || self::supersession_would_cycle( $source['public_id'], $replacement_ref ) ) {
+		if ( hash_equals( (string) $source['public_id'], $replacement_ref ) ) {
+			return RSV_Helpers::error( 'rsv_supersession_cycle', __( 'A Reel correction cannot supersede itself or create a supersession cycle.', RSV_TEXT_DOMAIN ), 409 );
+		}
+		$cycle = self::supersession_would_cycle( $source['public_id'], $replacement_ref );
+		if ( is_wp_error( $cycle ) ) return $cycle;
+		if ( $cycle ) {
 			return RSV_Helpers::error( 'rsv_supersession_cycle', __( 'A Reel correction cannot supersede itself or create a supersession cycle.', RSV_TEXT_DOMAIN ), 409 );
 		}
 		$existing = self::active_supersession_targets( absint( $source['id'] ) );
+		if ( is_wp_error( $existing ) ) return $existing;
 		if ( $existing && ! in_array( $replacement_ref, $existing, true ) ) {
 			return RSV_Helpers::error( 'rsv_supersession_ambiguous', __( 'This Reel already has an active replacement. Resolve the existing lineage before assigning another.', RSV_TEXT_DOMAIN ), 409 );
 		}
@@ -51,7 +57,19 @@ final class RSV_Future30_Public_Safety {
 	private static function active_supersession_targets( $source_id ) {
 		global $wpdb;
 		$table = RSV_Helpers::table( 'future_edges' );
-		return array_values( array_unique( array_filter( array_map( 'strval', (array) $wpdb->get_col( $wpdb->prepare( "SELECT target_ref FROM $table WHERE feature_id=%s AND source_reel_id=%d AND edge_type=%s AND status=%s ORDER BY id ASC LIMIT 5", 'F11-FUT-006', absint( $source_id ), 'supersedes', 'active' ) ) ) ) ) );
+		$rows = $wpdb->get_col( $wpdb->prepare( "SELECT target_ref FROM $table WHERE feature_id=%s AND source_reel_id=%d AND edge_type=%s AND status=%s ORDER BY id ASC LIMIT 5", 'F11-FUT-006', absint( $source_id ), 'supersedes', 'active' ) );
+		// A failed lineage lookup is not proof that no active correction exists.
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_supersession_lookup_unavailable', __( 'Reel correction history cannot be verified right now. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
+		$refs = array();
+		foreach ( $rows as $row ) {
+			if ( ! is_string( $row ) || '' === trim( $row ) ) {
+				return RSV_Helpers::error( 'rsv_supersession_lookup_invalid', __( 'Reel correction history cannot be verified safely.', RSV_TEXT_DOMAIN ), 503 );
+			}
+			$refs[] = $row;
+		}
+		return array_values( array_unique( $refs ) );
 	}
 
 	private static function supersession_would_cycle( $source_ref, $replacement_ref ) {
@@ -62,8 +80,13 @@ final class RSV_Future30_Public_Safety {
 			if ( isset( $seen[ $next_ref ] ) ) return true;
 			$seen[ $next_ref ] = true;
 			$target = RSV_Repository::find( $next_ref, true );
+			global $wpdb;
+			if ( '' !== (string) $wpdb->last_error ) {
+				return RSV_Helpers::error( 'rsv_supersession_target_unavailable', __( 'The next Reel correction cannot be verified right now.', RSV_TEXT_DOMAIN ), 503 );
+			}
 			if ( ! $target ) return false;
 			$targets = self::active_supersession_targets( absint( $target['id'] ) );
+			if ( is_wp_error( $targets ) ) return $targets;
 			$next_ref = $targets ? (string) $targets[0] : '';
 		}
 		return (bool) $next_ref;
