@@ -83,7 +83,7 @@ The 2026-08-12 Founder-approved amendment retains all `F11-FUT-001` through `F11
 
 ## Release identity
 
-- Plugin: `1.2.0-rc15`
+- Plugin: `1.2.0-rc21`
 - Main schema: `1.2.0`
 - Top-20 schema: `1.1.0`
 - Future30 schema: `1.0.0`
@@ -100,7 +100,7 @@ bash tests/run-all.sh
 bash tools/build-package.sh packages/reels-foundation-11-1.2.0-rc21.zip
 ```
 
-The exact-head rc15 release workflow must pass PHP 8.1/8.3/8.4 suites, JavaScript syntax, inherited corrective regressions, current-plan/Future30 and all three fresh20 contract suites, deterministic double build, checksum, ZIP integrity and exact runtime source/package parity.
+The exact-head rc21 release workflow must pass PHP 8.1/8.3/8.4 suites, JavaScript syntax, inherited corrective regressions, current-plan/Future30 and all three fresh20 contract suites, deterministic double build, checksum, ZIP integrity and exact runtime source/package parity.
 
 ## Claim boundary
 
