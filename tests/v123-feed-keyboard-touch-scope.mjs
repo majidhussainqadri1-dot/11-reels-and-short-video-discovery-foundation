@@ -13,11 +13,17 @@ const source = fs.readFileSync(path.join(__dirname, '../11-reels-foundation/asse
 const keyListeners = {};
 const status = { textContent: '' };
 function article(id) {
+    const frame = {
+        dataset: { controlOrigin:'' }, contentWindow: null,
+        setAttribute(name, value) { this[name] = String(value); },
+        getAttribute(name) { return this[name] ?? null; },
+        removeAttribute(name) { delete this[name]; }
+    };
     return {
-        id, dataset: { rsvReel: id },
+        id, frame, dataset: { rsvReel: id },
         classList: { isActive: false, toggle(cls, val) { if (cls === 'is-active') this.isActive = val; } },
-        querySelector() { return null; },
-        querySelectorAll() { return []; },
+        querySelector(selector) { return selector === 'iframe' ? frame : null; },
+        querySelectorAll(selector) { return selector.includes('iframe') ? [frame] : []; },
         setAttribute(name, val) { this[name] = String(val); },
         scrollIntoView() {},
         focus() {}
@@ -57,7 +63,8 @@ assert.equal(typeof keyListeners.keydown, 'function');
 assert.equal(typeof keyListeners.pointerdown, 'function');
 assert.equal(typeof keyListeners.pointerup, 'function');
 assert.equal(articles[0].classList.isActive, true);
-let checks = 0;
+assert.equal(articles[1].frame.tabindex, '-1', 'inactive Reel iframe must leave tab sequence');
+let checks = 1;
 function eventTarget(kind) {
     return {
         tagName: kind.toUpperCase(),
@@ -92,6 +99,8 @@ for (const [target, key] of interactive) {
 }
 assert.equal(sendKey('ArrowDown', root), 1);
 assert.equal(articles[1].classList.isActive, true);
+assert.equal(articles[1].frame.tabindex, undefined, 'active Reel iframe tab order restored');
+assert.equal(articles[0].frame.tabindex, '-1', 'previous iframe removed from tab order');
 ++checks;
 assert.equal(sendKey('ArrowUp', root, { ctrlKey:true }), 0);
 assert.equal(articles[1].classList.isActive, true);
