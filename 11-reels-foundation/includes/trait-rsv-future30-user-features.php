@@ -45,11 +45,13 @@ trait RSV_Future30_User_Features_Trait {
 		$rate = RSV_Security::rate_limit( 'future30_quiz_attempt', 60, HOUR_IN_SECONDS );
 		if ( is_wp_error( $rate ) ) return $rate;
 		$reel = self::reel( $request['id'] );
-		if ( is_wp_error( $reel ) || ! RSV_Security::can_view_reel( $reel ) )
+		if ( is_wp_error( $reel ) ) return $reel;
+		if ( ! RSV_Security::can_view_reel( $reel ) )
 			return RSV_Helpers::error( 'rsv_not_found', __( 'Reel not found.', RSV_TEXT_DOMAIN ), 404 );
 		$p = (array) $request->get_json_params();
 		$answers = (array) ( $p['answers'] ?? array() );
 		$quiz = self::object_rows( 'F11-FUT-019', $reel['id'], 0, 1 );
+		if ( is_wp_error( $quiz ) ) return $quiz;
 		if ( ! $quiz ) return RSV_Helpers::error( 'rsv_quiz_unavailable', __( 'No quiz is available for this Reel.', RSV_TEXT_DOMAIN ), 404 );
 		$questions = (array) ( $quiz[0]['payload']['questions'] ?? array() );
 		$total = count( $questions );
@@ -154,8 +156,8 @@ trait RSV_Future30_User_Features_Trait {
 		} );
 		return is_wp_error( $result ) ? $result : self::current_study_collections( $result );
 	}
-	public function notes( $request ) { RSV_Helpers::no_cache_private();$reel=self::reel($request['id']);if(is_wp_error($reel)||!RSV_Security::can_view_reel($reel))return RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404);return rest_ensure_response(self::state_get('F11-FUT-021',$reel['public_id'],'notes',array('payload'=>array('notes'=>array()),'version'=>0))); }
-	public function note_write( $request ) { RSV_Helpers::no_cache_private();$reel=self::reel($request['id']);if(is_wp_error($reel)||!RSV_Security::can_view_reel($reel))return RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404);$rate=RSV_Security::rate_limit('future30_notes',120,HOUR_IN_SECONDS);if(is_wp_error($rate))return $rate;$p=(array)$request->get_json_params();$idem=$request->get_header('Idempotency-Key');$scope='future30_note_'.$reel['public_id'];$begin=RSV_Security::idempotency_begin($scope,$idem,$p);if(is_wp_error($begin))return $begin;if(!empty($begin['replay']))return rest_ensure_response($begin['response']);$time=self::validate_time_range($reel,$p['second']??0,0);if(is_wp_error($time)){RSV_Security::idempotency_fail($scope,$idem);return $time;}$text=RSV_Helpers::textarea($p['text']??'',4000);if(!$text){RSV_Security::idempotency_fail($scope,$idem);return RSV_Helpers::error('rsv_note_text_required',__('Note text is required.',RSV_TEXT_DOMAIN),422);}$current=self::state_get('F11-FUT-021',$reel['public_id'],'notes',array('payload'=>array('notes'=>array()),'version'=>0));$notes=(array)($current['payload']['notes']??array());$notes[]=array('second'=>$time['start'],'text'=>$text,'created_at'=>RSV_Helpers::now());$notes=array_slice($notes,-200);return self::idempotent_finish_result($scope,$idem,static function() use($reel,$notes){return self::state_put('F11-FUT-021',$reel['public_id'],'notes',array('notes'=>$notes,'private'=>true));},array('entity_type'=>'reel','entity_id'=>absint($reel['id']),'action'=>'private_note_update','reason'=>'F11-FUT-021','event'=>'ReelPrivateNoteUpdated','event_data'=>array('reel_public_id'=>$reel['public_id'],'feature_id'=>'F11-FUT-021'))); }
+	public function notes( $request ) { RSV_Helpers::no_cache_private();$reel=self::reel($request['id']);if(is_wp_error($reel))return $reel;if(!RSV_Security::can_view_reel($reel))return RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404);return rest_ensure_response(self::state_get('F11-FUT-021',$reel['public_id'],'notes',array('payload'=>array('notes'=>array()),'version'=>0))); }
+	public function note_write( $request ) { RSV_Helpers::no_cache_private();$reel=self::reel($request['id']);if(is_wp_error($reel))return $reel;if(!RSV_Security::can_view_reel($reel))return RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404);$rate=RSV_Security::rate_limit('future30_notes',120,HOUR_IN_SECONDS);if(is_wp_error($rate))return $rate;$p=(array)$request->get_json_params();$idem=$request->get_header('Idempotency-Key');$scope='future30_note_'.$reel['public_id'];$begin=RSV_Security::idempotency_begin($scope,$idem,$p);if(is_wp_error($begin))return $begin;if(!empty($begin['replay']))return rest_ensure_response($begin['response']);$time=self::validate_time_range($reel,$p['second']??0,0);if(is_wp_error($time)){RSV_Security::idempotency_fail($scope,$idem);return $time;}$text=RSV_Helpers::textarea($p['text']??'',4000);if(!$text){RSV_Security::idempotency_fail($scope,$idem);return RSV_Helpers::error('rsv_note_text_required',__('Note text is required.',RSV_TEXT_DOMAIN),422);}$current=self::state_get('F11-FUT-021',$reel['public_id'],'notes',array('payload'=>array('notes'=>array()),'version'=>0));$notes=(array)($current['payload']['notes']??array());$notes[]=array('second'=>$time['start'],'text'=>$text,'created_at'=>RSV_Helpers::now());$notes=array_slice($notes,-200);return self::idempotent_finish_result($scope,$idem,static function() use($reel,$notes){return self::state_put('F11-FUT-021',$reel['public_id'],'notes',array('notes'=>$notes,'private'=>true));},array('entity_type'=>'reel','entity_id'=>absint($reel['id']),'action'=>'private_note_update','reason'=>'F11-FUT-021','event'=>'ReelPrivateNoteUpdated','event_data'=>array('reel_public_id'=>$reel['public_id'],'feature_id'=>'F11-FUT-021'))); }
 
 	public function ai_context( $request ) { RSV_Helpers::no_cache_private();$reel=self::reel($request['id']);if(is_wp_error($reel))return $reel;if(!RSV_Security::can_view_reel($reel))return RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404);$context=array('reel'=>RSV_Repository::public_dto($reel),'citations'=>self::edge_rows('F11-FUT-004',$reel['id'],100),'evidence'=>self::object_rows('F11-FUT-005',$reel['id'],0,20),'knowledge_card'=>self::object_rows('F11-FUT-018',$reel['id'],0,1),'chapters'=>self::edge_rows('F11-FUT-017',$reel['id'],100),'medical_authority'=>'education-only-no-diagnosis-prescription-dose-or-emergency-replacement');$context=apply_filters('rsv_future30_ai_grounded_context',$context,$reel,get_current_user_id());return rest_ensure_response(array('owner'=>'File 16','context'=>$context,'execute_ai'=>false)); }
 	/** Source-verified privacy-thresholded File 26 aggregates only. */
@@ -194,7 +196,8 @@ trait RSV_Future30_User_Features_Trait {
 	}
 	public function why( $request ) {
 		$reel = self::reel( $request['id'] );
-		if ( is_wp_error( $reel ) || ! RSV_Security::can_view_reel( $reel ) )
+		if ( is_wp_error( $reel ) ) return $reel;
+		if ( ! RSV_Security::can_view_reel( $reel ) )
 			return RSV_Helpers::error( 'rsv_not_found', __( 'Reel not found.', RSV_TEXT_DOMAIN ), 404 );
 		$native = RSV_Integrations::recommendation_explanation( $reel, sanitize_key( $request->get_param( 'sort' ) ?: 'recommended' ) );
 		$provider = apply_filters( 'rsv_future30_global_recommendation_reasons', array(), $reel, get_current_user_id() );
