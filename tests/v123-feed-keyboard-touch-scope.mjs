@@ -3,10 +3,12 @@
  * File11 V12.3 FR-005 / NFR-005 keyboard and touch scope regression.
  * Isolated DOM fixture, not a real browser, screenreader or Staging pass.
  */
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const vm = require('node:vm');
-const path = require('node:path');
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const source = fs.readFileSync(path.join(__dirname, '../11-reels-foundation/assets/js/rsv.js'), 'utf8');
 const keyListeners = {};
 const status = { textContent: '' };
