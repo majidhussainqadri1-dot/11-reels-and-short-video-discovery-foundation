@@ -14,6 +14,7 @@ php "$ROOT/tests/rc5-hardening-contracts.php"
 php "$ROOT/tests/rc6-forty-review-contracts.php"
 php "$ROOT/tests/current-plan-contracts.php"
 php "$ROOT/tests/v123-traceability-gate.php"
+php "$ROOT/tests/v123-file25-token-contract.php"
 php "$ROOT/tests/v123-future30-read-sql-behavior.php"
 php "$ROOT/tests/v123-future30-object-identity-readfail.php"
 php -l "$ROOT/tools/v123-readonly-freeze.php" >/dev/null
