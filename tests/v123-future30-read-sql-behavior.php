@@ -78,6 +78,7 @@ final class RSV_Read_Service {
     use RSV_Future30_Feature_Write_Trait;
     use RSV_Future30_User_Features_Trait;
     use RSV_Future30_Experience_Trait;
+    public static function definitions() { return array('F11-FUT-003'=>array('slug'=>'related-knowledge')); }
     public static function objects() { return self::object_rows('F11-FUT-001',0,0,5); }
     public static function edges() { return self::edge_rows('F11-FUT-004',27,5); }
     public static function state() { return self::state_get('F11-FUT-025','user','feed_preferences',array('payload'=>array('autoplay'=>false),'version'=>0)); }
@@ -160,6 +161,15 @@ $testError(RSV_Read_Service::projection(),'rsv_future_objects_unavailable');
 $db=$set(array());
 $db->queue[]=array(null,'SQL failed');
 $testError(RSV_Read_Service::projection(),'rsv_future_edges_unavailable');
+$set(null,'SQL failed');
+$testError((new RSV_Read_Service())->reel_feature_get(new RSV_Read_Request()),'rsv_future_objects_unavailable');
+$set(null,'SQL failed');
+$testError((new RSV_Read_Service())->knowledge_graph(new RSV_Read_Request()),'rsv_future_objects_unavailable');
+$db=$set(array());
+$db->queue[]=array(array(),'');
+$healthy=(new RSV_Read_Service())->reel_feature_get(new RSV_Read_Request());
+$assert(is_array($healthy)&&($healthy['objects']??null)===array()&&($healthy['edges']??null)===array(),
+    'healthy empty Reel feature projection is not a 503');
 $set(null,'SQL failed');
 $testError((new RSV_Read_Service())->quiz_attempt(new RSV_Read_Request()),'rsv_future_objects_unavailable');
 $set(null,'SQL failed');
