@@ -10,6 +10,11 @@ trait RSV_Future30_Storage_Trait {
 
 	private static function reel( $public_id, $require_owner = false ) {
 		$reel = RSV_Repository::find( sanitize_text_field( (string) $public_id ), true );
+		global $wpdb;
+		// SQL unavailability must never masquerade as a missing/private Reel.
+		if ( '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_future30_reel_unavailable', __( 'The Reel cannot be checked right now. Please retry.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		if ( ! $reel ) return RSV_Helpers::error( 'rsv_not_found', __( 'Reel not found.', RSV_TEXT_DOMAIN ), 404 );
 		if ( $require_owner && ! RSV_Security::can( RSV_Contracts::CAP_MANAGE ) && absint( $reel['owner_id'] ) !== get_current_user_id() ) return RSV_Helpers::error( 'rsv_forbidden', __( 'You cannot manage this Reel.', RSV_TEXT_DOMAIN ), 403 );
 		return $reel;
