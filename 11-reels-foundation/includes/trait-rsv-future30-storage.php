@@ -61,7 +61,9 @@ trait RSV_Future30_Storage_Trait {
 
 	private static function public_projection( $feature_id, $reel ) {
 		$objects = self::object_rows( $feature_id, $reel['id'], 0, 100 );
+		if ( is_wp_error( $objects ) ) return $objects;
 		$edges   = self::edge_rows( $feature_id, $reel['id'], 200 );
+		if ( is_wp_error( $edges ) ) return $edges;
 		$duration = self::authoritative_duration( $reel );
 		foreach ( $objects as &$object ) unset( $object['owner_id'] );
 		unset( $object );
@@ -269,14 +271,54 @@ trait RSV_Future30_Storage_Trait {
 	}
 
 	private static function object_rows( $feature_id, $reel_id = 0, $owner_id = 0, $limit = 50 ) {
-		global $wpdb; $table=RSV_Helpers::table('future_objects'); $where=array('feature_id=%s','status=%s'); $args=array($feature_id,'active');
-		if($reel_id){$where[]='reel_id=%d';$args[]=absint($reel_id);} if($owner_id){$where[]='owner_id=%d';$args[]=absint($owner_id);} $args[]=min(100,max(1,absint($limit)));
-		$sql="SELECT public_id,feature_id,object_type,reel_id,owner_id,title,payload_json,version,created_at,updated_at FROM $table WHERE ".implode(' AND ',$where).' ORDER BY updated_at DESC,id DESC LIMIT %d';
-		$rows=$wpdb->get_results($wpdb->prepare($sql,$args),ARRAY_A); foreach($rows as &$row){$row['payload']=RSV_Helpers::json_decode($row['payload_json']);unset($row['payload_json']);} return $rows;
+		global $wpdb;
+		$table = RSV_Helpers::table( 'future_objects' );
+		$where = array( 'feature_id=%s', 'status=%s' );
+		$args = array( $feature_id, 'active' );
+		if ( $reel_id ) { $where[] = 'reel_id=%d'; $args[] = absint( $reel_id ); }
+		if ( $owner_id ) { $where[] = 'owner_id=%d'; $args[] = absint( $owner_id ); }
+		$args[] = min( 100, max( 1, absint( $limit ) ) );
+		$sql = "SELECT public_id,feature_id,object_type,reel_id,owner_id,title,payload_json,version,created_at,updated_at FROM $table WHERE " .
+			implode( ' AND ', $where ) . ' ORDER BY updated_at DESC,id DESC LIMIT %d';
+		$rows = $wpdb->get_results( $wpdb->prepare( $sql, $args ), ARRAY_A );
+		// SQL failure is not an authoritative zero-object result.
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error(
+				'rsv_future_objects_query_unavailable',
+				__( 'The Reel study records could not be checked right now. Please retry.', RSV_TEXT_DOMAIN ),
+				503
+			);
+		}
+		foreach ( $rows as &$row ) {
+			$row['payload'] = RSV_Helpers::json_decode( $row['payload_json'] );
+			unset( $row['payload_json'] );
+		}
+		unset( $row );
+		return $rows;
 	}
 
 	private static function edge_rows( $feature_id, $reel_id, $limit = 100 ) {
-		global $wpdb;$table=RSV_Helpers::table('future_edges');$rows=$wpdb->get_results($wpdb->prepare("SELECT public_id,feature_id,edge_type,target_owner,target_ref,start_second,end_second,payload_json,version,created_at,updated_at FROM $table WHERE feature_id=%s AND source_reel_id=%d AND status='active' ORDER BY start_second ASC,id ASC LIMIT %d",$feature_id,absint($reel_id),min(200,max(1,absint($limit)))),ARRAY_A);foreach($rows as &$row){$row['payload']=RSV_Helpers::json_decode($row['payload_json']);unset($row['payload_json']);}return $rows;
+		global $wpdb;
+		$table = RSV_Helpers::table( 'future_edges' );
+		$sql = "SELECT public_id,feature_id,edge_type,target_owner,target_ref,start_second,end_second,payload_json,version,created_at,updated_at FROM $table WHERE feature_id=%s AND source_reel_id=%d AND status='active' ORDER BY start_second ASC,id ASC LIMIT %d";
+		$rows = $wpdb->get_results(
+			$wpdb->prepare( $sql, $feature_id, absint( $reel_id ), min( 200, max( 1, absint( $limit ) ) ) ),
+			ARRAY_A
+		);
+		// Fail closed; never crash or present partial graph edges as an empty success.
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error(
+				'rsv_future_edges_query_unavailable',
+				__( 'The Reel knowledge links could not be checked right now. Please retry.', RSV_TEXT_DOMAIN ),
+				503
+			);
+		}
+		foreach ( $rows as &$row ) {
+			$row['payload'] = RSV_Helpers::json_decode( $row['payload_json'] );
+			unset( $row['payload_json'] );
+		}
+		unset( $row );
+		return $rows;
 	}
 
 	private static function state_get( $feature_id, $object_ref, $state_key, $default = array() ) {

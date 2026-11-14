@@ -21,24 +21,34 @@ trait RSV_Future30_Experience_Trait {
 	public function accessibility(){RSV_Helpers::no_cache_private();return rest_ensure_response(self::state_get('F11-FUT-029','user','accessibility',array('payload'=>self::default_accessibility(),'version'=>0)));}
 	public function accessibility_write($request){RSV_Helpers::no_cache_private();$rate=RSV_Security::rate_limit('future30_accessibility',60,HOUR_IN_SECONDS);if(is_wp_error($rate))return $rate;$p=(array)$request->get_json_params();$data=self::default_accessibility();foreach(array('transcript_only','high_contrast','reduced_motion','audio_description_preferred','keyboard_first') as $k)if(array_key_exists($k,$p))$data[$k]=!empty($p[$k]);$data['captions_size']=RSV_Helpers::enum($p['captions_size']??'medium',array('small','medium','large','extra-large'),'medium');$data['captions_position']=RSV_Helpers::enum($p['captions_position']??'bottom',array('top','bottom'),'bottom');$saved=self::state_put('F11-FUT-029','user','accessibility',$data);if(!is_wp_error($saved))do_action('rsv_future30_accessibility_preferences_changed',get_current_user_id(),$data);return $saved;}
 
-	public function knowledge_graph($request){$reel=self::reel($request['id']);if(is_wp_error($reel))return $reel;if(!RSV_Security::can_view_reel($reel))return RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404);$local=self::public_projection('F11-FUT-030',$reel)['edges'];$provider=apply_filters('rsv_future30_knowledge_graph',array(),array('reel_public_id'=>$reel['public_id'],'topic'=>$reel['topic'],'language'=>$reel['language'],'limit'=>100,'public_safe'=>true));$safe=array();if(is_array($provider))foreach(array_slice($provider,0,100) as $row){if(!is_array($row))continue;$owner=RSV_Helpers::text($row['target_owner']??'File 06',30);$ref=RSV_Helpers::text($row['target_ref']??'',255);if(!self::canonical_ref_public_valid($owner,$ref,'knowledge-graph-provider'))continue;$evidence=RSV_Helpers::text($row['evidence_ref']??'',255);if($evidence&&!self::canonical_ref_public_valid('File 06',$evidence,'knowledge-graph-evidence-current'))continue;$safe[]=array('edge_type'=>sanitize_key($row['edge_type']??'related-to'),'target_owner'=>$owner,'target_ref'=>$ref,'label'=>RSV_Helpers::text($row['label']??'',160),'evidence_ref'=>$evidence);}return rest_ensure_response(array('local_edges'=>$local,'federated_edges'=>$safe,'canonical_knowledge_owner'=>'File 06','cross_platform_graph_owner'=>'File 26','file11_role'=>'Reel relationship projection only'));}
+	public function knowledge_graph($request){$reel=self::reel($request['id']);if(is_wp_error($reel))return $reel;if(!RSV_Security::can_view_reel($reel))return RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404);$projection=self::public_projection('F11-FUT-030',$reel);if(is_wp_error($projection))return $projection;$local=$projection['edges'];$provider=apply_filters('rsv_future30_knowledge_graph',array(),array('reel_public_id'=>$reel['public_id'],'topic'=>$reel['topic'],'language'=>$reel['language'],'limit'=>100,'public_safe'=>true));$safe=array();if(is_array($provider))foreach(array_slice($provider,0,100) as $row){if(!is_array($row))continue;$owner=RSV_Helpers::text($row['target_owner']??'File 06',30);$ref=RSV_Helpers::text($row['target_ref']??'',255);if(!self::canonical_ref_public_valid($owner,$ref,'knowledge-graph-provider'))continue;$evidence=RSV_Helpers::text($row['evidence_ref']??'',255);if($evidence&&!self::canonical_ref_public_valid('File 06',$evidence,'knowledge-graph-evidence-current'))continue;$safe[]=array('edge_type'=>sanitize_key($row['edge_type']??'related-to'),'target_owner'=>$owner,'target_ref'=>$ref,'label'=>RSV_Helpers::text($row['label']??'',160),'evidence_ref'=>$evidence);}return rest_ensure_response(array('local_edges'=>$local,'federated_edges'=>$safe,'canonical_knowledge_owner'=>'File 06','cross_platform_graph_owner'=>'File 26','file11_role'=>'Reel relationship projection only'));}
 
 	public static function public_tools( $reel ) {
-		if(!$reel||!is_array($reel))return array();
-		return array(
-			'series'=>array_slice(self::public_series_rows(),0,20),
-			'related'=>array_slice(self::public_projection('F11-FUT-003',$reel)['edges'],0,12),
-			'citations'=>array_slice(self::public_projection('F11-FUT-004',$reel)['edges'],0,20),
-			'evidence'=>array_slice(self::public_projection('F11-FUT-005',$reel)['objects'],0,10),
-			'chapters'=>array_slice(self::public_projection('F11-FUT-017',$reel)['edges'],0,30),
-			'knowledge_card'=>array_slice(self::public_projection('F11-FUT-018',$reel)['objects'],0,1),
-			'transcript'=>array_slice(self::public_projection('F11-FUT-016',$reel)['objects'],0,1),
-			'graph'=>array_slice(self::public_projection('F11-FUT-030',$reel)['edges'],0,30),
+		if ( ! $reel || ! is_array( $reel ) ) return array();
+		$series = self::public_series_rows();
+		if ( is_wp_error( $series ) ) return $series;
+		$tools = array( 'series' => array_slice( $series, 0, 20 ) );
+		$types = array(
+			'related'        => array( 'F11-FUT-003', 'edges', 12 ),
+			'citations'      => array( 'F11-FUT-004', 'edges', 20 ),
+			'evidence'       => array( 'F11-FUT-005', 'objects', 10 ),
+			'chapters'       => array( 'F11-FUT-017', 'edges', 30 ),
+			'knowledge_card' => array( 'F11-FUT-018', 'objects', 1 ),
+			'transcript'     => array( 'F11-FUT-016', 'objects', 1 ),
+			'graph'          => array( 'F11-FUT-030', 'edges', 30 ),
 		);
+		foreach ( $types as $name => $spec ) {
+			$projection = self::public_projection( $spec[0], $reel );
+			if ( is_wp_error( $projection ) ) return $projection;
+			$tools[ $name ] = array_slice( $projection[ $spec[1] ], 0, $spec[2] );
+		}
+		return $tools;
 	}
 
 	public static function render_tools( $reel ) {
-		$tools=self::public_tools($reel);$has=false;foreach($tools as $items)if(!empty($items)){$has=true;break;}if(!$has)return '';
+		$tools=self::public_tools($reel);
+		if ( is_wp_error( $tools ) ) return '<p class="rsv-future30-unavailable" role="status">' . esc_html__( 'Study tools are temporarily unavailable. Please retry.', RSV_TEXT_DOMAIN ) . '</p>';
+		$has=false;foreach($tools as $items)if(!empty($items)){$has=true;break;}if(!$has)return '';
 		$html='<details class="rsv-future30-tools"><summary>'.esc_html__('Study & knowledge tools',RSV_TEXT_DOMAIN).'</summary>';
 		if(!empty($tools['citations'])){$html.='<h3>'.esc_html__('Timestamp sources',RSV_TEXT_DOMAIN).'</h3><ul>';foreach($tools['citations'] as $row)$html.='<li>'.esc_html(gmdate('i:s',absint($row['start_second']))).' — '.esc_html($row['target_owner'].' · '.$row['target_ref']).'</li>';$html.='</ul>';}
 		if(!empty($tools['chapters'])){$html.='<h3>'.esc_html__('Key moments',RSV_TEXT_DOMAIN).'</h3><ol>';foreach($tools['chapters'] as $row)$html.='<li>'.esc_html(gmdate('i:s',absint($row['start_second']))).' — '.esc_html($row['payload']['title']??__('Chapter',RSV_TEXT_DOMAIN)).'</li>';$html.='</ol>';}
