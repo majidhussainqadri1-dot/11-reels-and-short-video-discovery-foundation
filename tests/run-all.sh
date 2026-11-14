@@ -18,6 +18,7 @@ php "$ROOT/tests/v123-file25-token-contract.php"
 php "$ROOT/tests/v123-future30-read-sql-behavior.php"
 php "$ROOT/tests/v123-future30-object-identity-readfail.php"
 php -l "$ROOT/tools/v123-readonly-freeze.php" >/dev/null
+php "$ROOT/tests/v123-p00-readonly-freeze-behavior.php"
 php "$ROOT/tests/future30-contracts.php"
 php "$ROOT/tests/fresh40-hardening-contracts.php"
 php "$ROOT/tests/fresh20-hardening-contracts.php"
