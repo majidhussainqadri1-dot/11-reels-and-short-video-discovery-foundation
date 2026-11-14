@@ -5,6 +5,7 @@ P="$ROOT/11-reels-foundation"
 find "$P" -type f -name '*.php' -print0 | sort -z | xargs -0 -n1 php -l >/dev/null
 node --check "$P/assets/js/rsv.js"
 node --check "$P/assets/js/rsv-top20.js"
+node "$ROOT/tests/v123-feed-keyboard-touch-scope.mjs"
 php "$ROOT/tests/unit-state-machine.php"
 php "$ROOT/tests/unit-helpers.php"
 php "$ROOT/tests/forensic-contracts.php"
