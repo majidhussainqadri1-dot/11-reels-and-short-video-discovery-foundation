@@ -79,7 +79,7 @@
 	}
 	function setInteractive(item, enabled) {
 		if (!item) return;
-		item.querySelectorAll('a,button,input,select,textarea,summary,video').forEach(function (control) {
+		item.querySelectorAll('a,button,input,select,textarea,summary,video,iframe,[tabindex]').forEach(function (control) {
 			if (enabled) {
 				if (control.dataset.rsvOldTabindex !== undefined) {
 					const old = control.dataset.rsvOldTabindex;
