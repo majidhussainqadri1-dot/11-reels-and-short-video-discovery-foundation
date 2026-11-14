@@ -82,7 +82,7 @@ $assert(($r['status']??'')==='no_existing_ambiguity_in_this_snapshot'
 $db=new V123_P09_DB();$db->exists=false;
 $r=$run($db);
 $assert(($r['status']??'')==='required_table_missing'
- && ($r['ambiguous_source_groups']??'unset')===null,
+ && array_key_exists('ambiguous_source_groups',$r) && $r['ambiguous_source_groups']===null,
  'missing schema not misclassified as empty healthy DB');
 $db=new V123_P09_DB();$db->columns=array('feature_id','source_reel_id');
 $r=$run($db);
@@ -91,7 +91,7 @@ $assert(($r['status']??'')==='incomplete_schema',
 $db=new V123_P09_DB();$db->summaryError='test SELECT interrupted';
 $r=$run($db);
 $assert(($r['status']??'')==='aggregate_read_unavailable'
- && ($r['active_supersession_edges']??'unset')===null,
+ && array_key_exists('active_supersession_edges',$r) && $r['active_supersession_edges']===null,
  'summary SQL error stays unverified');
 $db=new V123_P09_DB();$db->duplicateError='test SQL interrupted';
 $r=$run($db);
