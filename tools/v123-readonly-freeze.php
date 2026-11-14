@@ -1,101 +1,205 @@
 <?php
 /**
- * File11 V12.3 P00 read-only WP-CLI evidence collector.
- * Run using: wp eval-file tools/v123-readonly-freeze.php
- * No inserts/updates, no patient/user rows, no secret or option values.
+ * File11 V12.3 / P00 exact-deployed-state READ-ONLY WP-CLI collector.
+ * Usage (operator-approved host): wp eval-file tools/v123-readonly-freeze.php
+ *
+ * No user/patient rows, credentials, arbitrary wp_options values or logs printed.
+ * Table "rows" are database metadata ESTIMATES, never a verified count.
+ * A symlink, unreadable file or oversized file makes its source manifest INCOMPLETE.
+ * This script itself cannot verify staging, source/deploy parity or a live fix.
  */
 declare(strict_types=1);
-if (!defined('ABSPATH') || !defined('WP_CLI') || !WP_CLI || !class_exists('WP_CLI')) {
-    fwrite(STDERR, "WP-CLI only\n");
-    exit(1);
+if ( ! defined( 'ABSPATH' ) || ! defined( 'WP_CLI' ) || ! WP_CLI || ! class_exists( 'WP_CLI' ) ) {
+    fwrite( STDERR, "Operator-only WP-CLI required.\n" );
+    exit( 1 );
 }
 global $wpdb;
-$errors=[];
-$pluginRoot=realpath(WP_PLUGIN_DIR);
-$active=(array)get_option('active_plugins',[]);
-if(is_multisite()) $active=array_merge($active,array_keys((array)get_site_option('active_sitewide_plugins',[])));
-$active=array_values(array_unique($active));
-sort($active,SORT_STRING);
-$pluginDetails=[];
-foreach($active as $pluginName) {
-    if(!preg_match('/reel|rsv|short.video/i',(string)$pluginName)) continue;
-    $main=realpath(WP_PLUGIN_DIR.'/'.(string)$pluginName);
-    if(!$main || !is_file($main) || !$pluginRoot || strpos($main,$pluginRoot.DIRECTORY_SEPARATOR)!==0) {
-        $errors[]='plugin-root-cannot-be-verified';
+$errors = array();
+$active = (array) get_option( 'active_plugins', array() );
+if ( is_multisite() ) $active = array_merge( $active, array_keys( (array) get_site_option( 'active_sitewide_plugins', array() ) ) );
+$active = array_values( array_unique( array_map( 'strval', $active ) ) );
+sort( $active, SORT_STRING );
+$plugin_root = realpath( WP_PLUGIN_DIR );
+$plugin_details = array();
+foreach ( $active as $basename ) {
+    if ( ! preg_match( '/reel|rsv|short.video|video.wall|vwlb|membership|search.discovery/i', $basename ) ) continue;
+    $real = realpath( WP_PLUGIN_DIR . '/' . $basename );
+    if ( ! $real || ! is_file( $real ) || ! $plugin_root || strpos( $real, $plugin_root . DIRECTORY_SEPARATOR ) !== 0 ) {
+        $errors[] = 'relevant-plugin-path-unverifiable:' . $basename;
         continue;
     }
-    if(!function_exists('get_plugin_data')) require_once ABSPATH.'wp-admin/includes/plugin.php';
-    $info=get_plugin_data($main,false,false);
-    $root=dirname($main);
-    $files=[];$count=0;
-    foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root,FilesystemIterator::SKIP_DOTS)) as $file) {
-        if(++$count>1500) {$errors[]='manifest-over-limit';break;}
-        if($file->isLink() || !$file->isFile() || $file->getSize()>10485760) continue;
-        $real=$file->getRealPath();
-        if(!$real || strpos($real,$root.DIRECTORY_SEPARATOR)!==0) continue;
-        $rel=str_replace(DIRECTORY_SEPARATOR,'/',substr($real,strlen($root)+1));
-        $hash=hash_file('sha256',$real);
-        if($hash!==false) $files[$rel]=$hash;
+    if ( ! function_exists( 'get_plugin_data' ) ) require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    $info = get_plugin_data( $real, false, false );
+    $plugin_dir = dirname( $real );
+    $files = array();
+    $complete = true;
+    $file_limit = 1500;
+    $seen = 0;
+    try {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator( $plugin_dir, FilesystemIterator::SKIP_DOTS )
+        );
+        foreach ( $iterator as $entry ) {
+            ++$seen;
+            if ( $seen > $file_limit ) {
+                $errors[] = 'relevant-plugin-manifest-over-limit:' . $basename;
+                $complete = false;
+                break;
+            }
+            if ( $entry->isLink() ) {
+                $errors[] = 'relevant-plugin-symlink-omitted:' . $basename;
+                $complete = false;
+                continue;
+            }
+            if ( ! $entry->isFile() ) continue;
+            if ( $entry->getSize() > 10485760 ) {
+                $errors[] = 'relevant-plugin-large-file-unhashed:' . $basename;
+                $complete = false;
+                continue;
+            }
+            $file_path = $entry->getRealPath();
+            if ( ! $file_path || strpos( $file_path, $plugin_dir . DIRECTORY_SEPARATOR ) !== 0 ) {
+                $errors[] = 'relevant-plugin-file-path-unverifiable:' . $basename;
+                $complete = false;
+                continue;
+            }
+            $relative = str_replace( DIRECTORY_SEPARATOR, '/', substr( $file_path, strlen( $plugin_dir ) + 1 ) );
+            $sha = hash_file( 'sha256', $file_path );
+            if ( ! is_string( $sha ) || strlen( $sha ) !== 64 ) {
+                $errors[] = 'relevant-plugin-hash-failed:' . $basename;
+                $complete = false;
+                continue;
+            }
+            $files[ $relative ] = $sha;
+        }
+    } catch ( Throwable $error ) {
+        $errors[] = 'relevant-plugin-enumeration-error:' . $basename;
+        $complete = false;
     }
-    ksort($files,SORT_STRING);
-    $pluginDetails[]=[
-        'plugin_basename'=>(string)$pluginName,
-        'header_name'=>(string)($info['Name']??''),
-        'header_version'=>(string)($info['Version']??''),
-        'file_count'=>count($files),
-        'file_sha256'=>$files,
-        'manifest_sha256'=>hash('sha256',(string)wp_json_encode($files))
-    ];
+    ksort( $files, SORT_STRING );
+    $plugin_details[] = array(
+        'plugin_basename' => $basename,
+        'header_name' => (string) ( $info['Name'] ?? '' ),
+        'header_version' => (string) ( $info['Version'] ?? '' ),
+        'manifest_complete' => $complete,
+        'file_count' => count( $files ),
+        'file_sha256' => $files,
+        'manifest_sha256' => $complete ? hash( 'sha256', (string) wp_json_encode( $files ) ) : null,
+    );
 }
-if(!$pluginDetails) $errors[]='no-matching-active-plugin';
-$pattern=$wpdb->esc_like((string)$wpdb->prefix).'%';
-$all=$wpdb->get_col($wpdb->prepare('SHOW TABLES LIKE %s',$pattern));
-if(!is_array($all) || (string)$wpdb->last_error!=='') {
-    $errors[]='table-discovery-error';$all=[];
+if ( ! $plugin_details ) $errors[] = 'no-matching-active-relevant-plugin';
+$table_prefix = (string) $wpdb->prefix;
+if ( ! preg_match( '/^[A-Za-z0-9_]+$/D', $table_prefix ) ) {
+    $errors[] = 'table-prefix-unverifiable';
+    $candidate_tables = array();
+} else {
+    $candidate_tables = $wpdb->get_col( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_prefix ) . '%' ) );
+    if ( ! is_array( $candidate_tables ) || '' !== (string) ( $wpdb->last_error ?? '' ) ) {
+        $errors[] = 'table-discovery-error';
+        $candidate_tables = array();
+    }
 }
-$tables=[];
-foreach($all as $t) {
-    $t=(string)$t;
-    if(strpos($t,(string)$wpdb->prefix)!==0 || !preg_match('/rsv|reel|short_video/i',$t)) continue;
-    if(!preg_match('/^[a-zA-Z0-9_]+$/D',$t)) {$errors[]='unusual-identifier';continue;}
-    $quoted=chr(96).$t.chr(96);
-    $columns=$wpdb->get_results('SHOW FULL COLUMNS FROM '.$quoted,ARRAY_A);
-    $validCols=is_array($columns) && (string)$wpdb->last_error==='';
-    $indexes=$wpdb->get_results('SHOW INDEX FROM '.$quoted,ARRAY_A);
-    $validIdx=is_array($indexes) && (string)$wpdb->last_error==='';
-    if(!$validCols || !$validIdx) $errors[]='schema-read-error:'.$t;
-    $tables[$t]=[
-       'columns'=>$validCols?array_map(static function($x){return [
-           'name'=>(string)($x['Field']??''),
-           'type'=>(string)($x['Type']??''),
-           'null'=>(string)($x['Null']??'')
-       ];},$columns):null,
-       'indexes'=>$validIdx?array_map(static function($x){return [
-           'key'=>(string)($x['Key_name']??''),
-           'column'=>(string)($x['Column_name']??''),
-           'seq'=>(int)($x['Seq_in_index']??0),
-           'unique'=>isset($x['Non_unique']) && (int)$x['Non_unique']===0,
-           'sub_part'=>isset($x['Sub_part'])?(int)$x['Sub_part']:null
-       ];},$indexes):null
-    ];
+$schemas = array();
+$count_tables = 0;
+foreach ( $candidate_tables as $table ) {
+    $table = (string) $table;
+    if ( strpos( $table, $table_prefix ) !== 0 || ! preg_match( '/rsv|reel|vwlb|smc|file26/i', $table ) ) continue;
+    if ( ! preg_match( '/^[A-Za-z0-9_]+$/D', $table ) ) {
+        $errors[] = 'unusual-table-identifier-redacted';
+        continue;
+    }
+    if ( ++$count_tables > 80 ) {
+        $errors[] = 'relevant-table-limit-exceeded';
+        break;
+    }
+    $q = chr( 96 ) . $table . chr( 96 );
+    $columns = $wpdb->get_results( 'SHOW FULL COLUMNS FROM ' . $q, ARRAY_A );
+    $cols_ok = is_array( $columns ) && '' === (string) ( $wpdb->last_error ?? '' );
+    $indexes = $wpdb->get_results( 'SHOW INDEX FROM ' . $q, ARRAY_A );
+    $indexes_ok = is_array( $indexes ) && '' === (string) ( $wpdb->last_error ?? '' );
+    $metadata = $wpdb->get_row(
+        $wpdb->prepare( 'SHOW TABLE STATUS LIKE %s', $wpdb->esc_like( $table ) ),
+        ARRAY_A
+    );
+    $meta_ok = is_array( $metadata ) && '' === (string) ( $wpdb->last_error ?? '' );
+    if ( ! $cols_ok || ! $indexes_ok || ! $meta_ok ) $errors[] = 'relevant-schema-read-failed:' . $table;
+    $schemas[ $table ] = array(
+        'engine' => $meta_ok ? (string) ( $metadata['Engine'] ?? '' ) : null,
+        'row_count_estimate_not_exact' => $meta_ok && isset( $metadata['Rows'] ) ? (int) $metadata['Rows'] : null,
+        'columns' => $cols_ok ? array_map( static function ( $r ) {
+            return array(
+                'name' => (string) ( $r['Field'] ?? '' ),
+                'type' => (string) ( $r['Type'] ?? '' ),
+                'nullable' => (string) ( $r['Null'] ?? '' ),
+            );
+        }, $columns ) : null,
+        'indexes' => $indexes_ok ? array_map( static function ( $r ) {
+            return array(
+                'name' => (string) ( $r['Key_name'] ?? '' ),
+                'column' => (string) ( $r['Column_name'] ?? '' ),
+                'sequence' => (int) ( $r['Seq_in_index'] ?? 0 ),
+                'unique' => isset( $r['Non_unique'] ) && 0 === (int) $r['Non_unique'],
+                'sub_part' => isset( $r['Sub_part'] ) ? (int) $r['Sub_part'] : null,
+            );
+        }, $indexes ) : null,
+    );
 }
-ksort($tables,SORT_STRING);
-$names=$wpdb->get_col($wpdb->prepare('SELECT option_name FROM '.$wpdb->options.' WHERE option_name LIKE %s LIMIT 300',$wpdb->esc_like('rsv_').'%'));
-if(!is_array($names) || (string)$wpdb->last_error!==''){$errors[]='migration-option-discovery-error';$names=[];}
-$markers=array_values(array_filter(array_map('strval',$names),static function($v){
-    return (bool)preg_match('/schema|version|migrat|upgrade|contract|lock/i',$v);
-}));
-sort($markers,SORT_STRING);
-$report=[
- 'mode'=>'READ_ONLY_METADATA_ONLY',
- 'plan'=>'File11 V12.3 P00',
- 'wp'=>(string)get_bloginfo('version'),
- 'php'=>PHP_VERSION,
- 'multisite'=>is_multisite(),
- 'active_matching_plugins'=>$pluginDetails,
- 'table_schemas'=>$tables,
- 'migration_option_names_only'=>$markers,
- 'errors'=>array_values(array_unique($errors)),
- 'cannot_verify'=>['table row data','migration completion','runtime logs','staging/owner integration','source-to-deployed parity without comparison','R3/R4/R5']
-];
-WP_CLI::line((string)wp_json_encode($report,JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES));
+ksort( $schemas, SORT_STRING );
+$allowed_marker_keys = array(
+    'rsv_schema_version',
+    'rsv_top20_schema_version',
+    'rsv_future30_schema_version',
+    'rsv_future30_contract_version',
+    'rsv_future30_plan_revision',
+    'rsv_migration_checkpoint',
+    'rsv_migration_lock',
+    'rsv_pre_migration_snapshot',
+    'rsv_legacy_cutover_enabled',
+);
+$markers = array();
+foreach ( $allowed_marker_keys as $key ) $markers[ $key ] = array( 'present'=>false, 'value'=>null );
+$placeholders = implode( ',', array_fill( 0, count( $allowed_marker_keys ), '%s' ) );
+$rows = $wpdb->get_results(
+    $wpdb->prepare( 'SELECT option_name, option_value FROM ' . $wpdb->options . ' WHERE option_name IN (' . $placeholders . ')', $allowed_marker_keys ),
+    ARRAY_A
+);
+if ( ! is_array( $rows ) || '' !== (string) ( $wpdb->last_error ?? '' ) ) {
+    $errors[] = 'migration-marker-read-failed';
+} else {
+    foreach ( $rows as $row ) {
+        if ( ! is_array( $row ) ) { $errors[] = 'migration-marker-format-invalid'; continue; }
+        $key = (string) ( $row['option_name'] ?? '' );
+        if ( ! array_key_exists( $key, $markers ) ) continue;
+        $value = (string) ( $row['option_value'] ?? '' );
+        $safe_scalar = preg_match( '/^[a-zA-Z0-9_.-]{1,64}$/D', $value );
+        $plain_key = preg_match( '/^(rsv_(schema_version|top20_schema_version|future30_schema_version|future30_contract_version|future30_plan_revision|migration_checkpoint|legacy_cutover_enabled))$/D', $key );
+        $markers[ $key ] = array(
+            'present' => true,
+            'value' => $plain_key && $safe_scalar ? $value : null,
+            'redacted_or_structured' => ! ( $plain_key && $safe_scalar ),
+        );
+    }
+}
+$report = array(
+    'mode' => 'READ_ONLY_METADATA_ONLY',
+    'plan' => 'File11 V12.3 P00',
+    'runtime' => array(
+        'wordpress' => (string) get_bloginfo( 'version' ),
+        'php' => PHP_VERSION,
+        'multisite' => is_multisite(),
+        'wp_debug_enabled' => defined( 'WP_DEBUG' ) && WP_DEBUG,
+    ),
+    'active_relevant_plugins' => $plugin_details,
+    'relevant_table_schema_and_estimated_rows' => $schemas,
+    'allowlisted_migration_markers' => $markers,
+    'errors' => array_values( array_unique( $errors ) ),
+    'does_not_certify' => array(
+        'exact content of private rows',
+        'actual migration completion or parity',
+        'runtime errors or provider health',
+        'real Staging integration',
+        'artifact matches GitHub without independent SHA comparison',
+        'R3, R4, R5 or resolved live incident',
+    ),
+);
+WP_CLI::line( (string) wp_json_encode( $report, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
