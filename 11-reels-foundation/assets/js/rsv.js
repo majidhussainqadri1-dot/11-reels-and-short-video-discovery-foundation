@@ -79,7 +79,7 @@
 	}
 	function setInteractive(item, enabled) {
 		if (!item) return;
-		item.querySelectorAll('a,button,input,select,textarea,summary,video').forEach(function (control) {
+		item.querySelectorAll('a,button,input,select,textarea,summary,video,iframe,[tabindex]').forEach(function (control) {
 			if (enabled) {
 				if (control.dataset.rsvOldTabindex !== undefined) {
 					const old = control.dataset.rsvOldTabindex;
@@ -153,16 +153,29 @@
 		items().forEach(function (item) { if (!item.dataset.rsvObserved) { observer.observe(item); item.dataset.rsvObserved = '1'; } });
 	}
 
+	function isInteractiveTarget(target) {
+		if (!target || typeof target.closest !== 'function') return false;
+		return !!target.closest(
+			'input,textarea,select,button,a,summary,video,iframe,[contenteditable="true"],[contenteditable=""],' +
+			'[role="textbox"],[role="combobox"],[role="listbox"],[role="slider"],[role="spinbutton"],[role="dialog"]'
+		);
+	}
+
 	if (root) {
 		observeItems();
 		root.addEventListener('keydown', function (event) {
+			// Do not seize space/arrows from text editing, form controls or existing shortcuts.
+			if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || isInteractiveTarget(event.target)) return;
 			if (event.key === 'ArrowDown' || event.key === 'PageDown') { event.preventDefault(); saveProgress(items()[active], true); activate(active + 1); }
 			if (event.key === 'ArrowUp' || event.key === 'PageUp') { event.preventDefault(); saveProgress(items()[active], true); activate(active - 1); }
 			if (event.key === ' ') { event.preventDefault(); feedPaused = !feedPaused; feedPaused ? pauseMedia(items()[active]) : playMedia(items()[active]); }
 		});
-		root.addEventListener('pointerdown', function (event) { if (event.pointerType === 'touch') touchStart = { x: event.clientX, y: event.clientY }; });
+		root.addEventListener('pointerdown', function (event) {
+			touchStart = event.pointerType === 'touch' && !isInteractiveTarget(event.target)
+				? { x: event.clientX, y: event.clientY } : null;
+		});
 		root.addEventListener('pointerup', function (event) {
-			if (!touchStart || event.pointerType !== 'touch') return;
+			if (!touchStart || event.pointerType !== 'touch' || isInteractiveTarget(event.target)) { touchStart = null; return; }
 			const dx = event.clientX - touchStart.x, dy = event.clientY - touchStart.y; touchStart = null;
 			if (Math.abs(dy) > 55 && Math.abs(dy) > Math.abs(dx) * 1.2) { saveProgress(items()[active], true); activate(active + (dy < 0 ? 1 : -1)); }
 		});
