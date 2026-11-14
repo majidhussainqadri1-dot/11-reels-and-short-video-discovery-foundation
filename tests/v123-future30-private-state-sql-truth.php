@@ -107,7 +107,7 @@ foreach($surface as $case){
 $db=new F11_State_TestDB();$db->fail='DB outage';$GLOBALS['wpdb']=$db;
 $allow=F11_State_Service::feed_allows_row(array('topic'=>'clinical','owner_id'=>7,'title'=>'Hello'));
 $tested++;
-if($allow!==false)$errors[]='11 feed filtering failed open on unreadable mute preferences';
+if(!check_error($allow,'rsv_future_state_query_unavailable'))$errors[]='11 feed filtering failed open or hid SQL outage on unreadable mute preferences';
 $db=new F11_State_TestDB();$db->raw=array('payload_json'=>'{"muted_topics":["clinical"]}','version'=>2,'updated_at'=>'2026');$GLOBALS['wpdb']=$db;
 $allow=F11_State_Service::feed_allows_row(array('topic'=>'clinical','owner_id'=>7,'title'=>'Hello'));
 $tested++;
@@ -127,5 +127,8 @@ if(!is_array($classes)||!in_array('rsv-a11y-high-contrast',$classes,true)||!in_a
 $db=new F11_State_TestDB();$db->raw=null;$db->fail='Post-write read timed out';$GLOBALS['wpdb']=$db;
 $after=F11_State_Service::putState();$tested++;
 if(!check_error($after,'rsv_future_state_query_unavailable')||$db->writes!==1)$errors[]='16 post-UPSERT SELECT outage reported false success';
+$repoSource=file_get_contents(dirname(__DIR__).'/11-reels-foundation/includes/class-rsv-repository.php');
+$tested++;
+if(!is_string($repoSource)||strpos($repoSource,'if ( is_wp_error( $pref_allowed ) ) return $pref_allowed;')===false) $errors[]='17 feed repository does not propagate typed preference SQL outage instead of healthy empty';
 if($errors){fwrite(STDERR,"V12.3 Private State SQL failures:\n".implode("\n",$errors)."\n");exit(1);}
 echo 'V12.3 private state read-truth '.$tested.'/'.$tested." isolated tests PASS (not WP/MySQL/staging/live)\n";
