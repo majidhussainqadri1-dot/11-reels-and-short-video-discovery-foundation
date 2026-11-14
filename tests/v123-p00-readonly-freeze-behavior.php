@@ -20,7 +20,6 @@ function get_plugin_data($path,$markup=false,$translate=false) {
     return array('Name'=>'File11 test plugin','Version'=>'1.2.0-rc21');
 }
 function get_bloginfo($key){return '7.0.1';}
-function wp_json_encode($v,$options=0){return json_encode($v,$options);}
 final class WP_CLI {
     public static $last='';
     public static function line($s){self::$last=$s;}
