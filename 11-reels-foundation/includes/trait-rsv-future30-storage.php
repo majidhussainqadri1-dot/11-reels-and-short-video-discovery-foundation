@@ -239,6 +239,9 @@ trait RSV_Future30_Storage_Trait {
 		$public_id = $public_id ? RSV_Helpers::text( $public_id, 80 ) : RSV_Helpers::public_id( 'f30' );
 		$now = RSV_Helpers::now();
 		$existing = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE public_id=%s", $public_id ), ARRAY_A );
+		if ( '' !== (string) $wpdb->last_error || ( null !== $existing && ! is_array( $existing ) ) ) {
+			return RSV_Helpers::error( 'rsv_future_object_lookup_unavailable', __( 'Reel item identity cannot be verified right now.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		$data = array( 'feature_id'=>$feature_id,'object_type'=>$object_type,'reel_id'=>absint($reel_id),'owner_id'=>get_current_user_id(),'status'=>'active','title'=>RSV_Helpers::text($title,255),'payload_json'=>RSV_Helpers::json_encode(self::sanitize_payload($payload)),'updated_at'=>$now );
 		if ( $existing ) {
 			if ( absint( $existing['owner_id'] ) !== get_current_user_id() && ! RSV_Security::can( RSV_Contracts::CAP_MANAGE ) ) return RSV_Helpers::error( 'rsv_future_forbidden', __( 'You cannot update this item.', RSV_TEXT_DOMAIN ), 403 );
