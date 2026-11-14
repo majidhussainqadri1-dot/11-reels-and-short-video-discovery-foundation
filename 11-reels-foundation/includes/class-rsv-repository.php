@@ -153,8 +153,11 @@ final class RSV_Repository {
 			if ( ! RSV_Security::can_view_reel( $row, 0 ) ) {
 				continue;
 			}
-			if ( class_exists( 'RSV_Future30' ) && ! RSV_Future30::feed_allows_row( $row ) ) {
-				continue;
+			if ( class_exists( 'RSV_Future30' ) ) {
+				$pref_allowed = RSV_Future30::feed_allows_row( $row );
+				// A failed private mute/personalization read must not become a healthy empty feed.
+				if ( is_wp_error( $pref_allowed ) ) return $pref_allowed;
+				if ( ! $pref_allowed ) continue;
 			}
 			if ( count( $items ) >= $limit ) {
 				$extra_eligible = true;
