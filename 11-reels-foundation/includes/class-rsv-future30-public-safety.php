@@ -51,6 +51,17 @@ final class RSV_Future30_Public_Safety {
 		$data = $response->get_data();
 		if ( ! is_array( $data ) || empty( $data['feature_id'] ) ) return $response;
 		$reel = RSV_Repository::find( $m[1], true );
+		global $wpdb;
+		// A failed current-Reel lookup is not evidence that the Reel was removed.
+		// Surface an unavailable read rather than returning a misleading 404.
+		if ( '' !== (string) $wpdb->last_error ) {
+			$unavailable = rest_ensure_response( array(
+				'code'    => 'rsv_future30_reel_read_unavailable',
+				'message' => __( 'The Reel could not be verified right now. Please retry.', RSV_TEXT_DOMAIN ),
+			) );
+			$unavailable->set_status( 503 );
+			return $unavailable;
+		}
 		if ( ! $reel || ! RSV_Security::can_view_reel( $reel, 0 ) ) return self::not_found_response();
 		$data['objects'] = self::safe_objects( $m[2], (array) ( $data['objects'] ?? array() ), $reel );
 		$data['edges']   = self::safe_edges( $m[2], (array) ( $data['edges'] ?? array() ), $reel );
