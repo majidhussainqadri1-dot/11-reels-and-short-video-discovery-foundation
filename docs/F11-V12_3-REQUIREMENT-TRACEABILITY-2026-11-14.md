@@ -111,6 +111,26 @@ Each row has: exact ID, V12.3 normative acceptance scope (short paraphrase), *pr
 | F30-AT-14 | Donor/payment/follower-only signals not prioritized in explanations/metrics | R3/R4 BLOCKED |
 | F30-AT-15 | Backup/restore/rollback of Future30 additive tables; no foreign-owner mutation | R3/R4 BLOCKED |
 
+## V12.3 AJ-17 and AJ-31 to AJ-40 — cross-module real user journeys
+
+These 11 journeys are **additional** to the 55 File11 requirement IDs and the 15 F30-AT tests. They are not all File11-owned. The source is V12.3's AJ list (page 261 in the Word plan page map). None has a verified R3, R4 or R5 result.
+
+| Journey | Actual V12.3 journey scope (condensed) | Canonical owner boundary | Required real acceptance | Evidence state |
+|---|---|---|---|---|
+| AJ-17 | File 10 verified Reel duration 59 reject, 60–600 accept; source/safety label, autoplay off and clear history work | File11 + File10 + File00 | 59/60/600/601 server facts, verified consent, user pause, source card and private history clear | R3 BLOCKED |
+| AJ-31 | 200% zoom, keyboard-only, screen reader, reduced motion, captions and focus order across core journeys | File11 UI + File20 + File25 | 320px, 200% text/400% reflow, keyboard tab order, iframe fallback, NVDA/VoiceOver, caption/readable transcript | R3 BLOCKED |
+| AJ-32 | Urdu/Arabic RTL, English LTR, mixed script, dates, navigation priority and Back/Forward | File20 + File25 + File11 | Urdu/Arabic/English actual browser history and focus restoration, time/date formats, no wrong global nav | R3 BLOCKED |
+| AJ-33 | Slow 3G/low-end-device text-first home, audio only, resumable download, truthful offline stale states | File20 + File10 + File12 + File11 | Test data-saver no autoplay, truthful 503, adaptive rendition, offline deleted media, resource-limited device | R3 BLOCKED |
+| AJ-34 | New device/security notice, MFA, recovery, remote sign-out and audit evidence | File00 / File02 / File24; File11 consumes verified session | Revoked session cannot create Reel/like/save/private notes; File11 no independent auth truth | EXTERNAL OWNER R3 BLOCKED |
+| AJ-35 | Data export/delete SLA, verified identity, status, retention exception | File24 privacy + File11 private state | Real WordPress exporter/eraser and cache/outbox reconciliation; rollback and legal hold; avoid false complete | R3 BLOCKED |
+| AJ-36 | AI/search/live outage preserves core public reading/login fallback without fabricated success | File16 / File26 / File10 / File20 + File11 | Disconnect each provider, verify safe 503/degraded; no assumed AI answer, transcripts, source URL or search results | R3 BLOCKED |
+| AJ-37 | Backup restore on Staging verified within RPO/RTO, including deletion/rights state | File24 + infrastructure + File11 / File10 / File26 | Pre/post SHA and DB/version, consent/rights/tombstone replay and rollback with no resurrection | R3 BLOCKED |
+| AJ-38 | Serious safety, medical, privacy or primary access defect blocks release; optional isolation governed by CEN-REL-001 | File24 security + all active owners + Founder | Open high-severity defects=0 in active scope; transparent exception only with tested off-state/fallback | R3 RELEASE BLOCKED |
+| AJ-39 | Six §2.6 visual samples across desktop/mobile/tablet, Urdu/Arabic RTL, English LTR, roles and loading/error/suspension | File25 design + File20 shell + File11 surface | 6 source-linked representative screenshots, checksum/viewport, real role, keyboard, zoom, performance | R3/R4 BLOCKED |
+| AJ-40 | Two independent reviews with correction and retest after EACH; zero known active defects, then Founder acceptance, rollout and monitoring | Founder + File24 QA + module reviewers | Reviewer identity, exact candidate SHA, all review findings and fix retests; R4 approval and R5 live retest | R3/R4/R5 BLOCKED |
+
+**AJ-31 / P07 nuance:** the AJ sentence specifies 200% zoom; the detailed File11/NFR acceptance additionally requires 400% zoom reflow. Test both, not one in place of the other. **AJ-34:** File11 must consume canonical File00/02 session validity, not implement MFA. **AJ-38/40:** Founder approval alone never overrides unresolved safety findings.
+
 ## P00–P14 execution gates / evidence handoff
 
 | Phase | Required artifact | Current gate |
