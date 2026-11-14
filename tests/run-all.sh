@@ -13,6 +13,7 @@ php "$ROOT/tests/rc5-hardening-contracts.php"
 php "$ROOT/tests/rc6-forty-review-contracts.php"
 php "$ROOT/tests/current-plan-contracts.php"
 php "$ROOT/tests/v123-traceability-gate.php"
+php -l "$ROOT/tools/v123-readonly-freeze.php" >/dev/null
 php "$ROOT/tests/future30-contracts.php"
 php "$ROOT/tests/fresh40-hardening-contracts.php"
 php "$ROOT/tests/fresh20-hardening-contracts.php"
