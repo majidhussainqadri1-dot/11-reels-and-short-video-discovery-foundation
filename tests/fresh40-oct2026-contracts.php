@@ -16,13 +16,16 @@ foreach ( $files as $name => $source ) {
     }
 }
 $required = array(
-    array( 'experience', "self::public_projection('F11-FUT-030',\$reel)['edges']" ),
-    array( 'experience', "self::public_projection('F11-FUT-003',\$reel)['edges']" ),
-    array( 'experience', "self::public_projection('F11-FUT-004',\$reel)['edges']" ),
-    array( 'experience', "self::public_projection('F11-FUT-005',\$reel)['objects']" ),
-    array( 'experience', "self::public_projection('F11-FUT-016',\$reel)['objects']" ),
-    array( 'experience', "self::public_projection('F11-FUT-017',\$reel)['edges']" ),
-    array( 'experience', "self::public_projection('F11-FUT-018',\$reel)['objects']" ),
+    array( 'experience', "self::public_projection('F11-FUT-030',\$reel)" ),
+    array( 'experience', "'related'        => array( 'F11-FUT-003', 'edges', 12 )" ),
+    array( 'experience', "'citations'      => array( 'F11-FUT-004', 'edges', 20 )" ),
+    array( 'experience', "'evidence'       => array( 'F11-FUT-005', 'objects', 10 )" ),
+    array( 'experience', "'transcript'     => array( 'F11-FUT-016', 'objects', 1 )" ),
+    array( 'experience', "'chapters'       => array( 'F11-FUT-017', 'edges', 30 )" ),
+    array( 'experience', "'knowledge_card' => array( 'F11-FUT-018', 'objects', 1 )" ),
+    array( 'experience', "\$projection = self::public_projection( \$spec[0], \$reel );" ),
+    array( 'experience', "if ( is_wp_error( \$projection ) ) return \$projection;" ),
+    array( 'experience', "if ( is_wp_error( \$tools ) )" ),
     array( 'experience', "'knowledge-graph-evidence-current'" ),
     array( 'storage', "if ( ! \$refs ) return false;" ),
     array( 'storage', "'evidence-layer-current'" ),
