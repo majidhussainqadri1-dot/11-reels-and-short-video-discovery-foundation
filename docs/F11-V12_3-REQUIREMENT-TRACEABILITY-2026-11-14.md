@@ -88,7 +88,8 @@ Each row has: exact ID, V12.3 normative acceptance scope (short paraphrase), *pr
 3. Candidate `RSV_Future30::PLAN_REVISION` is `2026-08-12`, an earlier lineage marker; no inference that V12.3 was compiled into source. A V12.3 scope/revision decision and versioned contract must be explicit.
 4. P07 source UI `render_safe_tools` exposes plain owner/ref for citation and related knowledge without verified navigable canonical target. Provider destination contract needed first; do not guess URLs.
 5. Issue #38: concurrency atomicity unverified. Pre-transaction reads and unique `public_id` do not prove a single active supersession edge for a given source. Actual MySQL two-session fixture and rollback required before code fix or resolution.
-6. V12.3 references WordPress 7.0.1/PHP 8.3 as project compatibility baseline. Candidate declares lower minimum support. This is a verification differential, not evidence of incompatibility.
+6. Issue #45: Future30 generic read helpers may substitute empty/default state when MySQL SELECT fails; distinct from previously fixed export/erase and private POST SQL paths. Needs staging reproduction, complete caller audit and typed 503 before repair.
+7. V12.3 references WordPress 7.0.1/PHP 8.3 as project compatibility baseline. Candidate declares lower minimum support. This is a verification differential, not evidence of incompatibility.
 
 ## P09/P10 — 15 negative acceptance tests
 
@@ -136,6 +137,7 @@ Each row has: exact ID, V12.3 normative acceptance scope (short paraphrase), *pr
 |---|---:|---|---|
 | Distinct preexisting source defects described as fixed in PR #37 | 5 | SQL/privacy/correction/private-read fixes; 50 scoped regressions | source corrected, no live retest |
 | Open tracked concurrency risk | 1 | Issue #38 | NOT RESOLVED, needs MySQL reproduction |
+| New suspected read-SQL error/false-empty risk | 1 | Issue #45, `object_rows`/`edge_rows`/`state_get` source | UNRESOLVED, requires isolated real-DB reproduction; not a verified live defect |
 | Known source-level P07 UI gap group | 1 | canonical source/knowledge links not actually navigable | NOT FIXED; owner contract required |
 | V12.3 scoping ambiguity | 1 | FUT001 missing separate itemized text | UNRESOLVED decision |
 | Runtime/staging untested FR+NFR+FUT requirements | 55 | no R3 evidence | BLOCKED / not necessarily defects |
