@@ -322,7 +322,45 @@ trait RSV_Future30_Storage_Trait {
 	}
 
 	private static function state_get( $feature_id, $object_ref, $state_key, $default = array() ) {
-		global $wpdb;$table=RSV_Helpers::table('future_user_state');$row=$wpdb->get_row($wpdb->prepare("SELECT payload_json,version,updated_at FROM $table WHERE user_id=%d AND feature_id=%s AND object_ref=%s AND state_key=%s",get_current_user_id(),$feature_id,RSV_Helpers::text($object_ref,100),sanitize_key($state_key)),ARRAY_A);if(!$row)return $default;$payload_default=(is_array($default)&&array_key_exists('payload',$default))?(array)$default['payload']:(array)$default;return array('payload'=>RSV_Helpers::json_decode($row['payload_json'],$payload_default),'version'=>absint($row['version']),'updated_at'=>$row['updated_at']);
+		global $wpdb;
+		$table = RSV_Helpers::table( 'future_user_state' );
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT payload_json,version,updated_at FROM $table WHERE user_id=%d AND feature_id=%s AND object_ref=%s AND state_key=%s",
+				get_current_user_id(),
+				$feature_id,
+				RSV_Helpers::text( $object_ref, 100 ),
+				sanitize_key( $state_key )
+			),
+			ARRAY_A
+		);
+		// Missing state is normal only when SQL completed successfully. Never
+		// replace a failed query with an apparently valid empty private state.
+		if ( '' !== (string) $wpdb->last_error || false === $row ||
+			( null !== $row && ! is_array( $row ) ) ) {
+			return RSV_Helpers::error(
+				'rsv_future_state_query_unavailable',
+				__( 'Private Reel settings could not be checked right now. Please retry.', RSV_TEXT_DOMAIN ),
+				503
+			);
+		}
+		if ( null === $row ) return $default;
+		if ( ! array_key_exists( 'payload_json', $row ) ||
+			! array_key_exists( 'version', $row ) ||
+			! array_key_exists( 'updated_at', $row ) ) {
+			return RSV_Helpers::error(
+				'rsv_future_state_query_unavailable',
+				__( 'Private Reel settings could not be verified safely. Please retry.', RSV_TEXT_DOMAIN ),
+				503
+			);
+		}
+		$payload_default = is_array( $default ) && array_key_exists( 'payload', $default )
+			? (array) $default['payload'] : (array) $default;
+		return array(
+			'payload'    => RSV_Helpers::json_decode( $row['payload_json'], $payload_default ),
+			'version'    => absint( $row['version'] ),
+			'updated_at' => $row['updated_at'],
+		);
 	}
 
 	private static function state_put( $feature_id, $object_ref, $state_key, $payload ) {
