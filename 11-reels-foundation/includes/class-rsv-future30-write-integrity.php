@@ -52,6 +52,9 @@ final class RSV_Future30_Write_Integrity {
 		global $wpdb;
 		$table = RSV_Helpers::table( 'future_objects' );
 		$existing = $wpdb->get_row( $wpdb->prepare( "SELECT feature_id,reel_id,owner_id,version FROM $table WHERE public_id=%s LIMIT 1", $public_id ), ARRAY_A );
+		if ( '' !== (string) $wpdb->last_error || ( null !== $existing && ! is_array( $existing ) ) ) {
+			return RSV_Helpers::error( 'rsv_future_object_lookup_unavailable', __( 'Reel item identity cannot be verified right now.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		if ( ! $existing ) return $result;
 		if ( 'F11-FUT-007' === $feature ) {
 			return RSV_Helpers::error( 'rsv_version_snapshot_immutable', __( 'A historical Reel version snapshot is immutable and cannot be overwritten.', RSV_TEXT_DOMAIN ), 409 );
