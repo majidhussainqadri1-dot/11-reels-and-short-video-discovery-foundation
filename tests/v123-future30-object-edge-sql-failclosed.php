@@ -8,9 +8,11 @@ require __DIR__ . '/bootstrap.php';
 if ( ! defined( 'ARRAY_A' ) ) define( 'ARRAY_A', 'ARRAY_A' );
 function rest_ensure_response( $value ) { return $value; }
 function esc_html__( $value, $domain = '' ) { return $value; }
+function apply_filters( $name, $value, ...$args ) { return $value; }
 function add_filter( $name, $callback, $priority=10, $args=1 ) { return true; }
 
 final class RSV_Helpers {
+    public static function no_cache_private() { return null; }
     public static function table( $name ) { return 'wp_rsv_' . $name; }
     public static function error( $code, $message, $status=400 ) {
         return new WP_Error( $code, $message, array( 'status'=>$status ) );
@@ -50,10 +52,12 @@ final class RSV_V123_Query_DB {
 require dirname(__DIR__) . '/11-reels-foundation/includes/trait-rsv-future30-storage.php';
 require dirname(__DIR__) . '/11-reels-foundation/includes/trait-rsv-future30-feature-write.php';
 require dirname(__DIR__) . '/11-reels-foundation/includes/trait-rsv-future30-experience.php';
+require dirname(__DIR__) . '/11-reels-foundation/includes/trait-rsv-future30-user-features.php';
 final class RSV_V123_Query_Service {
     use RSV_Future30_Storage_Trait;
     use RSV_Future30_Feature_Write_Trait;
     use RSV_Future30_Experience_Trait;
+    use RSV_Future30_User_Features_Trait;
     public static function definitions() {
         return array( 'F11-FUT-017'=>array('slug'=>'chapters','owner'=>'File 11') );
     }
@@ -94,13 +98,16 @@ $scenarios = array(
     array('18 graph SQL outage','graph',null,'DB unavailable','rsv_future_objects_query_unavailable','error'),
     array('19 healthy public projection','projection-ok',array(),'',null,'projection'),
     array('20 healthy empty series','series-ok',array(),'',null,'empty'),
+    array('21 AI context failed object read','ai-object',null,'DB unavailable','rsv_future_objects_query_unavailable','error'),
+    array('22 AI context failed edge read','ai-edge',null,'DB unavailable','rsv_future_edges_query_unavailable','error'),
+    array('23 AI context healthy empty','ai-ok',array(),'',null,'ai-context'),
 );
 $errors = array();
 foreach ( $scenarios as $test ) {
     $db = new RSV_V123_Query_DB();
     $GLOBALS['wpdb']=$db;
     list($name,$mode,$rows,$sqlError,$errorCode,$expect)=$test;
-    if ( strpos($mode,'edge')===0 || $mode==='projection-edge' ) {
+    if ( in_array($mode,array('edge','projection-edge','ai-edge'),true) ) {
         $db->edges=$rows;
         $db->edges_error=$sqlError;
     } else {
@@ -119,6 +126,7 @@ foreach ( $scenarios as $test ) {
         case 'tools': $actual=RSV_V123_Query_Service::toolsCheck(); break;
         case 'render': $actual=RSV_V123_Query_Service::render_tools(array('id'=>27)); break;
         case 'graph': $actual=$service->knowledge_graph(array('id'=>'reel_any')); break;
+        case 'ai-object': case 'ai-edge': case 'ai-ok': $actual=$service->ai_context(array('id'=>'reel_any')); break;
         default: $actual=null;
     }
     if ( $expect==='error' ) {
@@ -132,6 +140,8 @@ foreach ( $scenarios as $test ) {
         $errors[]=$name.' expected decoded safe payload';
     } elseif ($expect==='degraded' && (!is_string($actual)||strpos($actual,'temporarily unavailable')===false||strpos($actual,'role="status"')===false)) {
         $errors[]=$name.' did not emit an accessible temporary-unavailable message';
+    } elseif ($expect==='ai-context' && (!is_array($actual)||($actual['owner']??'')!=='File 16'||($actual['execute_ai']??true)!==false||!is_array($actual['context']??null))) {
+        $errors[]=$name.' did not return safe nonexecuting File16 context';
     } elseif ($expect==='projection' && (!is_array($actual)||!array_key_exists('objects',$actual)||!array_key_exists('edges',$actual))) {
         $errors[]=$name.' expected healthy projection object/edges';
     }
