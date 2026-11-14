@@ -96,7 +96,7 @@ $assert(($r['status']??'')==='aggregate_read_unavailable'
 $db=new V123_P09_DB();$db->duplicateError='test SQL interrupted';
 $r=$run($db);
 $assert(($r['status']??'')==='duplicate_group_read_unavailable'
- && ($r['active_supersession_edges']??'unset')===null,
+ && array_key_exists('active_supersession_edges',$r) && $r['active_supersession_edges']===null,
  'duplicate SQL error does not fabricate successful zero');
 $db=new V123_P09_DB();$db->aggregate=array('active_edges'=>'2','distinct_sources'=>'2');$db->duplicate='1';
 $r=$run($db);
