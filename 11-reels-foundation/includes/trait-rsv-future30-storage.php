@@ -56,7 +56,9 @@ trait RSV_Future30_Storage_Trait {
 
 	private static function public_projection( $feature_id, $reel ) {
 		$objects = self::object_rows( $feature_id, $reel['id'], 0, 100 );
+		if ( is_wp_error( $objects ) ) return $objects;
 		$edges   = self::edge_rows( $feature_id, $reel['id'], 200 );
+		if ( is_wp_error( $edges ) ) return $edges;
 		$duration = self::authoritative_duration( $reel );
 		foreach ( $objects as &$object ) unset( $object['owner_id'] );
 		unset( $object );
@@ -263,19 +265,75 @@ trait RSV_Future30_Storage_Trait {
 		return array('public_id'=>$public_id,'version'=>1);
 	}
 
+	/** Distinguish a healthy empty result from an unavailable or malformed SQL read. */
 	private static function object_rows( $feature_id, $reel_id = 0, $owner_id = 0, $limit = 50 ) {
-		global $wpdb; $table=RSV_Helpers::table('future_objects'); $where=array('feature_id=%s','status=%s'); $args=array($feature_id,'active');
-		if($reel_id){$where[]='reel_id=%d';$args[]=absint($reel_id);} if($owner_id){$where[]='owner_id=%d';$args[]=absint($owner_id);} $args[]=min(100,max(1,absint($limit)));
-		$sql="SELECT public_id,feature_id,object_type,reel_id,owner_id,title,payload_json,version,created_at,updated_at FROM $table WHERE ".implode(' AND ',$where).' ORDER BY updated_at DESC,id DESC LIMIT %d';
-		$rows=$wpdb->get_results($wpdb->prepare($sql,$args),ARRAY_A); foreach($rows as &$row){$row['payload']=RSV_Helpers::json_decode($row['payload_json']);unset($row['payload_json']);} return $rows;
+		global $wpdb;
+		$table = RSV_Helpers::table( 'future_objects' );
+		$where = array( 'feature_id=%s', 'status=%s' );
+		$args  = array( $feature_id, 'active' );
+		if ( $reel_id ) { $where[] = 'reel_id=%d'; $args[] = absint( $reel_id ); }
+		if ( $owner_id ) { $where[] = 'owner_id=%d'; $args[] = absint( $owner_id ); }
+		$args[] = min( 100, max( 1, absint( $limit ) ) );
+		$sql = "SELECT public_id,feature_id,object_type,reel_id,owner_id,title,payload_json,version,created_at,updated_at FROM $table WHERE " . implode( ' AND ', $where ) . ' ORDER BY updated_at DESC,id DESC LIMIT %d';
+		$rows = $wpdb->get_results( $wpdb->prepare( $sql, $args ), ARRAY_A );
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_future_objects_unavailable', __( 'Reel learning records cannot be verified right now.', RSV_TEXT_DOMAIN ), 503 );
+		}
+		foreach ( $rows as &$row ) {
+			if ( ! is_array( $row ) ) {
+				return RSV_Helpers::error( 'rsv_future_objects_invalid', __( 'Reel learning records have an unexpected format.', RSV_TEXT_DOMAIN ), 503 );
+			}
+			$row['payload'] = RSV_Helpers::json_decode( $row['payload_json'] ?? '' );
+			unset( $row['payload_json'] );
+		}
+		unset( $row );
+		return $rows;
 	}
 
 	private static function edge_rows( $feature_id, $reel_id, $limit = 100 ) {
-		global $wpdb;$table=RSV_Helpers::table('future_edges');$rows=$wpdb->get_results($wpdb->prepare("SELECT public_id,feature_id,edge_type,target_owner,target_ref,start_second,end_second,payload_json,version,created_at,updated_at FROM $table WHERE feature_id=%s AND source_reel_id=%d AND status='active' ORDER BY start_second ASC,id ASC LIMIT %d",$feature_id,absint($reel_id),min(200,max(1,absint($limit)))),ARRAY_A);foreach($rows as &$row){$row['payload']=RSV_Helpers::json_decode($row['payload_json']);unset($row['payload_json']);}return $rows;
+		global $wpdb;
+		$table = RSV_Helpers::table( 'future_edges' );
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT public_id,feature_id,edge_type,target_owner,target_ref,start_second,end_second,payload_json,version,created_at,updated_at FROM $table WHERE feature_id=%s AND source_reel_id=%d AND status='active' ORDER BY start_second ASC,id ASC LIMIT %d",
+				$feature_id, absint( $reel_id ), min( 200, max( 1, absint( $limit ) ) )
+			),
+			ARRAY_A
+		);
+		if ( ! is_array( $rows ) || '' !== (string) $wpdb->last_error ) {
+			return RSV_Helpers::error( 'rsv_future_edges_unavailable', __( 'Reel source relationships cannot be verified right now.', RSV_TEXT_DOMAIN ), 503 );
+		}
+		foreach ( $rows as &$row ) {
+			if ( ! is_array( $row ) ) {
+				return RSV_Helpers::error( 'rsv_future_edges_invalid', __( 'Reel source relationships have an unexpected format.', RSV_TEXT_DOMAIN ), 503 );
+			}
+			$row['payload'] = RSV_Helpers::json_decode( $row['payload_json'] ?? '' );
+			unset( $row['payload_json'] );
+		}
+		unset( $row );
+		return $rows;
 	}
 
 	private static function state_get( $feature_id, $object_ref, $state_key, $default = array() ) {
-		global $wpdb;$table=RSV_Helpers::table('future_user_state');$row=$wpdb->get_row($wpdb->prepare("SELECT payload_json,version,updated_at FROM $table WHERE user_id=%d AND feature_id=%s AND object_ref=%s AND state_key=%s",get_current_user_id(),$feature_id,RSV_Helpers::text($object_ref,100),sanitize_key($state_key)),ARRAY_A);if(!$row)return $default;$payload_default=(is_array($default)&&array_key_exists('payload',$default))?(array)$default['payload']:(array)$default;return array('payload'=>RSV_Helpers::json_decode($row['payload_json'],$payload_default),'version'=>absint($row['version']),'updated_at'=>$row['updated_at']);
+		global $wpdb;
+		$table = RSV_Helpers::table( 'future_user_state' );
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT payload_json,version,updated_at FROM $table WHERE user_id=%d AND feature_id=%s AND object_ref=%s AND state_key=%s",
+				get_current_user_id(), $feature_id, RSV_Helpers::text( $object_ref, 100 ), sanitize_key( $state_key )
+			),
+			ARRAY_A
+		);
+		if ( '' !== (string) $wpdb->last_error || ( null !== $row && ! is_array( $row ) ) ) {
+			return RSV_Helpers::error( 'rsv_future_state_unavailable', __( 'Your private Reel settings cannot be verified right now.', RSV_TEXT_DOMAIN ), 503 );
+		}
+		if ( null === $row ) return $default;
+		$payload_default = ( is_array( $default ) && array_key_exists( 'payload', $default ) ) ? (array) $default['payload'] : (array) $default;
+		return array(
+			'payload' => RSV_Helpers::json_decode( $row['payload_json'] ?? '', $payload_default ),
+			'version' => absint( $row['version'] ?? 0 ),
+			'updated_at' => $row['updated_at'] ?? '',
+		);
 	}
 
 	private static function state_put( $feature_id, $object_ref, $state_key, $payload ) {
