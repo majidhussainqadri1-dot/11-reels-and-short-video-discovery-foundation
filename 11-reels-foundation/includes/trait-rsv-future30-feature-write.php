@@ -5,6 +5,7 @@ trait RSV_Future30_Feature_Write_Trait {
 	/** Public series must remain entirely composed of currently public File 11 Reels. */
 	private static function public_series_rows() {
 		$rows = self::object_rows( 'F11-FUT-001', 0, 0, 50 );
+		if ( is_wp_error( $rows ) ) return $rows;
 		$safe = array();
 		foreach ( $rows as $row ) {
 			$payload = (array) ( $row['payload'] ?? array() );
@@ -27,7 +28,10 @@ trait RSV_Future30_Feature_Write_Trait {
 		}
 		return $safe;
 	}
-	public function series_list() { return rest_ensure_response( self::public_series_rows() ); }
+	public function series_list() {
+		$series = self::public_series_rows();
+		return is_wp_error( $series ) ? $series : rest_ensure_response( $series );
+	}
 	public function series_create( $request ) { $p=(array)$request->get_json_params();$rate=RSV_Security::rate_limit('future30_series',30,HOUR_IN_SECONDS);if(is_wp_error($rate))return $rate;$idem=$request->get_header('Idempotency-Key');$begin=RSV_Security::idempotency_begin('future30_series',$idem,$p);if(is_wp_error($begin))return $begin;if(!empty($begin['replay']))return rest_ensure_response($begin['response']);$refs=array_values(array_unique(array_map('sanitize_text_field',(array)($p['ordered_reels']??array()))));if(!count($refs)||count($refs)>100){RSV_Security::idempotency_fail('future30_series',$idem);return RSV_Helpers::error('rsv_series_size_invalid',__('A Reel series must contain 1 to 100 current public Reels.',RSV_TEXT_DOMAIN),422);}foreach($refs as $ref)if(!self::canonical_ref_public_valid('File 11',$ref,'series')){RSV_Security::idempotency_fail('future30_series',$idem);return RSV_Helpers::error('rsv_series_reel_invalid',__('Every series item must be a current public Reel.',RSV_TEXT_DOMAIN),422);}return self::idempotent_finish_result('future30_series',$idem,static function() use($p,$refs){return self::put_object('F11-FUT-001','series',0,$p['title']??'',array('description'=>$p['description']??'','difficulty'=>$p['difficulty']??'','ordered_reels'=>$refs),$p['public_id']??'');},array('entity_type'=>'future30','action'=>'series_update','reason'=>'F11-FUT-001','event'=>'ReelSeriesUpdated','event_data'=>array('feature_id'=>'F11-FUT-001'))); }
 	/**
 	 * File 05 is the authority for course and lesson publication status.
@@ -73,7 +77,9 @@ trait RSV_Future30_Feature_Write_Trait {
 		return $safe;
 	}
 	public function path_list() {
-		return rest_ensure_response( self::public_learning_path_rows( self::object_rows( 'F11-FUT-002', 0, 0, 50 ) ) );
+		$rows = self::object_rows( 'F11-FUT-002', 0, 0, 50 );
+		if ( is_wp_error( $rows ) ) return $rows;
+		return rest_ensure_response( self::public_learning_path_rows( $rows ) );
 	}
 	/** Validate File 05 course and lesson truth before persisting a path. */
 	private static function validated_path_steps( $raw ) {
@@ -124,7 +130,7 @@ trait RSV_Future30_Feature_Write_Trait {
 	public function reel_feature_get( $request ) {
 		list($fid,$def)=self::feature($request['feature']); if(!$fid)return RSV_Helpers::error('rsv_future_unknown',__('Unknown future feature.',RSV_TEXT_DOMAIN),404);if(!self::generic_public_allowed($fid))return RSV_Helpers::error('rsv_future_private',__('This capability is private and available only through its dedicated endpoint.',RSV_TEXT_DOMAIN),404);$reel=self::reel($request['id']);if(is_wp_error($reel))return $reel;
 		$public=RSV_Security::can_view_reel($reel); if(!$public)return RSV_Helpers::error('rsv_not_found',__('Reel not found.',RSV_TEXT_DOMAIN),404);
-		$projection=self::public_projection($fid,$reel);return rest_ensure_response(array('feature_id'=>$fid,'definition'=>$def,'objects'=>$projection['objects'],'edges'=>$projection['edges']));
+		$projection=self::public_projection($fid,$reel);if(is_wp_error($projection))return $projection;return rest_ensure_response(array('feature_id'=>$fid,'definition'=>$def,'objects'=>$projection['objects'],'edges'=>$projection['edges']));
 	}
 
 	public function reel_feature_write( $request ) {
