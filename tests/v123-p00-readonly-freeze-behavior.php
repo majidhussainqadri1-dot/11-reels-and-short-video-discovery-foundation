@@ -84,7 +84,7 @@ $ok(($cols['row_count_estimate_not_exact']??null)===18 && ($cols['engine']??'')=
 $ok(($markers['rsv_schema_version']['value']??null)==='1.2.0','safe version marker retained');
 $ok(($markers['rsv_migration_checkpoint']['value']??null)==='v2-batch-3','safe checkpoint marker retained');
 $ok(($markers['rsv_migration_lock']['redacted_or_structured']??false)===true
- && ($markers['rsv_migration_lock']['value']??'X')===null,'structured lock marker fully redacted');
+ && array_key_exists('value',$markers['rsv_migration_lock']) && $markers['rsv_migration_lock']['value']===null,'structured lock marker fully redacted');
 $ok(strpos(WP_CLI::$last,'SUPER_SECRET')===false,'no raw migration lock token in output');
 $ok(!array_filter($GLOBALS['wpdb']->operations,static function($op){return !in_array($op,array('PREPARED SELECT/SHOW','SHOW TABLES','SHOW COLUMNS','SHOW INDEX','SELECT ALLOWLISTED MARKERS','SHOW TABLE STATUS'),true);}),
     'collector never executes a DB write');
@@ -94,7 +94,7 @@ if(function_exists('symlink')&&symlink($file,$plugindir.'/linked-source.php')){
     $report=json_decode(WP_CLI::$last,true);
     $plugin=$report['active_relevant_plugins'][0]??array();
     $ok(($plugin['manifest_complete']??true)===false
-        && ($plugin['manifest_sha256']??'nonempty')===null,
+        && array_key_exists('manifest_sha256',$plugin) && $plugin['manifest_sha256']===null,
         'symlink omission invalidates manifest SHA instead of claiming parity');
     $ok(in_array('relevant-plugin-symlink-omitted:reels-foundation-11/reels-foundation-11.php',
         $report['errors']??array(),true),'symlink omission is explicitly reported');
