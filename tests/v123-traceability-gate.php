@@ -18,10 +18,10 @@ preg_match_all('/^\| (F30-AT-\d{2}) \|[^\r\n]+$/m',$txt,$m);
 $wanted=[];for($i=1;$i<=15;$i++)$wanted[]=sprintf('F30-AT-%02d',$i);
 if($m[1]!==$wanted)$failures[]='Acceptance matrix must contain F30-AT-01 through F30-AT-15 exactly once in order';
 $ajWanted=array_merge(array('AJ-17'),array_map(static function($n){return 'AJ-'.$n;},range(31,40)));
-preg_match_all('/^\\| (AJ-(?:17|3[1-9]|40)) \\|[^\\r\\n]+$/m',$txt,$ajMatches);
+preg_match_all('/^\| (AJ-(?:17|3[1-9]|40)) \|[^\r\n]+$/m',$txt,$ajMatches);
 if($ajMatches[1]!==$ajWanted)$failures[]='AJ-17 and AJ-31 through AJ-40 must appear exactly once, in order';
 foreach($ajWanted as $aj){
-    if(!preg_match('/^\\| '.preg_quote($aj,'/').' \\|[^\\r\\n]+R3[^\\r\\n]+BLOCKED[^\\r\\n]*$/m',$txt)){
+    if(!preg_match('/^\| '.preg_quote($aj,'/').' \|[^\r\n]+R3[^\r\n]+BLOCKED[^\r\n]*$/m',$txt)){
         $failures[]=$aj.' requires an explicit R3 blocked acceptance state';
     }
 }
