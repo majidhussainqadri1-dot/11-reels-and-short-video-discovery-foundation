@@ -68,7 +68,7 @@ foreach ( $cases as $case ) {
     RSV_Repository::$sql_error = $case[2];
     RSV_Repository::$calls = 0;
     RSV_Security::$allow = $case[3];
-    $request = new RSV_V123_Read_Request( $case[4], $case[9] ?? null );
+    $request = new RSV_V123_Read_Request( $case[4], $case[8] ?? null );
     $payload = $case[5] ? array('feature_id'=>'F11-FUT-005','objects'=>array(),'edges'=>array()) : array('objects'=>array());
     $response = new WP_REST_Response( $payload );
     $actual = RSV_Future30_Public_Safety::filter_response( $response, null, $request );
