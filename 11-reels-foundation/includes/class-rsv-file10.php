@@ -58,6 +58,26 @@ final class RSV_File10 {
 			true === VWLB_Security::can_view( $video, 'reel_public_view' );
 	}
 
+	/**
+	 * Current viewer's canonical File10 delivery grant for nonpublic Reels.
+	 *
+	 * File10's VWLB_Security::can_view() checks the CURRENT WP actor. Never
+	 * reuse that actor's permission to approve a different explicit user_id
+	 * (privacy export/history, REST projection, or admin-assisted views).
+	 * Missing/withdrawn provider/rights/consent is DENY, not a local grant.
+	 */
+	public static function current_viewer_authorized( $id, $user_id ) {
+		$user_id = absint( $user_id );
+		if ( ! $user_id || $user_id !== get_current_user_id() || ! self::ready() )
+			return false;
+		if ( ! class_exists( 'VWLB_Security' ) ||
+			! is_callable( array( 'VWLB_Security', 'can_view' ) ) )
+			return false;
+		$video = self::video( $id );
+		return self::eligible_video_row( $video ) &&
+			true === VWLB_Security::can_view( $video, 'playback' );
+	}
+
 	public static function validate_for_reel( $id, $owner_id = 0 ) {
 		if ( ! self::ready() ) return RSV_Helpers::error( 'rsv_file10_unavailable', __( 'File 10 media services are unavailable.', RSV_TEXT_DOMAIN ), 503 );
 		// File10 repository distinguishes a failed SELECT from a legitimately absent video.
