@@ -8,7 +8,11 @@ final class VWLB_Contracts {}
 final class VWLB_Security {
     public static $allowed=true;
     public static $unlistedOwner=false;
+    public static $throws=false;
+    public static $malformed=false;
     public static function can_view($video,$purpose='reel_public_view'){
+        if(self::$throws)throw new RuntimeException('Synthetic File10 provider exception');
+        if(self::$malformed)return new WP_Error('invalid_policy','Bad type');
         if(!self::$allowed||!empty($video['deleted_at']))return false;
         if(($video['visibility']??'')==='unlisted')return self::$unlistedOwner;
         return ($video['visibility']??'')==='public';
@@ -168,5 +172,15 @@ $restricted=$base;$restricted['deleted_at']='2026-11-15 03:00:00';
 $reset($restricted);
 $assert(RSV_File10::current_viewer_authorized(21,7)===false,
     'soft-deleted File10 media never authorized to private viewers');
+$reset($base);
+VWLB_Security::$throws=true;
+$assert(RSV_File10::current_viewer_authorized(21,7)===false,
+    'File10 current delivery provider exception cannot manufacture a media grant');
+VWLB_Security::$throws=false;
+$reset($base);
+VWLB_Security::$malformed=true;
+$assert(RSV_File10::current_viewer_authorized(21,7)===false,
+    'nonboolean File10 provider response cannot be interpreted as consent');
+VWLB_Security::$malformed=false;
 if($failed){fwrite(STDERR,"File10 owner-read fixtures failed:\n".implode("\n",$failed)."\n");exit(1);}
 echo "File11 V12.3 File10 duration and SQL truth: $checks/$checks isolated assertions PASS (not real File10 installed integration)\n";
