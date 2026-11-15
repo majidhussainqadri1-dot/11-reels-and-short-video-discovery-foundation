@@ -76,7 +76,7 @@ trait RSV_Top20_Context_Trait {
 		if ( ! $user_id ) return $defaults;
 		global $wpdb;
 		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . RSV_Helpers::table( 'preferences' ) . ' WHERE user_id=%d', $user_id ), ARRAY_A );
-		if ( '' !== (string) ( $wpdb->last_error ?? '' ) || ( null !== $row && ! is_array( $row ) ) ) {
+		if ( '' !== (string) ( $wpdb->last_error ?? '' ) || ( null !== $row && ( ! is_array( $row ) || array_diff( array( 'youth_safe', 'history_paused', 'session_limit_minutes', 'natural_stop_every', 'late_night_reminder', 'version' ), array_keys( $row ) ) ) ) ) {
 			// Never reinterpret SQL failure as the user consenting to watch-history or unrestricted media.
 			$defaults['read_unavailable'] = true;
 			$defaults['youth_safe'] = true;
