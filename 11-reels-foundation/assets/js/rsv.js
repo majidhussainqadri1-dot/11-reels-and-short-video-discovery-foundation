@@ -67,15 +67,24 @@
 		const saveData = navigator.connection && navigator.connection.saveData;
 		return autoplay && !feedPaused && !document.hidden && !reduced && !saveData;
 	}
-	function playMedia(item) {
-		if (!item || !canAutoplay()) return;
+	function playMedia(item, manual) {
+		// Manual Resume is a user gesture, not permission for the next Reel to autoplay.
+		if (!item || document.hidden || feedPaused || (!manual && !canAutoplay())) return;
 		const video = item.querySelector('video');
 		if (video) {
 			const resume = Number(video.dataset.resume || 0);
 			if (resume && !video.currentTime) video.currentTime = resume;
-			video.muted = true;
+			if (!manual) video.muted = true;
 			video.play().catch(function () {});
 		}
+	}
+
+	function updatePauseControl() {
+		document.querySelectorAll('[data-rsv-pause]').forEach(function (button) {
+			const label = button.querySelector('span');
+			const text = feedPaused ? RSV.i18n.resume : RSV.i18n.pause;
+			if (label) label.textContent = text; else button.textContent = text;
+		});
 	}
 	function setInteractive(item, enabled) {
 		if (!item) return;
@@ -105,6 +114,8 @@
 			if (!enabled) pauseMedia(item);
 		});
 		active = index;
+		if (!autoplay) feedPaused = true;
+		updatePauseControl();
 		const item = list[active];
 		if (focus !== false) {
 			item.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
@@ -162,13 +173,14 @@
 	}
 
 	if (root) {
+		updatePauseControl();
 		observeItems();
 		root.addEventListener('keydown', function (event) {
 			// Do not seize space/arrows from text editing, form controls or existing shortcuts.
 			if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || isInteractiveTarget(event.target)) return;
 			if (event.key === 'ArrowDown' || event.key === 'PageDown') { event.preventDefault(); saveProgress(items()[active], true); activate(active + 1); }
 			if (event.key === 'ArrowUp' || event.key === 'PageUp') { event.preventDefault(); saveProgress(items()[active], true); activate(active - 1); }
-			if (event.key === ' ') { event.preventDefault(); feedPaused = !feedPaused; feedPaused ? pauseMedia(items()[active]) : playMedia(items()[active]); }
+			if (event.key === ' ') { event.preventDefault(); feedPaused = !feedPaused; updatePauseControl(); feedPaused ? pauseMedia(items()[active]) : playMedia(items()[active], true); }
 		});
 		root.addEventListener('pointerdown', function (event) {
 			touchStart = event.pointerType === 'touch' && !isInteractiveTarget(event.target)
@@ -188,9 +200,9 @@
 		if (event.target.closest('[data-rsv-prev]')) { saveProgress(items()[active], true); activate(active - 1); }
 		if (event.target.closest('[data-rsv-next]')) { saveProgress(items()[active], true); activate(active + 1); }
 		const pause = event.target.closest('[data-rsv-pause]');
-		if (pause) { feedPaused = !feedPaused; const label = pause.querySelector('span'); if (label) label.textContent = feedPaused ? RSV.i18n.resume : RSV.i18n.pause; else pause.textContent = feedPaused ? RSV.i18n.resume : RSV.i18n.pause; feedPaused ? pauseMedia(items()[active]) : playMedia(items()[active]); }
+		if (pause) { feedPaused = !feedPaused; updatePauseControl(); feedPaused ? pauseMedia(items()[active]) : playMedia(items()[active], true); }
 		const auto = event.target.closest('[data-rsv-autoplay]');
-		if (auto) { autoplay = !autoplay; auto.setAttribute('aria-pressed', autoplay ? 'true' : 'false'); const label = auto.querySelector('span'); if (label) label.textContent = autoplay ? RSV.i18n.disableAutoplay : RSV.i18n.enableAutoplay; else auto.textContent = autoplay ? RSV.i18n.disableAutoplay : RSV.i18n.enableAutoplay; if (autoplay) { feedPaused = false; playMedia(items()[active]); } else pauseMedia(items()[active]); }
+		if (auto) { autoplay = !autoplay; auto.setAttribute('aria-pressed', autoplay ? 'true' : 'false'); const label = auto.querySelector('span'); if (label) label.textContent = autoplay ? RSV.i18n.disableAutoplay : RSV.i18n.enableAutoplay; else auto.textContent = autoplay ? RSV.i18n.disableAutoplay : RSV.i18n.enableAutoplay; if (autoplay) { feedPaused = false; updatePauseControl(); playMedia(items()[active]); } else { feedPaused = true; updatePauseControl(); pauseMedia(items()[active]); } }
 		const action = event.target.closest('[data-rsv-action]');
 		if (action) {
 			const reel = action.closest('[data-rsv-reel]');
@@ -250,6 +262,6 @@
 		});
 	}
 	bindVideos(document);
-	document.addEventListener('visibilitychange', function () { if (document.hidden) { saveProgress(items()[active], true); pauseMedia(items()[active]); } else playMedia(items()[active]); });
-	window.addEventListener('offline', function () { announce(RSV.i18n.error); pauseMedia(items()[active]); });
+	document.addEventListener('visibilitychange', function () { if (document.hidden) { saveProgress(items()[active], true); feedPaused = true; updatePauseControl(); pauseMedia(items()[active]); } });
+	window.addEventListener('offline', function () { announce(RSV.i18n.error); feedPaused = true; updatePauseControl(); pauseMedia(items()[active]); });
 }());
