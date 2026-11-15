@@ -232,7 +232,90 @@ final class RSV_Fresh20_Hardening {
 	public static function safe_single_reel_tools() {$public_id=get_query_var('rsv_reel');if(!$public_id)return;$reel=RSV_Repository::find($public_id,true);if(!$reel||!RSV_Security::can_view_reel($reel))return;echo wp_kses_post(self::render_safe_tools($reel));}
 	public static function shortcode( $atts ) {$atts=shortcode_atts(array('reel'=>''),$atts,'rsv_future30');$reel=RSV_Repository::find(RSV_Helpers::text($atts['reel'],80),true);if(!$reel||!RSV_Security::can_view_reel($reel))return'';return self::render_safe_tools($reel);}
 
-	private static function render_safe_tools( $reel ) {$citations=self::safe_edges('F11-FUT-004',absint($reel['id']),20,$reel);$related=self::safe_edges('F11-FUT-003',absint($reel['id']),12,$reel);$chapters=self::safe_edges('F11-FUT-017',absint($reel['id']),30,$reel,false);$cards=self::safe_objects('F11-FUT-018',absint($reel['id']),1,$reel);$transcripts=self::safe_objects('F11-FUT-016',absint($reel['id']),1,$reel);if(is_wp_error($citations)||is_wp_error($related)||is_wp_error($chapters)||is_wp_error($cards)||is_wp_error($transcripts))return '<p class="rsv-state rsv-error" role="status">'.esc_html__('Study tools are temporarily unavailable.',RSV_TEXT_DOMAIN).'</p>';if(!$citations&&!$related&&!$chapters&&!$cards&&!$transcripts)return'';$html='<details class="rsv-future30-tools"><summary>'.esc_html__('Study & knowledge tools',RSV_TEXT_DOMAIN).'</summary>';if($citations){$html.='<h3>'.esc_html__('Timestamp sources',RSV_TEXT_DOMAIN).'</h3><ul>';foreach($citations as$row)$html.='<li>'.esc_html(gmdate('i:s',absint($row['start_second']))).' — '.esc_html($row['target_owner'].' · '.$row['target_ref']).'</li>';$html.='</ul>';}if($chapters){$html.='<h3>'.esc_html__('Key moments',RSV_TEXT_DOMAIN).'</h3><ol>';foreach($chapters as$row)$html.='<li>'.esc_html(gmdate('i:s',absint($row['start_second']))).' — '.esc_html($row['payload']['title']??__('Chapter',RSV_TEXT_DOMAIN)).'</li>';$html.='</ol>';}if($related){$html.='<h3>'.esc_html__('Related knowledge',RSV_TEXT_DOMAIN).'</h3><ul>';foreach($related as$row)$html.='<li>'.esc_html($row['target_owner'].' · '.$row['target_ref']).'</li>';$html.='</ul>';}if(!empty($cards[0]['payload']['summary']))$html.='<p class="rsv-knowledge-summary">'.esc_html($cards[0]['payload']['summary']).'</p>';if(!empty($transcripts[0]['payload']['transcript_ref']))$html.='<p class="rsv-transcript-reference"><strong>'.esc_html__('Reviewed transcript:',RSV_TEXT_DOMAIN).'</strong> '.esc_html($transcripts[0]['payload']['transcript_ref']).'</p>';return$html.'</details>';}
+	/**
+	 * Provider-owned verified public URL. File11 never constructs foreign routes from IDs.
+	 *
+	 * The canonical owner must assert current public visibility and return an exact
+	 * owner/ref binding; unresolved, revoked and cross-origin destinations stay plain text.
+	 */
+	private static function verified_reference_href( $owner, $ref, $purpose ) {
+		$owner = RSV_Helpers::text( $owner, 30 );
+		$ref = RSV_Helpers::text( $ref, 255 );
+		if ( ! $owner || ! $ref || ! self::public_ref_valid( $owner, $ref, $purpose ) ) return '';
+		$binding = apply_filters( 'rsv_future30_verified_public_url', null, $owner, $ref, sanitize_key( $purpose ) );
+		if ( ! is_array( $binding ) ||
+			( $binding['owner'] ?? null ) !== $owner ||
+			( $binding['ref'] ?? null ) !== $ref ||
+			( $binding['visibility'] ?? null ) !== 'public' ||
+			true !== ( $binding['public_current'] ?? null ) ||
+			true !== ( $binding['verified'] ?? null ) ) return '';
+		$url = $binding['url'] ?? null;
+		if ( ! is_string( $url ) || ! $url || strlen( $url ) > 2048 ||
+			preg_match( '/[\x00-\x1f\x7f]|%(?:0[ad]|7f)/i', $url ) ) return '';
+		$parts = wp_parse_url( $url );
+		$site = wp_parse_url( home_url( '/' ) );
+		if ( ! is_array( $parts ) || ! is_array( $site ) ||
+			! isset( $parts['scheme'], $parts['host'], $site['scheme'], $site['host'] ) ||
+			! in_array( strtolower( $parts['scheme'] ), array( 'http', 'https' ), true ) ||
+			strtolower( $parts['scheme'] ) !== strtolower( $site['scheme'] ) ||
+			strtolower( $parts['host'] ) !== strtolower( $site['host'] ) ||
+			( $parts['port'] ?? null ) !== ( $site['port'] ?? null ) ||
+			isset( $parts['user'] ) || isset( $parts['pass'] ) ) return '';
+		return $url;
+	}
+
+	private static function verified_reference_markup( $owner, $ref, $purpose ) {
+		$owner = RSV_Helpers::text( $owner, 30 );
+		$ref = RSV_Helpers::text( $ref, 255 );
+		$label = esc_html( $owner . ' · ' . $ref );
+		$url = self::verified_reference_href( $owner, $ref, $purpose );
+		if ( ! $url ) return $label;
+		return '<a class="rsv-canonical-source" href="' . esc_url( $url ) . '">' . $label . '</a>';
+	}
+
+	private static function render_safe_tools( $reel ) {
+		$citations = self::safe_edges( 'F11-FUT-004', absint( $reel['id'] ), 20, $reel );
+		$related = self::safe_edges( 'F11-FUT-003', absint( $reel['id'] ), 12, $reel );
+		$chapters = self::safe_edges( 'F11-FUT-017', absint( $reel['id'] ), 30, $reel, false );
+		$cards = self::safe_objects( 'F11-FUT-018', absint( $reel['id'] ), 1, $reel );
+		$transcripts = self::safe_objects( 'F11-FUT-016', absint( $reel['id'] ), 1, $reel );
+		foreach ( array( $citations, $related, $chapters, $cards, $transcripts ) as $result ) {
+			if ( is_wp_error( $result ) )
+				return '<p class="rsv-state rsv-error" role="status">' .
+					esc_html__( 'Study tools are temporarily unavailable.', RSV_TEXT_DOMAIN ) . '</p>';
+		}
+		if ( ! $citations && ! $related && ! $chapters && ! $cards && ! $transcripts ) return '';
+		$html = '<details class="rsv-future30-tools"><summary>' . esc_html__( 'Study & knowledge tools', RSV_TEXT_DOMAIN ) . '</summary>';
+		if ( $citations ) {
+			$html .= '<h3>' . esc_html__( 'Timestamp sources', RSV_TEXT_DOMAIN ) . '</h3><ul>';
+			foreach ( $citations as $row ) {
+				$html .= '<li>' . esc_html( gmdate( 'i:s', absint( $row['start_second'] ) ) ) . ' — ' .
+					self::verified_reference_markup( $row['target_owner'], $row['target_ref'], 'timestamp-source-link' ) . '</li>';
+			}
+			$html .= '</ul>';
+		}
+		if ( $chapters ) {
+			$html .= '<h3>' . esc_html__( 'Key moments', RSV_TEXT_DOMAIN ) . '</h3><ol>';
+			foreach ( $chapters as $row )
+				$html .= '<li>' . esc_html( gmdate( 'i:s', absint( $row['start_second'] ) ) ) .
+					' — ' . esc_html( $row['payload']['title'] ?? __( 'Chapter', RSV_TEXT_DOMAIN ) ) . '</li>';
+			$html .= '</ol>';
+		}
+		if ( $related ) {
+			$html .= '<h3>' . esc_html__( 'Related knowledge', RSV_TEXT_DOMAIN ) . '</h3><ul>';
+			foreach ( $related as $row )
+				$html .= '<li>' . self::verified_reference_markup( $row['target_owner'], $row['target_ref'], 'related-knowledge-link' ) . '</li>';
+			$html .= '</ul>';
+		}
+		if ( ! empty( $cards[0]['payload']['summary'] ) )
+			$html .= '<p class="rsv-knowledge-summary">' . esc_html( $cards[0]['payload']['summary'] ) . '</p>';
+		if ( ! empty( $transcripts[0]['payload']['transcript_ref'] ) ) {
+			$html .= '<p class="rsv-transcript-reference"><strong>' .
+				esc_html__( 'Reviewed transcript:', RSV_TEXT_DOMAIN ) . '</strong> ' .
+				self::verified_reference_markup( 'File 10', $transcripts[0]['payload']['transcript_ref'], 'reviewed-transcript-link' ) . '</p>';
+		}
+		return $html . '</details>';
+	}
 	private static function safe_edges( $feature,$reel_id,$limit,$reel,$validate_target=true ){global$wpdb;$table=RSV_Helpers::table('future_edges');$rows=$wpdb->get_results($wpdb->prepare("SELECT public_id,edge_type,target_owner,target_ref,start_second,end_second,payload_json FROM $table WHERE feature_id=%s AND source_reel_id=%d AND status=%s ORDER BY start_second ASC,id ASC LIMIT %d",$feature,$reel_id,'active',min(100,max(1,absint($limit)))),ARRAY_A);if(!is_array($rows)||''!==(string)$wpdb->last_error)return RSV_Helpers::error('rsv_future_tools_read_unavailable',__('Reel study tools cannot be verified right now.',RSV_TEXT_DOMAIN),503);$out=array();foreach($rows as$row){if(!is_array($row)||!isset($row['payload_json'])||!is_string($row['payload_json']))return RSV_Helpers::error('rsv_future_tools_read_unavailable',__('Reel study tools returned an invalid result.',RSV_TEXT_DOMAIN),503);$row['payload']=RSV_Helpers::json_decode($row['payload_json']);unset($row['payload_json']);$owner=RSV_Helpers::text($row['target_owner']??'',30);$ref=RSV_Helpers::text($row['target_ref']??'',255);if($validate_target&&!self::public_ref_valid($owner,$ref,'public-tools-current'))continue;if('F11-FUT-004'===$feature&&(!$owner||!$ref))continue;if('F11-FUT-017'===$feature){$duration=absint(RSV_Repository::public_dto($reel)['duration_seconds']??0);if(absint($row['start_second'])>$duration||absint($row['end_second'])>$duration)continue;}$out[]=$row;}return$out;}
 	private static function safe_objects( $feature,$reel_id,$limit,$reel ){global$wpdb;$table=RSV_Helpers::table('future_objects');$rows=$wpdb->get_results($wpdb->prepare("SELECT public_id,title,payload_json FROM $table WHERE feature_id=%s AND reel_id=%d AND status=%s ORDER BY updated_at DESC,id DESC LIMIT %d",$feature,$reel_id,'active',min(20,max(1,absint($limit)))),ARRAY_A);if(!is_array($rows)||''!==(string)$wpdb->last_error)return RSV_Helpers::error('rsv_future_tools_read_unavailable',__('Reel study tools cannot be verified right now.',RSV_TEXT_DOMAIN),503);$out=array();foreach($rows as$row){if(!is_array($row)||!isset($row['payload_json'])||!is_string($row['payload_json']))return RSV_Helpers::error('rsv_future_tools_read_unavailable',__('Reel study tools returned an invalid result.',RSV_TEXT_DOMAIN),503);$p=RSV_Helpers::json_decode($row['payload_json']);if('F11-FUT-016'===$feature){$ref=RSV_Helpers::text($p['transcript_ref']??'',255);if(empty($p['reviewed'])||!$ref||true!==apply_filters('rsv_future30_transcript_ref_public_valid',false,$ref,$reel))continue;}if('F11-FUT-018'===$feature){$refs=array_merge((array)($p['remedy_refs']??array()),(array)($p['disease_refs']??array()),(array)($p['book_refs']??array()),(array)($p['source_refs']??array()));$valid=true;foreach($refs as$ref)if(!self::public_ref_valid('File 06',RSV_Helpers::text($ref,255),'knowledge-card-current')){$valid=false;break;}if(!$valid)continue;}$out[]=array('public_id'=>RSV_Helpers::text($row['public_id']??'',80),'title'=>RSV_Helpers::text($row['title']??'',255),'payload'=>self::safe_public_payload($p));}return$out;}
 	private static function safe_file06_objects( $rows,$purpose ){$out=array();foreach($rows as$row){if(!is_array($row))continue;$p=(array)($row['payload']??array());$refs=array_merge((array)($p['source_refs']??array()),(array)($p['remedy_refs']??array()),(array)($p['disease_refs']??array()),(array)($p['book_refs']??array()));$valid=true;foreach($refs as$ref)if(!self::public_ref_valid('File 06',RSV_Helpers::text($ref,255),$purpose)){$valid=false;break;}if(!$valid)continue;$out[]=array('public_id'=>RSV_Helpers::text($row['public_id']??'',80),'title'=>RSV_Helpers::text($row['title']??'',255),'payload'=>self::safe_public_payload($p),'version'=>absint($row['version']??0),'updated_at'=>RSV_Helpers::text($row['updated_at']??'',40));}return$out;}
