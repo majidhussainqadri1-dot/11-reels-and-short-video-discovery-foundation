@@ -75,7 +75,16 @@
 			const resume = Number(video.dataset.resume || 0);
 			if (resume && !video.currentTime) video.currentTime = resume;
 			if (!manual) video.muted = true;
-			video.play().catch(function () {});
+			const failed = function () {
+				if (items()[active] !== item) return;
+				feedPaused = true;
+				updatePauseControl();
+				announce(RSV.i18n.error, item.querySelector('.rsv-item-status'));
+			};
+			try {
+				const attempt = video.play();
+				if (attempt && typeof attempt.catch === 'function') attempt.catch(failed);
+			} catch (error) { failed(); }
 		}
 	}
 
@@ -258,7 +267,11 @@
 			video.dataset.rsvBound = '1';
 			video.addEventListener('play', function () { ensureViewSession(video.closest('[data-rsv-reel]')).catch(function () {}); });
 			video.addEventListener('timeupdate', function () { saveProgress(video.closest('[data-rsv-reel]'), false); });
-			video.addEventListener('ended', function () { saveProgress(video.closest('[data-rsv-reel]'), true); });
+			video.addEventListener('ended', function () {
+				const reel = video.closest('[data-rsv-reel]');
+				saveProgress(reel, true);
+				if (reel === items()[active]) { feedPaused = true; updatePauseControl(); }
+			});
 		});
 	}
 	bindVideos(document);
