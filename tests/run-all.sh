@@ -19,6 +19,8 @@ php "$ROOT/tests/v123-file25-token-contract.php"
 php "$ROOT/tests/v123-future30-read-sql-behavior.php"
 php "$ROOT/tests/v123-fresh20-read-sql-behavior.php"
 php "$ROOT/tests/v123-owner-verified-canonical-links.php"
+php -l "$ROOT/tools/v123-p07-owner-link-readiness.php" >/dev/null
+php "$ROOT/tests/v123-p07-owner-link-readiness.php"
 php "$ROOT/tests/v123-top20-preferences-sql-truth.php"
 php "$ROOT/tests/v123-top20-history-pause-read.php"
 php "$ROOT/tests/v123-top20-export-sql-truth.php"

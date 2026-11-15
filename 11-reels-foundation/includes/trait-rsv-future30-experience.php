@@ -64,22 +64,41 @@ trait RSV_Future30_Experience_Trait {
 		) );
 	}
 
+	/** Native fallback: every provider read must complete before public markup is rendered. */
 	public static function public_tools( $reel ) {
-		if(!$reel||!is_array($reel))return array();
-		return array(
-			'series'=>array_slice(self::public_series_rows(),0,20),
-			'related'=>array_slice(self::public_projection('F11-FUT-003',$reel)['edges'],0,12),
-			'citations'=>array_slice(self::public_projection('F11-FUT-004',$reel)['edges'],0,20),
-			'evidence'=>array_slice(self::public_projection('F11-FUT-005',$reel)['objects'],0,10),
-			'chapters'=>array_slice(self::public_projection('F11-FUT-017',$reel)['edges'],0,30),
-			'knowledge_card'=>array_slice(self::public_projection('F11-FUT-018',$reel)['objects'],0,1),
-			'transcript'=>array_slice(self::public_projection('F11-FUT-016',$reel)['objects'],0,1),
-			'graph'=>array_slice(self::public_projection('F11-FUT-030',$reel)['edges'],0,30),
-		);
+		if ( ! is_array( $reel ) || ! $reel ) return array();
+		$series = self::public_series_rows();
+		if ( is_wp_error( $series ) ) return $series;
+		$projections = array();
+		foreach ( array(
+			'related'=>'F11-FUT-003',
+			'citations'=>'F11-FUT-004',
+			'evidence'=>'F11-FUT-005',
+			'chapters'=>'F11-FUT-017',
+			'knowledge_card'=>'F11-FUT-018',
+			'transcript'=>'F11-FUT-016',
+			'graph'=>'F11-FUT-030',
+		) as $key=>$feature ) {
+			$projection = self::public_projection( $feature, $reel );
+			if ( is_wp_error( $projection ) ) return $projection;
+			$projections[ $key ] = array_slice(
+				(array) ( $projection[ in_array( $key, array( 'evidence','knowledge_card','transcript' ), true ) ? 'objects' : 'edges' ] ?? array() ),
+				0,
+				array(
+					'related'=>12,'citations'=>20,'evidence'=>10,'chapters'=>30,
+					'knowledge_card'=>1,'transcript'=>1,'graph'=>30,
+				)[ $key ]
+			);
+		}
+		return array_merge( array( 'series'=>array_slice( $series, 0, 20 ) ), $projections );
 	}
 
 	public static function render_tools( $reel ) {
-		$tools=self::public_tools($reel);$has=false;foreach($tools as $items)if(!empty($items)){$has=true;break;}if(!$has)return '';
+		$tools = self::public_tools( $reel );
+		if ( is_wp_error( $tools ) )
+			return '<p class="rsv-state rsv-error" role="status">' .
+				esc_html__( 'Study tools are temporarily unavailable.', RSV_TEXT_DOMAIN ) . '</p>';
+		$has=false;foreach($tools as $items)if(!empty($items)){$has=true;break;}if(!$has)return '';
 		$html='<details class="rsv-future30-tools"><summary>'.esc_html__('Study & knowledge tools',RSV_TEXT_DOMAIN).'</summary>';
 		if(!empty($tools['citations'])){$html.='<h3>'.esc_html__('Timestamp sources',RSV_TEXT_DOMAIN).'</h3><ul>';foreach($tools['citations'] as $row)$html.='<li>'.esc_html(gmdate('i:s',absint($row['start_second']))).' — '.esc_html($row['target_owner'].' · '.$row['target_ref']).'</li>';$html.='</ul>';}
 		if(!empty($tools['chapters'])){$html.='<h3>'.esc_html__('Key moments',RSV_TEXT_DOMAIN).'</h3><ol>';foreach($tools['chapters'] as $row)$html.='<li>'.esc_html(gmdate('i:s',absint($row['start_second']))).' — '.esc_html($row['payload']['title']??__('Chapter',RSV_TEXT_DOMAIN)).'</li>';$html.='</ol>';}
