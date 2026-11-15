@@ -128,8 +128,10 @@ trait RSV_Top20_Privacy_Integration_Trait {
 		$batch = 100;
 		$result = RSV_DB::transaction(
 			static function () use ( $wpdb, $user, $batch, $page ) {
-				$story_rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id,version FROM " . RSV_Helpers::table( 'stories' ) . " WHERE owner_id=%d AND status IN ('draft','review') ORDER BY id ASC LIMIT %d", $user->ID, $batch ), ARRAY_A );
-				$response_rows = (array) $wpdb->get_results( $wpdb->prepare( "SELECT id,version FROM " . RSV_Helpers::table( 'responses' ) . " WHERE owner_id=%d AND status='review' ORDER BY id ASC LIMIT %d", $user->ID, $batch ), ARRAY_A );
+				$story_rows = self::privacy_rows( $wpdb->prepare( "SELECT id,version FROM " . RSV_Helpers::table( 'stories' ) . " WHERE owner_id=%d AND status IN ('draft','review') ORDER BY id ASC LIMIT %d", $user->ID, $batch ), 'rsv_top20_stories_erase_unavailable', array( 'id', 'version' ) );
+				if ( is_wp_error( $story_rows ) ) return $story_rows;
+				$response_rows = self::privacy_rows( $wpdb->prepare( "SELECT id,version FROM " . RSV_Helpers::table( 'responses' ) . " WHERE owner_id=%d AND status='review' ORDER BY id ASC LIMIT %d", $user->ID, $batch ), 'rsv_top20_responses_erase_unavailable', array( 'id', 'version' ) );
+				if ( is_wp_error( $response_rows ) ) return $response_rows;
 				$removed = 0;
 				if ( 1 === max( 1, absint( $page ) ) ) {
 					$deleted = $wpdb->delete( RSV_Helpers::table( 'preferences' ), array( 'user_id' => $user->ID ), array( '%d' ) );
@@ -138,25 +140,31 @@ trait RSV_Top20_Privacy_Integration_Trait {
 				}
 				foreach ( $story_rows as $row ) {
 					$changed = $wpdb->update( RSV_Helpers::table( 'stories' ), array( 'status' => 'removed', 'body' => '', 'destination_url' => '', 'version' => absint( $row['version'] ) + 1, 'updated_at' => RSV_Helpers::now() ), array( 'id' => absint( $row['id'] ), 'owner_id' => $user->ID, 'version' => absint( $row['version'] ) ), array( '%s','%s','%s','%d','%s' ), array( '%d','%d','%d' ) );
-					if ( false === $changed ) return RSV_Helpers::error( 'rsv_privacy_story_erase_failed', __( 'An unpublished Story could not be minimized safely.', RSV_TEXT_DOMAIN ), 500 );
+					if ( 1 !== $changed ) return RSV_Helpers::error( 'rsv_privacy_story_erase_failed', __( 'An unpublished Story changed or could not be minimized safely.', RSV_TEXT_DOMAIN ), 409 );
 					$removed += (int) $changed;
 				}
 				foreach ( $response_rows as $row ) {
 					$changed = $wpdb->update( RSV_Helpers::table( 'responses' ), array( 'status' => 'removed', 'attribution_text' => 'Removed unpublished response', 'version' => absint( $row['version'] ) + 1, 'updated_at' => RSV_Helpers::now() ), array( 'id' => absint( $row['id'] ), 'owner_id' => $user->ID, 'version' => absint( $row['version'] ) ), array( '%s','%s','%d','%s' ), array( '%d','%d','%d' ) );
-					if ( false === $changed ) return RSV_Helpers::error( 'rsv_privacy_response_erase_failed', __( 'An unpublished response could not be minimized safely.', RSV_TEXT_DOMAIN ), 500 );
+					if ( 1 !== $changed ) return RSV_Helpers::error( 'rsv_privacy_response_erase_failed', __( 'An unpublished response changed or could not be minimized safely.', RSV_TEXT_DOMAIN ), 409 );
 					$removed += (int) $changed;
 				}
-				$retained = (int) $wpdb->get_var( $wpdb->prepare(
+				$retained_raw = $wpdb->get_var( $wpdb->prepare(
 					"SELECT (SELECT COUNT(*) FROM " . RSV_Helpers::table( 'stories' ) . " WHERE owner_id=%d AND status IN ('published','expired')) + (SELECT COUNT(*) FROM " . RSV_Helpers::table( 'responses' ) . " WHERE owner_id=%d AND status='published') + (SELECT COUNT(*) FROM " . RSV_Helpers::table( 'highlights' ) . " WHERE owner_id=%d AND status='published')",
 					$user->ID, $user->ID, $user->ID
 				) );
+				if ( '' !== (string) ( $wpdb->last_error ?? '' ) || ! is_scalar( $retained_raw ) ||
+					! ctype_digit( (string) $retained_raw ) ) {
+					return RSV_Helpers::error( 'rsv_top20_retained_count_unavailable',
+						__( 'Retention verification failed; erasure is not complete.', RSV_TEXT_DOMAIN ), 503 );
+				}
+				$retained = (int) $retained_raw;
 				if ( $removed > 0 && ! RSV_Helpers::audit( 'privacy_erasure', $user->ID, 'erase_private_reel_data', '', '', 'Preferences and unpublished temporal items removed or minimized', array( 'removed_count' => $removed, 'retained_governed_count' => $retained ), 0 ) ) {
 					return RSV_Helpers::error( 'rsv_privacy_erasure_evidence_failed', __( 'Private Reel data could not be erased with complete audit evidence.', RSV_TEXT_DOMAIN ), 500 );
 				}
 				return array( 'removed' => $removed, 'retained' => $retained, 'done' => count( $story_rows ) < $batch && count( $response_rows ) < $batch );
 			}
 		);
-		if ( is_wp_error( $result ) ) return array( 'items_removed' => false, 'items_retained' => false, 'messages' => array( $result->get_error_message() ), 'done' => false );
+		if ( is_wp_error( $result ) ) return array( 'items_removed' => false, 'items_retained' => true, 'messages' => array( $result->get_error_message() ), 'done' => false );
 		$messages = array();
 		if ( $result['retained'] > 0 ) $messages[] = __( 'Published Stories, Highlights and responses are retained for governed correction or takedown rather than silently erased.', RSV_TEXT_DOMAIN );
 		return array( 'items_removed' => $result['removed'] > 0, 'items_retained' => $result['retained'] > 0, 'messages' => $messages, 'done' => (bool) $result['done'] );
