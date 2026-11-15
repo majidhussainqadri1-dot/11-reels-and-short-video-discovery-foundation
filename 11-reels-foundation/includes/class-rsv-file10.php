@@ -34,9 +34,9 @@ final class RSV_File10 {
 		return is_array( $video ) ? $video : null;
 	}
 
-	public static function eligible_for_reel( $id ) {
-		$video = self::video( $id );
-		if ( ! $video ) return false;
+	/** Single File10 authoritative snapshot per evaluation; no second SELECT. */
+	private static function eligible_video_row( $video ) {
+		if ( ! is_array( $video ) ) return false;
 		$duration = absint( $video['duration_seconds'] ?? 0 );
 		return 'published' === ( $video['status'] ?? '' )
 			&& $duration >= 60 && $duration <= 600
@@ -44,14 +44,28 @@ final class RSV_File10 {
 			&& in_array( $video['consent_status'] ?? '', array( 'not_patient_case', 'documented', 'anonymized', 'approved' ), true );
 	}
 
+	public static function eligible_for_reel( $id ) {
+		return self::eligible_video_row( self::video( $id ) );
+	}
+
 	public static function publicly_eligible( $id ) {
 		$video = self::video( $id );
-		return self::eligible_for_reel( $id ) && in_array( $video['visibility'] ?? '', array( 'public', 'unlisted' ), true );
+		return self::eligible_video_row( $video ) &&
+			in_array( $video['visibility'] ?? '', array( 'public', 'unlisted' ), true );
 	}
 
 	public static function validate_for_reel( $id, $owner_id = 0 ) {
 		if ( ! self::ready() ) return RSV_Helpers::error( 'rsv_file10_unavailable', __( 'File 10 media services are unavailable.', RSV_TEXT_DOMAIN ), 503 );
+		// File10 repository distinguishes a failed SELECT from a legitimately absent video.
+		// Reset before this lookup so a previous request's failure cannot contaminate it.
+		if ( is_callable( array( 'VWLB_Repository', 'reset_read_failure' ) ) )
+			VWLB_Repository::reset_read_failure();
 		$video = self::video( $id );
+		global $wpdb;
+		$provider_failed = is_callable( array( 'VWLB_Repository', 'read_failed' ) ) &&
+			VWLB_Repository::read_failed();
+		if ( $provider_failed || ( isset( $wpdb ) && '' !== (string) ( $wpdb->last_error ?? '' ) ) )
+			return RSV_Helpers::error( 'rsv_video_read_unavailable', __( 'File 10 could not verify the selected video right now.', RSV_TEXT_DOMAIN ), 503 );
 		if ( ! $video ) return RSV_Helpers::error( 'rsv_video_missing', __( 'The selected video does not exist.', RSV_TEXT_DOMAIN ), 404 );
 		if ( $owner_id && absint( $video['owner_id'] ?? 0 ) !== absint( $owner_id ) ) return RSV_Helpers::error( 'rsv_video_forbidden', __( 'You cannot link this video.', RSV_TEXT_DOMAIN ), 403 );
 		$duration = absint( $video['duration_seconds'] ?? 0 );
