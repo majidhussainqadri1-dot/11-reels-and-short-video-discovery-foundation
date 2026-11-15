@@ -24,6 +24,27 @@ trait RSV_Top20_Privacy_Integration_Trait {
 		return array( 'group_id' => $group_id, 'group_label' => $group_label, 'item_id' => $item_id, 'data' => $data );
 	}
 
+
+	/** Never confuse a failed or malformed SQL read with a verified empty privacy export page. */
+	private static function privacy_rows( $sql, $code, $required = array() ) {
+		global $wpdb;
+		$rows = $wpdb->get_results( $sql, ARRAY_A );
+		if ( ! is_array( $rows ) || '' !== (string) ( $wpdb->last_error ?? '' ) ) {
+			return RSV_Helpers::error( $code, __( 'Reel privacy data could not be verified right now.', RSV_TEXT_DOMAIN ), 503 );
+		}
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) {
+				return RSV_Helpers::error( $code, __( 'Reel privacy data has an unexpected format.', RSV_TEXT_DOMAIN ), 503 );
+			}
+			foreach ( $required as $field ) {
+				if ( ! array_key_exists( $field, $row ) ) {
+					return RSV_Helpers::error( $code, __( 'Reel privacy data is incomplete.', RSV_TEXT_DOMAIN ), 503 );
+				}
+			}
+		}
+		return $rows;
+	}
+
 	public static function privacy_export( $email, $page = 1 ) {
 		$user = get_user_by( 'email', $email );
 		if ( ! $user ) return array( 'data' => array(), 'done' => true );
@@ -32,19 +53,25 @@ trait RSV_Top20_Privacy_Integration_Trait {
 		$offset = ( $page - 1 ) * $limit;
 		$data   = array();
 		if ( 1 === $page ) {
+			$preferences = self::preferences( $user->ID );
+			if ( ! empty( $preferences['read_unavailable'] ) ) {
+				return RSV_Helpers::error( 'rsv_top20_preferences_export_unavailable',
+					__( 'Private Reel preferences cannot be exported completely at this time.', RSV_TEXT_DOMAIN ), 503 );
+			}
 			$data[] = self::export_item(
 				'rsv-wellbeing',
 				__( 'Reel well-being preferences', RSV_TEXT_DOMAIN ),
 				'preferences-' . $user->ID,
-				array( __( 'Preferences', RSV_TEXT_DOMAIN ) => self::preferences( $user->ID ) )
+				array( __( 'Preferences', RSV_TEXT_DOMAIN ) => $preferences )
 			);
 		}
 
 		global $wpdb;
-		$stories = (array) $wpdb->get_results( $wpdb->prepare(
+		$stories = self::privacy_rows( $wpdb->prepare(
 			'SELECT public_id,title,body,status,visibility,destination_url,expires_at,published_at,created_at,updated_at FROM ' . RSV_Helpers::table( 'stories' ) . ' WHERE owner_id=%d ORDER BY id ASC LIMIT %d OFFSET %d',
 			$user->ID, $limit, $offset
-		), ARRAY_A );
+		), 'rsv_top20_stories_export_unavailable', array( 'public_id', 'title', 'body', 'status', 'visibility', 'destination_url', 'expires_at', 'published_at', 'created_at', 'updated_at' ) );
+		if ( is_wp_error( $stories ) ) return $stories;
 		foreach ( $stories as $row ) {
 			$data[] = self::export_item( 'rsv-stories', __( 'Reel Stories', RSV_TEXT_DOMAIN ), $row['public_id'], array(
 				__( 'Title', RSV_TEXT_DOMAIN ) => $row['title'], __( 'Body', RSV_TEXT_DOMAIN ) => $row['body'], __( 'Status', RSV_TEXT_DOMAIN ) => $row['status'],
@@ -53,10 +80,11 @@ trait RSV_Top20_Privacy_Integration_Trait {
 			) );
 		}
 
-		$responses = (array) $wpdb->get_results( $wpdb->prepare(
+		$responses = self::privacy_rows( $wpdb->prepare(
 			'SELECT public_id,attribution_text,patient_reuse_consent,status,published_at,created_at,updated_at FROM ' . RSV_Helpers::table( 'responses' ) . ' WHERE owner_id=%d ORDER BY id ASC LIMIT %d OFFSET %d',
 			$user->ID, $limit, $offset
-		), ARRAY_A );
+		), 'rsv_top20_responses_export_unavailable', array( 'public_id', 'attribution_text', 'patient_reuse_consent', 'status', 'published_at', 'created_at', 'updated_at' ) );
+		if ( is_wp_error( $responses ) ) return $responses;
 		foreach ( $responses as $row ) {
 			$data[] = self::export_item( 'rsv-responses', __( 'Attributed Reel responses', RSV_TEXT_DOMAIN ), $row['public_id'], array(
 				__( 'Attribution', RSV_TEXT_DOMAIN ) => $row['attribution_text'], __( 'Patient reuse consent declared', RSV_TEXT_DOMAIN ) => ! empty( $row['patient_reuse_consent'] ) ? 'yes' : 'no',
@@ -64,10 +92,11 @@ trait RSV_Top20_Privacy_Integration_Trait {
 			) );
 		}
 
-		$highlights = (array) $wpdb->get_results( $wpdb->prepare(
+		$highlights = self::privacy_rows( $wpdb->prepare(
 			'SELECT public_id,title,slug,status,created_at,updated_at FROM ' . RSV_Helpers::table( 'highlights' ) . ' WHERE owner_id=%d ORDER BY id ASC LIMIT %d OFFSET %d',
 			$user->ID, $limit, $offset
-		), ARRAY_A );
+		), 'rsv_top20_highlights_export_unavailable', array( 'public_id', 'title', 'slug', 'status', 'created_at', 'updated_at' ) );
+		if ( is_wp_error( $highlights ) ) return $highlights;
 		foreach ( $highlights as $row ) {
 			$data[] = self::export_item( 'rsv-highlights', __( 'Reel Highlights', RSV_TEXT_DOMAIN ), $row['public_id'], array(
 				__( 'Title', RSV_TEXT_DOMAIN ) => $row['title'], __( 'Slug', RSV_TEXT_DOMAIN ) => $row['slug'], __( 'Status', RSV_TEXT_DOMAIN ) => $row['status'],
@@ -75,10 +104,11 @@ trait RSV_Top20_Privacy_Integration_Trait {
 			) );
 		}
 
-		$contexts = (array) $wpdb->get_results( $wpdb->prepare(
+		$contexts = self::privacy_rows( $wpdb->prepare(
 			'SELECT r.public_id,c.source_title,c.source_url,c.transcript_url,c.safety_summary,c.allow_response,c.patient_reuse_policy,c.updated_at FROM ' . RSV_Helpers::table( 'reel_context' ) . ' c JOIN ' . RSV_Helpers::table( 'reels' ) . ' r ON r.id=c.reel_id WHERE r.owner_id=%d ORDER BY c.reel_id ASC LIMIT %d OFFSET %d',
 			$user->ID, $limit, $offset
-		), ARRAY_A );
+		), 'rsv_top20_context_export_unavailable', array( 'public_id', 'source_title', 'source_url', 'transcript_url', 'safety_summary', 'allow_response', 'patient_reuse_policy', 'updated_at' ) );
+		if ( is_wp_error( $contexts ) ) return $contexts;
 		foreach ( $contexts as $row ) {
 			$data[] = self::export_item( 'rsv-source-context', __( 'Reel source and safety context', RSV_TEXT_DOMAIN ), 'context-' . $row['public_id'], array(
 				__( 'Reel', RSV_TEXT_DOMAIN ) => $row['public_id'], __( 'Source label', RSV_TEXT_DOMAIN ) => $row['source_title'], __( 'Source URL', RSV_TEXT_DOMAIN ) => $row['source_url'],
