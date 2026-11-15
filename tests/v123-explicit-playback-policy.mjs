@@ -10,18 +10,22 @@ const docListeners={};
 let reduced=false,saveData=false,hidden=false,plays=[],pauses=[];
 const videos=[];
 function video(id){
-    return {id, currentTime:0, dataset:{resume:'0'}, muted:false,
-        play(){plays.push(id);return Promise.resolve();},
-        pause(){pauses.push(id);}
+    return {id, currentTime:0, dataset:{resume:'0'}, muted:false, rejectNext:false, listeners:{},
+        play(){if(this.rejectNext){this.rejectNext=false;return Promise.reject(new Error('NotAllowedError'));}plays.push(id);return Promise.resolve();},
+        pause(){pauses.push(id);},
+        addEventListener(name,fn){this.listeners[name]=fn;},
+        closest(selector){return selector==='[data-rsv-reel]'?this.reel:null;}
     };
 }
 function article(id){
     const player=video(id);videos.push(player);
-    return { dataset:{rsvReel:id},player,classList:{toggle(){}},
+    const reel={ dataset:{rsvReel:id},player,classList:{toggle(){}},
         querySelector(selector){return selector==='video'?player:null;},
         querySelectorAll(){return [];},
         setAttribute(){},scrollIntoView(){},focus(){}
     };
+    player.reel=reel;
+    return reel;
 }
 const articles=[article('A'),article('B')];
 const root={addEventListener(name,callback){listeners[name]=callback;},
@@ -47,7 +51,7 @@ const doc={
         if(selector==='[data-rsv-autoplay]')return autoButton;
         return null;
     },
-    querySelectorAll(selector){return selector==='[data-rsv-pause]'?[pauseButton]:[];},
+    querySelectorAll(selector){return selector==='[data-rsv-pause]'?[pauseButton]:selector==='.rsv-video:not([data-rsv-bound])'?videos:[];},
     addEventListener(name,cb){docListeners[name]=cb;},
     body:{appendChild(){}},
 };
@@ -113,4 +117,17 @@ check(pauses.at(-1)==='B','disabling autoplay pauses media');
 const afterDisable=plays.length;
 arrow('ArrowUp');
 check(plays.length===afterDisable,'autoplay disabled again: navigation stays paused');
+videos[0].rejectNext=true;
+click('pause');
+await Promise.resolve();
+await Promise.resolve();
+check(pauseButton.child.textContent==='Resume Reel',
+    'rejected native video.play must reset play/pause control to truthful stopped state');
+check(status.textContent==='Error',
+    'blocked browser playback must surface a non-silent status to user');
+click('pause');
+check(pauseButton.child.textContent==='Pause Reel','successful manual replay is permitted after a rejection');
+check(typeof videos[0].listeners.ended==='function','native ended event is bound');
+videos[0].listeners.ended();
+check(pauseButton.child.textContent==='Resume Reel','ended Reel returns explicit Resume state without auto-next');
 console.log('V12.3 explicit playback/manual consent: '+n+'/'+n+' isolated browser-shim assertions PASS (not real browser)');
