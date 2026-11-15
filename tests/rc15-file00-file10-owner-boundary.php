@@ -25,6 +25,16 @@ function smc_is_founder( $user_id ) { return ! empty( $GLOBALS['rsv_founder'] );
 define('VWLB_VERSION','1.2.6');
 define('VWLB_CONTRACT_VERSION',3);
 final class VWLB_Contracts {}
+// File10's actual current candidate includes VWLB_Security::can_view; this
+// fixture must model public versus directly-authorized unlisted access.
+final class VWLB_Security {
+    public static function can_view( $video, $purpose = 'reel_public_view' ) {
+        if ( ! is_array( $video ) || ! empty( $video['deleted_at'] ) ) return false;
+        if ( 'public' === ( $video['visibility'] ?? '' ) ) return true;
+        return 'unlisted' === ( $video['visibility'] ?? '' ) &&
+            absint( $video['owner_id'] ?? 0 ) === get_current_user_id();
+    }
+}
 final class VWLB_Repository {
     public static function find( $type, $id ) { return $GLOBALS['rsv_media']; }
 }
@@ -96,7 +106,8 @@ $GLOBALS['rsv_media']=array(
 $public=array('status'=>'published','visibility'=>'public','video_id'=>45,'owner_id'=>7);
 $unlisted=array_merge($public,array('visibility'=>'unlisted'));
 $check(!RSV_Security::can_view_reel($public,0),'Unlisted File10 asset exposed through public Reel');
-$check(RSV_Security::can_view_reel($unlisted,0),'Unlisted Reel with unlisted File10 source incorrectly denied');
+$check(!RSV_Security::can_view_reel($unlisted,0),'Unlisted Reel improperly exposed to explicit anonymous/public discovery');
+$check(RSV_Security::can_view_reel($unlisted),'Authorized signed-in owner cannot open directly linked unlisted Reel');
 $GLOBALS['rsv_media']['visibility']='public';
 $check(RSV_Security::can_view_reel($public,0),'Public Reel with public File10 source denied');
 $GLOBALS['rsv_media']['owner_id']=99;
