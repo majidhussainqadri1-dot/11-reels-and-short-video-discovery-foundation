@@ -51,6 +51,12 @@ $db=$reset(false,'');
 $r=V123_Top20_Prefs::preferences();
 $check(!empty($r['read_unavailable'])&&$r['history_paused']===true&&$r['youth_safe']===true,
     'malformed false result is not healthy missing row');
+foreach(array(array(),array('history_paused'=>1)) as $incomplete) {
+    $db=$reset($incomplete);
+    $r=V123_Top20_Prefs::preferences();
+    $check(!empty($r['read_unavailable'])&&$r['youth_safe']===true&&$r['history_paused']===true&&$db->writes===0,
+        'incomplete DB preference row must fail closed without modifying state');
+}
 $db=$reset(null);
 $r=V123_Top20_Prefs::preferences();
 $check(empty($r['read_unavailable'])&&$r['history_paused']===false&&$r['youth_safe']===false&&$r['version']===0,
