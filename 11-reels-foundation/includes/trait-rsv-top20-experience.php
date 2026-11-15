@@ -178,7 +178,11 @@ trait RSV_Top20_Experience_Trait {
 
 	public static function rest_preferences() {
 		RSV_Helpers::no_cache_private();
-		return rest_ensure_response( self::preferences() );
+		$preferences = self::preferences();
+		if ( ! empty( $preferences['read_unavailable'] ) ) {
+			return RSV_Helpers::error( 'rsv_preferences_read_unavailable', __( 'Saved Reel privacy preferences cannot be verified right now.', RSV_TEXT_DOMAIN ), 503 );
+		}
+		return rest_ensure_response( $preferences );
 	}
 
 	public static function rest_preferences_update( $request ) {
@@ -379,6 +383,11 @@ trait RSV_Top20_Experience_Trait {
 	private static function render_preferences() {
 		if ( ! is_user_logged_in() ) return '<p>' . esc_html__( 'Sign in to control private history and well-being settings.', RSV_TEXT_DOMAIN ) . '</p>';
 		$preferences = self::preferences();
+		if ( ! empty( $preferences['read_unavailable'] ) ) {
+			return '<p class="rsv-state rsv-error" role="status">' .
+				esc_html__( 'Saved Reel privacy preferences are temporarily unavailable. Watch history and youth-sensitive features stay paused until they can be verified.', RSV_TEXT_DOMAIN ) .
+				'</p>';
+		}
 		$disabled = $preferences['mandatory_youth_safe'] ? ' disabled' : '';
 		$html = '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="rsv_top20_preferences"><input type="hidden" name="version" value="' . absint( $preferences['version'] ) . '">' . wp_nonce_field( 'rsv_top20_preferences', '_rsv_nonce', true, false );
 		$html .= '<label><input type="checkbox" name="youth_safe" value="1"' . checked( $preferences['youth_safe'], true, false ) . $disabled . '> ' . esc_html__( 'Youth-safe recommendations', RSV_TEXT_DOMAIN ) . '</label>';
