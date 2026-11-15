@@ -37,10 +37,12 @@ const autoButton={
     child:{textContent:''},
     setAttribute(name,value){this[name]=value;}
 };
+const status={textContent:''};
 const doc={
     get hidden(){return hidden;},
     querySelector(selector){
         if(selector==='[data-rsv-feed]')return root;
+        if(selector==='.rsv-status')return status;
         if(selector==='[data-rsv-pause]')return pauseButton;
         if(selector==='[data-rsv-autoplay]')return autoButton;
         return null;
