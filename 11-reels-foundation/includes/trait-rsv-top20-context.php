@@ -76,7 +76,15 @@ trait RSV_Top20_Context_Trait {
 		if ( ! $user_id ) return $defaults;
 		global $wpdb;
 		$row = $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM ' . RSV_Helpers::table( 'preferences' ) . ' WHERE user_id=%d', $user_id ), ARRAY_A );
-		if ( ! $row ) return $defaults;
+		if ( '' !== (string) ( $wpdb->last_error ?? '' ) || ( null !== $row && ! is_array( $row ) ) ) {
+			// Never reinterpret SQL failure as the user consenting to watch-history or unrestricted media.
+			$defaults['read_unavailable'] = true;
+			$defaults['youth_safe'] = true;
+			$defaults['history_paused'] = true;
+			$defaults['session_limit_minutes'] = 5;
+			return $defaults;
+		}
+		if ( null === $row ) return $defaults;
 		return array(
 			'user_id'              => $user_id,
 			'youth_safe'           => $mandatory || ! empty( $row['youth_safe'] ),
@@ -94,6 +102,9 @@ trait RSV_Top20_Context_Trait {
 		if ( ! $user_id ) return RSV_Helpers::error( 'rsv_login_required', __( 'Sign in to save well-being preferences.', RSV_TEXT_DOMAIN ), 401 );
 		$data    = is_array( $data ) ? $data : array();
 		$current = self::preferences( $user_id );
+		if ( ! empty( $current['read_unavailable'] ) ) {
+			return RSV_Helpers::error( 'rsv_preferences_read_unavailable', __( 'Your saved Reel privacy settings cannot be verified right now.', RSV_TEXT_DOMAIN ), 503 );
+		}
 		$expected = array_key_exists( 'version', $data ) ? absint( $data['version'] ) : absint( $current['version'] );
 		$mandatory = self::mandatory_youth_mode( $user_id );
 
