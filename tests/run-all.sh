@@ -20,6 +20,7 @@ php "$ROOT/tests/v123-future30-read-sql-behavior.php"
 php "$ROOT/tests/v123-fresh20-read-sql-behavior.php"
 php "$ROOT/tests/v123-owner-verified-canonical-links.php"
 php "$ROOT/tests/v123-file10-owner-read-and-duration.php"
+php "$ROOT/tests/v123-unlisted-reel-anonymous-projection.php"
 php -l "$ROOT/tools/v123-p10-file10-duration-staging.php" >/dev/null
 php "$ROOT/tests/v123-p10-file10-duration-staging.php"
 php -l "$ROOT/tools/v123-p07-owner-link-readiness.php" >/dev/null
