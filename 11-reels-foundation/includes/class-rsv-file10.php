@@ -73,9 +73,14 @@ final class RSV_File10 {
 		if ( ! class_exists( 'VWLB_Security' ) ||
 			! is_callable( array( 'VWLB_Security', 'can_view' ) ) )
 			return false;
-		$video = self::video( $id );
-		return self::eligible_video_row( $video ) &&
-			true === VWLB_Security::can_view( $video, 'playback' );
+		try {
+			$video = self::video( $id );
+			return self::eligible_video_row( $video ) &&
+				true === VWLB_Security::can_view( $video, 'playback' );
+		} catch ( Throwable $error ) {
+			// A File10 policy/provider exception can never manufacture a grant.
+			return false;
+		}
 	}
 
 	public static function validate_for_reel( $id, $owner_id = 0 ) {
