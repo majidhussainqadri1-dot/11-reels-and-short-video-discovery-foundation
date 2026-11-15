@@ -90,12 +90,12 @@ $db=$start(array(array(array(),''),array(array(),'')),'0');
 $r=V123_Top20_Eraser::privacy_erase('found@example.test');
 $check(($r['done']??false)===true&&in_array('COMMIT',$db->tx,true)&&
     ($r['items_removed']??true)===false,'healthy empty erasure completes exactly');
-$db=$start(array(array(array('id'=>101,'version'=>1),''),array(array(),'')),'1');
+$db=$start(array(array(array(array('id'=>101,'version'=>1)),''),array(array(),'')),'1');
 $r=V123_Top20_Eraser::privacy_erase('found@example.test');
 $check(($r['done']??false)===true&&($r['items_removed']??false)===true&&
     ($r['items_retained']??false)===true&&$db->updates===1&&in_array('COMMIT',$db->tx,true),
     'healthy existing draft minimized and retained published data acknowledged');
-$db=$start(array(array(array('id'=>101,'version'=>1),''),array(array(),'')),'0');
+$db=$start(array(array(array(array('id'=>101,'version'=>1)),''),array(array(),'')),'0');
 $db->updateResult=0;
 $r=V123_Top20_Eraser::privacy_erase('found@example.test');
 $check(($r['done']??true)===false&&in_array('ROLLBACK',$db->tx,true),
