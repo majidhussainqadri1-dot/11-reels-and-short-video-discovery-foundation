@@ -216,7 +216,14 @@ final class RSV_Security {
 		if ( ! $allowed ) {
 			return false;
 		}
-		$user_id  = $explicit_user ? absint( $user_id ) : get_current_user_id();
+		$user_id = $explicit_user ? absint( $user_id ) : get_current_user_id();
+		// File 00/Reel entitlement ALONE cannot grant File 10 media delivery.
+		// A public/unlisted Reel has its separate current File 10 public policy
+		// above. For member/private/entitled, the owner's per-actor media
+		// rights and patient consent must also be current and verified.
+		if ( ! in_array( $visibility, array( 'public', 'unlisted' ), true ) &&
+			! RSV_File10::current_viewer_authorized( absint( $reel['video_id'] ?? 0 ), $user_id ) )
+			return false;
 		$filtered = (bool) apply_filters( 'rsv_can_view_reel', true, $reel, $user_id );
 		return $allowed && $filtered;
 	}
