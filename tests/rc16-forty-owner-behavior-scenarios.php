@@ -97,7 +97,7 @@ $run('35 ineligible member Reel denied',function()use($reel){$GLOBALS['f11_membe
 $run('36 admin does not bypass ineligible private read',function()use($reel){$GLOBALS['f11_admin']=true;$GLOBALS['f11_member']['eligible']=false;return RSV_Security::can_view_reel($reel('member'),7);},false);
 $run('37 admin does not bypass absent entitlement',function()use($reel){$GLOBALS['f11_admin']=true;$GLOBALS['f11_member']['entitlements']=array();return RSV_Security::can_view_reel($reel('entitled'),7);},false);
 $run('38 unlisted File10 never public Reel',function()use($reel){$GLOBALS['f11_video_visibility']='unlisted';return RSV_Security::can_view_reel($reel('public'),0);},false);
-$run('39 unlisted File10 allowed only under unlisted Reel',function()use($reel){$GLOBALS['f11_video_visibility']='unlisted';return RSV_Security::can_view_reel($reel('unlisted'),0);},true);
+$run('39 authorized direct unlisted Reel remains viewable',function()use($reel){$GLOBALS['f11_video_visibility']='unlisted';return RSV_Security::can_view_reel($reel('unlisted'));},true);
 $run('40 unpublished File10 fails safely',function()use($reel){$GLOBALS['f11_video_ready']=false;return RSV_Security::can_view_reel($reel('public'),0);},false);
 if($n!==40) $fail[]="expected 40, got $n";
 if($fail){fwrite(STDERR,"RC16 FORTY DISTINCT BEHAVIOR SCENARIOS FAILED:\n".implode("\n",$fail)."\n");exit(1);}

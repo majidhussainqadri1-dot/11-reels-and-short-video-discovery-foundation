@@ -178,6 +178,9 @@ final class RSV_Security {
 		}
 		$explicit_user = null !== $user_id;
 		$visibility = RSV_Helpers::enum( $reel['visibility'] ?? '', RSV_Contracts::VISIBILITIES, '' );
+		// Explicit viewer 0 means a public projection, not the logged-in PHP caller.
+		// An unlisted Reel must not be projected into public search/source results.
+		if ( $explicit_user && 0 === absint( $user_id ) && 'unlisted' === $visibility ) return false;
 		$allowed    = false;
 		if ( in_array( $visibility, array( 'public', 'unlisted' ), true ) ) {
 			// Public discovery must never publish a File 10 unlisted asset.
