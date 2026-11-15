@@ -29,6 +29,7 @@ require dirname(__DIR__).'/11-reels-foundation/includes/class-rsv-contracts.php'
 final class RSV_File10 {
     public static function eligible_for_reel($id) { return $id===5 && $GLOBALS['f11_video_ready']; }
     public static function publicly_eligible($id) { return $id===5 && $GLOBALS['f11_video_ready']; }
+    public static function current_viewer_authorized($id,$viewer) { return $id===5 && $viewer===get_current_user_id() && $GLOBALS['f11_video_ready']; }
     public static function video($id) { return $id===5 ? array('visibility'=>$GLOBALS['f11_video_visibility']) : null; }
 }
 require dirname(__DIR__).'/11-reels-foundation/includes/class-rsv-security.php';
