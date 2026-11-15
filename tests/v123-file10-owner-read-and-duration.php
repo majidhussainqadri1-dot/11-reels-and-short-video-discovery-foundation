@@ -8,7 +8,11 @@ final class VWLB_Contracts {}
 final class VWLB_Security {
     public static $allowed=true;
     public static $unlistedOwner=false;
+    public static $throws=false;
+    public static $malformed=false;
     public static function can_view($video,$purpose='reel_public_view'){
+        if(self::$throws)throw new RuntimeException('Synthetic File10 provider exception');
+        if(self::$malformed)return new WP_Error('invalid_policy','Bad type');
         if(!self::$allowed||!empty($video['deleted_at']))return false;
         if(($video['visibility']??'')==='unlisted')return self::$unlistedOwner;
         return ($video['visibility']??'')==='public';
@@ -139,5 +143,44 @@ $restricted=$base;$restricted['status']='deleted';
 $reset($restricted);$r=RSV_File10::validate_for_reel(21,7);
 $assert(is_wp_error($r)&&$r->get_error_code()==='rsv_video_not_ready',
     'deleted/restricted video remains rejected');
+$reset($base);
+VWLB_Security::$allowed=true;
+$assert(RSV_File10::current_viewer_authorized(21,7)===true &&
+    VWLB_Repository::$reads===1,
+    'canonical File10 current viewer playback permit must be required');
+$reset($base);
+VWLB_Security::$allowed=false;
+$assert(RSV_File10::current_viewer_authorized(21,7)===false,
+    'File10 rights/consent revocation vetoes private Reel viewer');
+VWLB_Security::$allowed=true;
+$reset($base);
+$assert(RSV_File10::current_viewer_authorized(21,99)===false &&
+    VWLB_Repository::$reads===0,
+    'another user must not inherit current actor File10 authority');
+$reset($base);
+$assert(RSV_File10::current_viewer_authorized(21,0)===false &&
+    VWLB_Repository::$reads===0,
+    'anonymous user has no private-owner media entitlement');
+$reset(null,true);
+$assert(RSV_File10::current_viewer_authorized(21,7)===false,
+    'database failure cannot authorize current actor media');
+$restricted=$base;$restricted['consent_status']='withdrawn';
+$reset($restricted);
+$assert(RSV_File10::current_viewer_authorized(21,7)===false,
+    'withdrawn primitive media consent stops even if File10 mock allows');
+$restricted=$base;$restricted['deleted_at']='2026-11-15 03:00:00';
+$reset($restricted);
+$assert(RSV_File10::current_viewer_authorized(21,7)===false,
+    'soft-deleted File10 media never authorized to private viewers');
+$reset($base);
+VWLB_Security::$throws=true;
+$assert(RSV_File10::current_viewer_authorized(21,7)===false,
+    'File10 current delivery provider exception cannot manufacture a media grant');
+VWLB_Security::$throws=false;
+$reset($base);
+VWLB_Security::$malformed=true;
+$assert(RSV_File10::current_viewer_authorized(21,7)===false,
+    'nonboolean File10 provider response cannot be interpreted as consent');
+VWLB_Security::$malformed=false;
 if($failed){fwrite(STDERR,"File10 owner-read fixtures failed:\n".implode("\n",$failed)."\n");exit(1);}
 echo "File11 V12.3 File10 duration and SQL truth: $checks/$checks isolated assertions PASS (not real File10 installed integration)\n";
