@@ -59,6 +59,8 @@ php "$ROOT/tests/rc21-future30-privacy-sql-failclosed.php"
 php "$ROOT/tests/rc21-supersession-sql-failclosed.php"
 php "$ROOT/tests/v123-sequential-supersession-guard.php"
 php "$ROOT/tests/v123-private-state-route-map.php"
+php -l "$ROOT/tools/v123-p08-runtime-hook-inventory.php" >/dev/null
+php "$ROOT/tests/v123-p08-runtime-hook-inventory.php"
 php "$ROOT/tests/rc21-private-write-readfail.php"
 php "$ROOT/tests/rc19-playback-detail-provider-errors.php"
 php "$ROOT/tests/rc19-schema-failclosed-migration.php"
