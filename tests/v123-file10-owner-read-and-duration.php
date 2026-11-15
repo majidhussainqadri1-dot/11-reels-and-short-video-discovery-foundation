@@ -5,6 +5,15 @@ define('VWLB_VERSION','1.2.25-rc1');
 define('VWLB_CONTRACT_VERSION','2');
 function apply_filters($hook,$initial,...$args){return $initial;}
 final class VWLB_Contracts {}
+final class VWLB_Security {
+    public static $allowed=true;
+    public static $unlistedOwner=false;
+    public static function can_view($video,$purpose='reel_public_view'){
+        if(!self::$allowed||!empty($video['deleted_at']))return false;
+        if(($video['visibility']??'')==='unlisted')return self::$unlistedOwner;
+        return ($video['visibility']??'')==='public';
+    }
+}
 final class VWLB_Videos {
     public static function playback($id){return array();}
     public static function progress(...$args){return true;}
@@ -100,6 +109,32 @@ $restricted=$base;$restricted['consent_status']='withdrawn';
 $reset($restricted);$r=RSV_File10::validate_for_reel(21,7);
 $assert(is_wp_error($r)&&$r->get_error_code()==='rsv_consent_incomplete',
     'withdrawn consent remains rejected');
+$restricted=$base;$restricted['deleted_at']='2026-11-15 02:00:00';
+$reset($restricted);
+$assert(RSV_File10::eligible_for_reel(21)===false,
+    'soft-deleted media is ineligible even if status remains published');
+$reset($restricted);
+$r=RSV_File10::validate_for_reel(21,7);
+$assert(is_wp_error($r)&&$r->get_error_code()==='rsv_video_not_ready',
+    'soft-deleted video fails File11 selection before any publish');
+$reset($restricted);
+$assert(RSV_File10::publicly_eligible(21)===false,
+    'soft-deleted public media never becomes a Reel');
+$restricted=$base;$restricted['visibility']='unlisted';
+$reset($restricted);
+VWLB_Security::$unlistedOwner=false;
+$assert(RSV_File10::publicly_eligible(21)===false,
+    'unlisted File10 media denied to unentitled public viewer');
+$reset($restricted);
+VWLB_Security::$unlistedOwner=true;
+$assert(RSV_File10::publicly_eligible(21)===true,
+    'unlisted media only allowed when File10 explicitly authorizes viewer');
+VWLB_Security::$unlistedOwner=false;
+$reset($base);
+VWLB_Security::$allowed=false;
+$assert(RSV_File10::publicly_eligible(21)===false,
+    'File10 current revocation or rights security veto prevents public Reel');
+VWLB_Security::$allowed=true;
 $restricted=$base;$restricted['status']='deleted';
 $reset($restricted);$r=RSV_File10::validate_for_reel(21,7);
 $assert(is_wp_error($r)&&$r->get_error_code()==='rsv_video_not_ready',
