@@ -26,7 +26,8 @@ $report = array(
     'cases_passed'=>0,
     'cases_failed'=>0,
     'cases'=>array(),
-    'real_file10_provider_installation_verified'=>false,
+    'file10_candidate_contract_callable'=>false,
+    'file10_deployed_package_checksum_verified'=>false,
     'real_rest_reel_creation_tested'=>false,
     'migration_parity_verified'=>false,
     'live_retest_completed'=>false,
@@ -70,7 +71,7 @@ foreach ( $inputs as $expected_duration=>$id ) {
         ? is_array( $result )
         : ( is_wp_error( $result ) &&
             'rsv_duration_invalid' === $result->get_error_code() &&
-            422 === (int) ( (array) $result->get_error_data() )['status'] );
+            422 === (int) ( ( (array) $result->get_error_data() )['status'] ?? 0 ) );
     $passed = $actual_duration === (int) $expected_duration && $result_matches;
     $report['cases'][] = array(
         'expected_seconds'=>(int) $expected_duration,
@@ -84,5 +85,5 @@ foreach ( $inputs as $expected_duration=>$id ) {
     else ++$report['cases_failed'];
 }
 $report['status'] = $report['cases_failed'] ? 'STAGING_DURATION_ACCEPTANCE_FAILED' : 'STAGING_DURATION_OWNER_READ_ACCEPTED';
-$report['real_file10_provider_installation_verified'] = true;
+$report['file10_candidate_contract_callable'] = true;
 $emit( $report );
