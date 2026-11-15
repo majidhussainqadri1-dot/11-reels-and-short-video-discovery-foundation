@@ -6,6 +6,7 @@ find "$P" -type f -name '*.php' -print0 | sort -z | xargs -0 -n1 php -l >/dev/nu
 node --check "$P/assets/js/rsv.js"
 node --check "$P/assets/js/rsv-top20.js"
 node "$ROOT/tests/v123-feed-keyboard-touch-scope.mjs"
+node "$ROOT/tests/v123-explicit-playback-policy.mjs"
 php "$ROOT/tests/unit-state-machine.php"
 php "$ROOT/tests/unit-helpers.php"
 php "$ROOT/tests/forensic-contracts.php"
