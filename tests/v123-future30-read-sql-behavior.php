@@ -12,6 +12,7 @@ function apply_filters($hook, $value, ...$args) { return $value; }
 function do_action(...$args) { return true; }
 function sanitize_html_class($v) { return sanitize_key($v); }
 function wp_strip_all_tags($v) { return strip_tags((string)$v); }
+function esc_html__($text, ...$unused) { return $text; }
 
 final class RSV_Helpers {
     public static function table($name) { return 'wp_rsv_'.$name; }
@@ -179,6 +180,23 @@ RSV_Security::$failCount=0;
 $res=(new RSV_Read_Service())->note_write(new RSV_Read_Request());
 $testError($res,'rsv_future_state_unavailable');
 $assert($db->writes===0 && RSV_Security::$failCount===1,'failed note read prevents write and closes idempotency');
+$reelForTools=RSV_Repository::find('reel');
+$set(null,'SQL failed');
+$testError(RSV_Read_Service::public_tools($reelForTools),'rsv_future_objects_unavailable');
+$set(null,'SQL failed');
+$nativeOut=RSV_Read_Service::render_tools($reelForTools);
+$assert(is_string($nativeOut)&&str_contains($nativeOut,'temporarily unavailable')&&
+    !str_contains($nativeOut,'<a'), 'native fallback displays a safe 503-equivalent UI state without fatal TypeError');
+$db=$set(array());
+$db->queue[]=array(null,'SQL failed');
+$testError(RSV_Read_Service::public_tools($reelForTools),'rsv_future_objects_unavailable');
+$set(array());
+$allEmpty=RSV_Read_Service::public_tools($reelForTools);
+$assert(is_array($allEmpty)&&count($allEmpty)===8&&
+    ($allEmpty['citations']??null)===array(),'native healthy empty projections remain ordinary empty lists');
+$set(array());
+$assert(RSV_Read_Service::render_tools($reelForTools)==='',
+    'native healthy no-content renderer returns empty markup without an artificial failure');
 if ($failed) {
     fwrite(STDERR, "V12.3 Future30 SQL read regression failures:\n".implode("\n",$failed)."\n");
     exit(1);
