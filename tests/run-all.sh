@@ -24,6 +24,8 @@ php "$ROOT/tests/v123-top20-erase-sql-truth.php"
 php "$ROOT/tests/v123-future30-object-identity-readfail.php"
 php -l "$ROOT/tools/v123-readonly-freeze.php" >/dev/null
 php "$ROOT/tests/v123-p00-readonly-freeze-behavior.php"
+php -l "$ROOT/tools/v123-p00-offline-parity.php" >/dev/null
+node "$ROOT/tests/v123-p00-offline-parity.mjs"
 php -l "$ROOT/tools/v123-p09-lineage-readonly.php" >/dev/null
 php "$ROOT/tests/v123-p09-lineage-readonly-behavior.php"
 php "$ROOT/tests/future30-contracts.php"
